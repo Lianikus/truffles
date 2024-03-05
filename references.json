@@ -1,0 +1,508 @@
+[
+	{
+		"id": "staubliHiddenFairyRings2022",
+		"type": "article-journal",
+		"abstract": "Burgundy truffles are heterothallic ascomycetes that grow in symbiosis with trees. Despite their esteemed belowground fruitbodies, the species’ complex lifecycle is still not fully understood. Here, we present the genetic patterns in three natural Burgundy truffle populations based on genotyped fruitbodies, ascospore extracts and ectomycorrhizal root tips using microsatellites and the mating-type locus. Distinct genetic structures with high relatedness in close vicinity were found for females (forming the fruitbodies) and males (fertilizing partner as inferred from ascospore extracts), with high genotypic diversity and annual turnover of males, suggesting that ephemeral male mating partners are germinating ascospores from decaying fruitbodies. The presence of hermaphrodites and the interannual persistence of a few males suggest that persistent mycelia may sporadically also act as males. Only female or hermaphroditic individuals were detected on root tips. At one site, fruitbodies grew in a fairy ring formed by a large female individual that showed an outward growth rate of 30 cm per year, with the mycelium decaying within the ring and being fertilized by over 50 male individuals. While fairy ring structures have never been shown for truffles, the genetics of Burgundy truffle populations support a similar reproductive biology as those of other highly prized truffles.",
+		"container-title": "Environmental Microbiology",
+		"DOI": "10.1111/1462-2920.16131",
+		"ISSN": "1462-2912, 1462-2920",
+		"issue": "12",
+		"journalAbbreviation": "Environmental Microbiology",
+		"language": "en",
+		"page": "6376-6391",
+		"source": "DOI.org (Crossref)",
+		"title": "Hidden fairy rings and males—Genetic patterns of natural Burgundy truffle ( <i>Tuber aestivum</i> Vittad.) populations reveal new insights into its life cycle",
+		"URL": "https://sfamjournals.onlinelibrary.wiley.com/doi/10.1111/1462-2920.16131",
+		"volume": "24",
+		"author": [
+			{
+				"family": "Staubli",
+				"given": "Florian"
+			},
+			{
+				"family": "Imola",
+				"given": "Lea"
+			},
+			{
+				"family": "Dauphin",
+				"given": "Benjamin"
+			},
+			{
+				"family": "Molinier",
+				"given": "Virginie"
+			},
+			{
+				"family": "Pfister",
+				"given": "Stephanie"
+			},
+			{
+				"family": "Piñuela",
+				"given": "Yasmine"
+			},
+			{
+				"family": "Schürz",
+				"given": "Laura"
+			},
+			{
+				"family": "Sproll",
+				"given": "Ludger"
+			},
+			{
+				"family": "Steidinger",
+				"given": "Brian S."
+			},
+			{
+				"family": "Stobbe",
+				"given": "Uli"
+			},
+			{
+				"family": "Tegel",
+				"given": "Willy"
+			},
+			{
+				"family": "Büntgen",
+				"given": "Ulf"
+			},
+			{
+				"family": "Egli",
+				"given": "Simon"
+			},
+			{
+				"family": "Peter",
+				"given": "Martina"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2024",
+					2,
+					5
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2022",
+					12
+				]
+			]
+		}
+	},
+	{
+		"id": "diniz-filhoMantelTestPopulation2013",
+		"type": "article-journal",
+		"abstract": "The comparison of genetic divergence or genetic distances, estimated by pairwise FST and related statistics, with geographical distances by Mantel test is one of the most popular approaches to evaluate spatial processes driving population structure. There have been, however, recent criticisms and discussions on the statistical performance of the Mantel test. Simultaneously, alternative frameworks for data analyses are being proposed. Here, we review the Mantel test and its variations, including Mantel correlograms and partial correlations and regressions. For illustrative purposes, we studied spatial genetic divergence among 25 populations of Dipteryx alata (“Baru”), a tree species endemic to the Cerrado, the Brazilian savannas, based on 8 microsatellite loci. We also applied alternative methods to analyze spatial patterns in this dataset, especially a multivariate generalization of Spatial Eigenfunction Analysis based on redundancy analysis. The different approaches resulted in similar estimates of the magnitude of spatial structure in the genetic data. Furthermore, the results were expected based on previous knowledge of the ecological and evolutionary processes underlying genetic variation in this species. Our review shows that a careful application and interpretation of Mantel tests, especially Mantel correlograms, can overcome some potential statistical problems and provide a simple and useful tool for multivariate analysis of spatial patterns of genetic divergence.",
+		"container-title": "Genetics and Molecular Biology",
+		"DOI": "10.1590/S1415-47572013000400002",
+		"ISSN": "1415-4757",
+		"issue": "4",
+		"journalAbbreviation": "Genet Mol Biol",
+		"note": "PMID: 24385847\nPMCID: PMC3873175",
+		"page": "475-485",
+		"source": "PubMed Central",
+		"title": "Mantel test in population genetics",
+		"URL": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3873175/",
+		"volume": "36",
+		"author": [
+			{
+				"family": "Diniz-Filho",
+				"given": "José Alexandre F."
+			},
+			{
+				"family": "Soares",
+				"given": "Thannya N."
+			},
+			{
+				"family": "Lima",
+				"given": "Jacqueline S."
+			},
+			{
+				"family": "Dobrovolski",
+				"given": "Ricardo"
+			},
+			{
+				"family": "Landeiro",
+				"given": "Victor Lemes"
+			},
+			{
+				"family": "Campos Telles",
+				"given": "Mariana Pires",
+				"non-dropping-particle": "de"
+			},
+			{
+				"family": "Rangel",
+				"given": "Thiago F."
+			},
+			{
+				"family": "Bini",
+				"given": "Luis Mauricio"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2024",
+					2,
+					26
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2013",
+					12
+				]
+			]
+		}
+	},
+	{
+		"id": "steidingerFallSummerTruffle2022",
+		"type": "article-journal",
+		"abstract": "Global warming is pushing populations outside their range of physiological tolerance. According to the environmental envelope framework, the most vulnerable populations occur near the climatic edge of their species' distributions. In contrast, populations from the climatic center of the species range should be relatively buffered against climate warming. We tested this latter prediction using a combination of linear mixed effects and machine learning algorithms on an extensive, citizen-scientist generated dataset on the fruitbody productivity of the Burgundy (aka summer) truffle (Tuber aestivum Vittad.), a keystone, ectomycorrhizal tree-symbiont occurring on a wide range of temperate climates. T. aestivum's fruitbody productivity was monitored at 3-week resolution over up to 8 continuous years at 20 sites distributed in the climatic center of its European distribution in southwest Germany and Switzerland. We found that T. aestivum fruitbody production is more sensitive to summer drought than would be expected from the breadth of its species' climatic niche. The monitored populations occurring nearly 5°C colder than the edge of their species' climatic distribution. However, interannual fruitbody productivity (truffle mass year−1) fell by a median loss of 22% for every 1°C increase in summer temperature over a site's 30-year mean. Among the most productive monitored populations, the temperature sensitivity was even higher, with single summer temperature anomalies of 3°C sufficient to stop fruitbody production altogether. Interannual truffle productivity was also related to the phenology of host trees, with 22 g less truffle mass for each 1-day reduction in the length of the tree growing season. Increasing summer drought extremes are therefore likely to reduce fruiting among summer truffle populations throughout Central Europe. Our results suggest that European T. aestivum may be a mosaic of vulnerable populations, sensitive to climate-driven declines at lower thresholds than implied by its species distribution model.",
+		"container-title": "Global Change Biology",
+		"DOI": "10.1111/gcb.16424",
+		"ISSN": "1365-2486",
+		"issue": "24",
+		"language": "en",
+		"license": "© 2022 The Authors. Global Change Biology published by John Wiley & Sons Ltd.",
+		"note": "_eprint: https://onlinelibrary.wiley.com/doi/pdf/10.1111/gcb.16424",
+		"page": "7376-7390",
+		"source": "Wiley Online Library",
+		"title": "The fall of the summer truffle: Recurring hot, dry summers result in declining fruitbody production of Tuber aestivum in Central Europe",
+		"title-short": "The fall of the summer truffle",
+		"URL": "https://onlinelibrary.wiley.com/doi/abs/10.1111/gcb.16424",
+		"volume": "28",
+		"author": [
+			{
+				"family": "Steidinger",
+				"given": "Brian S."
+			},
+			{
+				"family": "Büntgen",
+				"given": "Ulf"
+			},
+			{
+				"family": "Stobbe",
+				"given": "Uli"
+			},
+			{
+				"family": "Tegel",
+				"given": "Willy"
+			},
+			{
+				"family": "Sproll",
+				"given": "Ludger"
+			},
+			{
+				"family": "Haeni",
+				"given": "Matthias"
+			},
+			{
+				"family": "Moser",
+				"given": "Barbara"
+			},
+			{
+				"family": "Bagi",
+				"given": "István"
+			},
+			{
+				"family": "Bonet",
+				"given": "José-Antonio"
+			},
+			{
+				"family": "Buée",
+				"given": "Marc"
+			},
+			{
+				"family": "Dauphin",
+				"given": "Benjamin"
+			},
+			{
+				"family": "Martínez-Peña",
+				"given": "Fernando"
+			},
+			{
+				"family": "Molinier",
+				"given": "Virginie"
+			},
+			{
+				"family": "Zweifel",
+				"given": "Roman"
+			},
+			{
+				"family": "Egli",
+				"given": "Simon"
+			},
+			{
+				"family": "Peter",
+				"given": "Martina"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2024",
+					3,
+					5
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2022"
+				]
+			]
+		}
+	},
+	{
+		"id": "molinierFirstIdentificationPolymorphic2013",
+		"type": "article-journal",
+		"abstract": "• Premise of the study: Tuber aestivum, the most common truffle in Europe, plays an important role in the commercial truffle market. For the first time, microsatellite primers were developed to investigate polymorphism within this species., • Methods and Results: Using direct shotgun pyrosequencing, 15 polymorphic microsatellites were identified out of the 7784 perfect microsatellites present in the 534620 reads obtained. Tested on 75 samples, these microsatellites were highly polymorphic. The number of alleles varied from four to 15, and the expected heterozygosity ranged from 0.266 to 0.620. A multilocus analysis allowed the identification of 63 genotypes over the 75 samples analyzed., • Conclusions: Direct shotgun pyrosequencing is a fast and relatively low-cost technique allowing identification of microsatellites in nonmodel species. The microsatellites developed in this study will be useful in population genetic studies to infer the evolutionary history of this species.",
+		"container-title": "Applications in Plant Sciences",
+		"DOI": "10.3732/apps.1200220",
+		"ISSN": "2168-0450",
+		"issue": "2",
+		"journalAbbreviation": "Appl Plant Sci",
+		"note": "PMID: 25202513\nPMCID: PMC4105367",
+		"page": "apps.1200220",
+		"source": "PubMed Central",
+		"title": "First identification of polymorphic microsatellite markers in the Burgundy truffle, Tuber aestivum (Tuberaceae)1",
+		"URL": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4105367/",
+		"volume": "1",
+		"author": [
+			{
+				"family": "Molinier",
+				"given": "Virginie"
+			},
+			{
+				"family": "Murat",
+				"given": "Claude"
+			},
+			{
+				"family": "Morin",
+				"given": "Emmanuelle"
+			},
+			{
+				"family": "Gollotte",
+				"given": "Armelle"
+			},
+			{
+				"family": "Wipf",
+				"given": "Daniel"
+			},
+			{
+				"family": "Martin",
+				"given": "Francis"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2024",
+					3,
+					5
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2013",
+					1,
+					31
+				]
+			]
+		}
+	},
+	{
+		"id": "molinierSSRbasedIdentificationGenetic2016",
+		"type": "article-journal",
+		"container-title": "Mycorrhiza",
+		"DOI": "10.1007/s00572-015-0649-0",
+		"ISSN": "0940-6360",
+		"language": "en",
+		"page": "99-110",
+		"source": "www.dora.lib4ri.ch",
+		"title": "SSR-based identification of genetic groups within European populations of &lt;em&gt;Tuber aestivum&lt;/em&gt; Vittad",
+		"URL": "https://www.dora.lib4ri.ch/wsl/islandora/object/wsl%3A5371/",
+		"author": [
+			{
+				"family": "Molinier",
+				"given": "Virgine"
+			},
+			{
+				"family": "Murat",
+				"given": "Claude"
+			},
+			{
+				"family": "Peter",
+				"given": "Martina"
+			},
+			{
+				"family": "Gollotte",
+				"given": "Armelle"
+			},
+			{
+				"family": "De la Varga",
+				"given": "Herminia"
+			},
+			{
+				"family": "Meier",
+				"given": "Barbara"
+			},
+			{
+				"family": "Egli",
+				"given": "Simon"
+			},
+			{
+				"family": "Belfiori",
+				"given": "Beatrice"
+			},
+			{
+				"family": "Paolocci",
+				"given": "Francesco"
+			},
+			{
+				"family": "Wipf",
+				"given": "Daniel"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2024",
+					3,
+					5
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2016"
+				]
+			]
+		}
+	},
+	{
+		"id": "molinierFinescaleGeneticStructure2016",
+		"type": "article-journal",
+		"abstract": "Although the Burgundy truffle (Tuber aestivum) is an ectomycorrhizal fungus of important economic value, its subterranean life cycle and population biology are still poorly understood. Here, we determine mating type and simple sequence repeat (SSR) maternal genotypes of mapped fruiting bodies to assess their genetic structure within two naturally colonized forest sites in southern Germany. Forty-one genotypes were identified from 112 fruiting bodies. According to their mating types, the maternal genotypes were aggregated only in one population. Genotypic diversity of individuals that mostly were small and occurred in 1 out of 2 years of sampling was high. Although these results suggested a ruderal colonization strategy, some genets spread several hundred meters. This result indicates that, besides sexual spore dispersal, vegetative growth or spreading by mycelial propagules contributes to dissemination. In one site, fewer individuals with a tendency to expand genets belonging to only one genetic group were observed. In the second site, numerous small individuals were found and were grouped into two clearly differentiated genetic groups that were spatially intermingled. Forest characteristics and disturbances are possible reasons for the observed genetic patterns. Our findings contribute to a better understanding of the biology of one of the most widespread and commercially important truffle species. This knowledge is critical for establishing and maintaining sustainable long-term truffle cultivations.",
+		"container-title": "Mycorrhiza",
+		"DOI": "10.1007/s00572-016-0719-y",
+		"ISSN": "1432-1890",
+		"issue": "8",
+		"journalAbbreviation": "Mycorrhiza",
+		"language": "eng",
+		"note": "PMID: 27460217",
+		"page": "895-907",
+		"source": "PubMed",
+		"title": "Fine-scale genetic structure of natural Tuber aestivum sites in southern Germany",
+		"volume": "26",
+		"author": [
+			{
+				"family": "Molinier",
+				"given": "Virginie"
+			},
+			{
+				"family": "Murat",
+				"given": "Claude"
+			},
+			{
+				"family": "Baltensweiler",
+				"given": "Andri"
+			},
+			{
+				"family": "Büntgen",
+				"given": "Ulf"
+			},
+			{
+				"family": "Martin",
+				"given": "Francis"
+			},
+			{
+				"family": "Meier",
+				"given": "Barbara"
+			},
+			{
+				"family": "Moser",
+				"given": "Barbara"
+			},
+			{
+				"family": "Sproll",
+				"given": "Ludger"
+			},
+			{
+				"family": "Stobbe",
+				"given": "Ulrich"
+			},
+			{
+				"family": "Tegel",
+				"given": "Willy"
+			},
+			{
+				"family": "Egli",
+				"given": "Simon"
+			},
+			{
+				"family": "Peter",
+				"given": "Martina"
+			}
+		],
+		"issued": {
+			"date-parts": [
+				[
+					"2016",
+					11
+				]
+			]
+		}
+	},
+	{
+		"id": "legendreComparisonMantelTest2010",
+		"type": "article-journal",
+		"abstract": "The Mantel test is widely used to test the linear or monotonic independence of the elements in two distance matrices. It is one of the few appropriate tests when the hypothesis under study can only be formulated in terms of distances; this is often the case with genetic data. In particular, the Mantel test has been widely used to test for spatial relationship between genetic data and spatial layout of the sampling locations. We describe the domain of application of the Mantel test and derived forms. Formula development demonstrates that the sum-of-squares (SS) partitioned in Mantel tests and regression on distance matrices differs from the SS partitioned in linear correlation, regression and canonical analysis. Numerical simulations show that in tests of significance of the relationship between simple variables and multivariate data tables, the power of linear correlation, regression and canonical analysis is far greater than that of the Mantel test and derived forms, meaning that the former methods are much more likely than the latter to detect a relationship when one is present in the data. Examples of difference in power are given for the detection of spatial gradients. Furthermore, the Mantel test does not correctly estimate the proportion of the original data variation explained by spatial structures. The Mantel test should not be used as a general method for the investigation of linear relationships or spatial structures in univariate or multivariate data. Its use should be restricted to tests of hypotheses that can only be formulated in terms of distances.",
+		"container-title": "Molecular Ecology Resources",
+		"DOI": "10.1111/j.1755-0998.2010.02866.x",
+		"ISSN": "1755-0998",
+		"issue": "5",
+		"language": "en",
+		"license": "© 2010 Blackwell Publishing Ltd",
+		"note": "_eprint: https://onlinelibrary.wiley.com/doi/pdf/10.1111/j.1755-0998.2010.02866.x",
+		"page": "831-844",
+		"source": "Wiley Online Library",
+		"title": "Comparison of the Mantel test and alternative approaches for detecting complex multivariate relationships in the spatial analysis of genetic data",
+		"URL": "https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1755-0998.2010.02866.x",
+		"volume": "10",
+		"author": [
+			{
+				"family": "Legendre",
+				"given": "Pierre"
+			},
+			{
+				"family": "Fortin",
+				"given": "Marie-Josée"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2024",
+					3,
+					5
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2010"
+				]
+			]
+		}
+	}
+]

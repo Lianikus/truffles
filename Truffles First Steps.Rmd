@@ -1,0 +1,37 @@
+---
+title: "Truffle Monitoring"
+author: "Lia Baumann"
+date: "2024-03-05"
+output: github_document
+bibliography: references.json
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Basis
+
+The basis for the research about Truffle Monitoring data is described in detail in these publications:
+@molinierFirstIdentificationPolymorphic2013
+@molinierSSRbasedIdentificationGenetic2016
+@molinierFinescaleGeneticStructure2016
+@staubliHiddenFairyRings2022
+@steidingerFallSummerTruffle2022
+@legendreComparisonMantelTest2010
+
+
+```{r erste Datensichtung, eval=FALSE, include=FALSE}
+library(readxl)
+T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_2024.xlsx")
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
