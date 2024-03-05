@@ -21,9 +21,14 @@ The basis for the research about Truffle Monitoring data is described in detail 
 @legendreComparisonMantelTest2010
 
 
-```{r erste Datensichtung, eval=FALSE, include=FALSE}
+```{r Tabellen laden, include=FALSE}
 library(readxl)
+library(tidyr)
+library(dplyr)
 T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_2024.xlsx")
+```
+```{r erste Datensichtung}
+View(T_all)
 ```
 
 ## Including Plots

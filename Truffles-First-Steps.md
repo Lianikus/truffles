@@ -10,6 +10,10 @@ detail in these publications: Virginie Molinier et al. (2013) Virgine
 Molinier et al. (2016) Virginie Molinier et al. (2016) Staubli et al.
 (2022) Steidinger et al. (2022) Legendre and Fortin (2010)
 
+``` r
+View(T_all)
+```
+
 ## Including Plots
 
 You can also embed plots, for example:
