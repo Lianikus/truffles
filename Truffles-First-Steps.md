@@ -10,18 +10,23 @@ detail in these publications: Virginie Molinier et al. (2013) Virgine
 Molinier et al. (2016) Virginie Molinier et al. (2016) Staubli et al.
 (2022) Steidinger et al. (2022) Legendre and Fortin (2010)
 
-``` r
-View(T_all)
-```
+## Monitoring Sites
 
-## Including Plots
+![](Truffles-First-Steps_files/figure-gfm/Maps%20laden-1.png)<!-- -->
 
-You can also embed plots, for example:
+The dataset was already corrected in the following way: - Removal of
+samples with less than 10 markers - Removal of samples with two mating
+types.
 
-![](Truffles-First-Steps_files/figure-gfm/pressure-1.png)<!-- -->
+# Number of samples per Site
 
-Note that the `echo = FALSE` parameter was added to the code chunk to
-prevent printing of the R code that generated the plot.
+Standorte mit weniger als 10 Samples werden entfernt. Dies lässt danach
+noch folgende Standorte für die Auswertung zu:
+
+\#Idee: alle Observationen auf einer Zeitachse und nach Standort
+unterteilt anzeigen
+
+![](Truffles-First-Steps_files/figure-gfm/all%20observations-1.png)<!-- -->
 
 <div id="refs" class="references csl-bib-body hanging-indent">
 

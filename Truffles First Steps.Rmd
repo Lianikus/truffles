@@ -21,22 +21,72 @@ The basis for the research about Truffle Monitoring data is described in detail 
 @legendreComparisonMantelTest2010
 
 
-```{r Tabellen laden, include=FALSE}
+```{r Tabellen laden, message=FALSE, warning=FALSE, include=FALSE}
 library(readxl)
-library(tidyr)
-library(dplyr)
+library(tidyverse)
+library(ggplot2)
+theme_set(theme_bw())
+library(sf)
+library(ggspatial)
+library(rnaturalearth)
+library(envalysis)
+library(forcats)
 T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_2024.xlsx")
-```
-```{r erste Datensichtung}
-View(T_all)
+coord <- read_excel("Koordinaten_2024.xlsx")
 ```
 
-## Including Plots
+## Monitoring Sites
 
-You can also embed plots, for example:
+```{r Maps laden, echo=FALSE, warning=FALSE}
+europe <- ne_countries(scale="medium",returnclass="sf",continent="europe")
+europe_points <- st_centroid(europe)
+europe_points <- cbind(europe,st_coordinates(st_centroid(europe$geometry)))
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+ggplot(data=europe) + geom_sf() +
+  geom_text(data=europe_points,aes(x=X,y=Y,label = name),
+            color = "darkmagenta", fontface = "bold", check_overlap = FALSE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  #annotation_north_arrow(location = "bl",which_north = "true",
+  #                       pad_x = unit(0.5,"in"),pad_y=unit(0.5,"in"),
+  #                       style=north_arrow_fancy_orienteering) +
+  coord_sf(xlim = c(5.5,11), ylim = c(45.5,48.5), expand = FALSE) +
+  geom_point(data=coord,
+             aes(x=LON, y=LAT),shape=20,color="darkcyan", fill = "darkcyan",
+             pch = 5, size = 3)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+The dataset was already corrected in the following way:
+- Removal of samples with less than 10 markers
+- Removal of samples with two mating types.
+
+
+# Number of samples per Site
+
+```{r erste Datensichtung, include=FALSE}
+# of observations per site
+number_obs_all <- as.data.frame(T_all %>%
+                                  count(Site_1_abrev))
+number_obs_all
+```
+
+Standorte mit weniger als 10 Samples werden entfernt.
+Dies lässt danach noch folgende Standorte für die Auswertung zu:
+
+```{r Standorte mit weniger als 3 Samples entfernen, include=FALSE}
+# of observations per site
+T_all_corr1 <- subset(T_all,Site_1_abrev!="BAR")
+T_all_corr2 <- subset(T_all_corr1, Site_1_abrev != "GEN")
+```
+
+#Idee: alle Observationen auf einer Zeitachse und nach Standort unterteilt anzeigen
+
+```{r all observations, echo=FALSE, message=FALSE, warning=FALSE}
+
+ggplot(T_all_corr2) +
+  geom_point(aes(x=Sampling_date, y= fct_rev(Site_1_abrev), color = factor(Nb_markers))) +
+  scale_colour_brewer(palette= "Greens") +
+  theme_publish(base_family = "Times") +
+  labs(title = "Overview of samples in truffle monitoring dataset",
+       x = "Sampling year", y = "Sampling site abbreviation",
+       colour = "Nb_markers")
+```
