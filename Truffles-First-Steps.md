@@ -20,6 +20,31 @@ types.
 
 # Number of samples per Site
 
+| Site_1_abrev | Site                  |   n |
+|:-------------|:----------------------|----:|
+| ALD          | Aldingen              |  71 |
+| BAR          | Barbengo              |   2 |
+| BOB          | Bohlingen Buche       | 477 |
+| BOH          | Bohlingen Hasel       |  54 |
+| BUR          | Bursins               | 284 |
+| FRB          | Freiburg-Brumaleweg   |  20 |
+| FRE          | Freiburg-Wittnau      | 268 |
+| FRI          | Frick                 | 125 |
+| GEN          | Genolier              |   5 |
+| KON          | Köniz                 | 234 |
+| NEU          | Neuchatel             |  38 |
+| RIE          | Rietheim              |  67 |
+| SCD          | Schlieren Dreieck     | 123 |
+| SCG          | Schlieren Graben      |  24 |
+| SCL          | Schlieren Grillplatz  | 299 |
+| SCS          | Schiffenensee         |  50 |
+| TRO          | Trossingen            |  37 |
+| UEB          | Bohlingen Ueberlingen | 204 |
+| UST          | Uster                 |  43 |
+| WSL          | WSL                   | 283 |
+
+Number of observations per site
+
 Evtl. später: Standorte mit weniger als 10 Samples werden entfernt. Dies
 lässt danach noch folgende Standorte für die Auswertung zu:
 
