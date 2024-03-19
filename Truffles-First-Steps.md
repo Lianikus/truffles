@@ -45,6 +45,8 @@ types.
 
 Number of observations per site
 
+![](Truffles-First-Steps_files/figure-gfm/Data%20structure%20per%20site-1.png)<!-- -->
+
 Evtl. später: Standorte mit weniger als 10 Samples werden entfernt. Dies
 lässt danach noch folgende Standorte für die Auswertung zu:
 
