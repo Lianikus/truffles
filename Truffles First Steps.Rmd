@@ -69,6 +69,7 @@ number_obs_all <- as.data.frame(T_all %>%
 number_obs_all
 ```
 
+Evtl. später:
 Standorte mit weniger als 10 Samples werden entfernt.
 Dies lässt danach noch folgende Standorte für die Auswertung zu:
 
@@ -82,7 +83,7 @@ T_all_corr2 <- subset(T_all_corr1, Site_1_abrev != "GEN")
 
 ```{r all observations, echo=FALSE, message=FALSE, warning=FALSE}
 
-ggplot(T_all_corr2) +
+ggplot(T_all) +
   geom_point(aes(x=Sampling_date, y= fct_rev(Site_1_abrev), color = factor(Nb_markers))) +
   scale_colour_brewer(palette= "Greens") +
   theme_publish(base_family = "Times") +

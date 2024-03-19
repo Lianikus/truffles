@@ -20,8 +20,8 @@ types.
 
 # Number of samples per Site
 
-Standorte mit weniger als 10 Samples werden entfernt. Dies lässt danach
-noch folgende Standorte für die Auswertung zu:
+Evtl. später: Standorte mit weniger als 10 Samples werden entfernt. Dies
+lässt danach noch folgende Standorte für die Auswertung zu:
 
 \#Idee: alle Observationen auf einer Zeitachse und nach Standort
 unterteilt anzeigen
