@@ -9,6 +9,7 @@ The basis for the research about Truffle Monitoring data is described in
 detail in these publications: Virginie Molinier et al. (2013) Virgine
 Molinier et al. (2016) Virginie Molinier et al. (2016) Staubli et al.
 (2022) Steidinger et al. (2022) Legendre and Fortin (2010)
+(**kamvarPopprPackageGenetic2014?**)
 
 ## Monitoring Sites
 
@@ -54,6 +55,24 @@ lässt danach noch folgende Standorte für die Auswertung zu:
 unterteilt anzeigen
 
 ![](Truffles-First-Steps_files/figure-gfm/all%20observations-1.png)<!-- -->
+
+\##Clone correction from
+<https://grunwaldlab.github.io/Population_Genetics_in_R/Population_Strata.html>
+When dealing with clonal populations, analyses are typically conducted
+with and without clone correction. Clone correction is a method of
+censoring a data set such that only one individual per MLG is
+represented per population (Milgroom, 1996; Grünwald et al., 2003;
+Grünwald & Hoheisel, 2006). This technique is commonly used with the
+index of association and genotypic diversity measures since clone
+corrected populations approximate behavior of sexual populations. Since
+we want to only observe unique genotypes per population, clone
+correction requires specification of the stratifications at which clones
+should be censored. This section will show how to clone correct at a
+specific stratification and also compare the results with uncorrected
+data.
+
+Question: Will allelic diversity increase or decrease with
+clone-censored data?
 
 <div id="refs" class="references csl-bib-body hanging-indent">
 

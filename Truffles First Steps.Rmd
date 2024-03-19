@@ -19,6 +19,7 @@ The basis for the research about Truffle Monitoring data is described in detail 
 @staubliHiddenFairyRings2022
 @steidingerFallSummerTruffle2022
 @legendreComparisonMantelTest2010
+@kamvarPopprPackageGenetic2014
 
 
 ```{r Tabellen laden, message=FALSE, warning=FALSE, include=FALSE}
@@ -32,6 +33,7 @@ library(ggspatial)
 library(rnaturalearth)
 library(envalysis)
 library(forcats)
+library(poppr)
 T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_2024.xlsx")
 coord <- read_excel("Koordinaten_2024.xlsx")
 ```
@@ -101,4 +103,22 @@ ggplot(T_all) +
   labs(title = "Overview of samples in truffle monitoring dataset",
        x = "Sampling year", y = "Sampling site abbreviation",
        colour = "Nb_markers")
+```
+
+##Clone correction
+from https://grunwaldlab.github.io/Population_Genetics_in_R/Population_Strata.html
+When dealing with clonal populations, analyses are typically conducted with and without clone correction. Clone correction is a method of censoring a data set such that only one individual per MLG is represented per population (Milgroom, 1996; Grünwald et al., 2003; Grünwald & Hoheisel, 2006). This technique is commonly used with the index of association and genotypic diversity measures since clone corrected populations approximate behavior of sexual populations. Since we want to only observe unique genotypes per population, clone correction requires specification of the stratifications at which clones should be censored. This section will show how to clone correct at a specific stratification and also compare the results with uncorrected data.
+
+Question: Will allelic diversity increase or decrease with clone-censored data?
+
+```{r subsetting data, eval=FALSE, include=FALSE}
+myData <- read.genalex("Daten_Genalex.csv",sep=";")
+popdata <- poppr(myData)
+popdata
+#N = Number of individuals, MLG = Number of multilocus genotypes, eMLG = number of expected MLG at the smallest sample size >= 10 based on rarefaction
+#SE = Standard error based on eMLG, H = Shannon-Wiener Index of MLG diversity
+#G = Stoddart & Taylor's Index of MLG diversity
+# lambda = Simpsons index, E.5 = Evenness, Hexp = Neis Expected Heterozygosity
+#Ia = Index of association, rbarD = stand. Index of association
+mlg <- mlg(popdata)
 ```
