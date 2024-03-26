@@ -35,6 +35,7 @@ library(envalysis)
 library(forcats)
 library(poppr)
 library(treemap)
+library(pegas)
 T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_2024.xlsx")
 coord <- read_excel("Koordinaten_2024.xlsx")
 ```
@@ -123,13 +124,22 @@ myData #stratum "Pop" is already defined.
 #monstrata #entspricht aktuell noch der gleichen Tabelle wie "number_obs_all"
 #treemap(monstrata, index=nameStrata(myData),vSize="count", type="categorical")
 ```
-#Clone correction
+
+Show missing data
+
+```{r missing data, echo=FALSE}
+info_table(myData,plot=TRUE)
+#for more stuff (removal of individuals or loci etc.): grunwaldlab.github.io/population_genetics_in_r/locus_stats.html
+```
+
+Clone correction
 
 ```{r clone correction, echo=FALSE}
 clonecorrect_data <- clonecorrect(myData, strata=~Pop)
 clonecorrect_data
 ```
-```{r compare diversity between corrected and uncorrected}
+
+```{r compare diversity between corrected and uncorrected, echo=FALSE}
 #see grunwaldlab.github.io/population_genetics_in_R/Population_Strata_html
 cc <- locus_table(clonecorrect_data, info=FALSE)
 mp <- locus_table(myData, info = FALSE)
@@ -137,6 +147,8 @@ mp-cc
 locus_diff <- mp-cc
 barplot(locus_diff[,"1-D"], ylab="Change in Simpson's Index",xlab="Locus", main = "Comparison of clone-corrected vs. uncorrected data")
 ```
+
+
 The graph shows a decrease of diversity for most markers when clone-correcting the data (increase of Simpson index means a decrease of genotypic diversity).
 
 ```{r poppr stuff}

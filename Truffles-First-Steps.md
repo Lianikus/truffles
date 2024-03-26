@@ -88,7 +88,81 @@ clone-censored data?
     ##       1 stratum - Pop
     ##      20 populations defined - ALD, BAR, BOB, ..., UEB, UST, WSL
 
-\#Clone correction
+Show missing data
+
+![](Truffles-First-Steps_files/figure-gfm/missing%20data-1.png)<!-- -->
+
+    ##           Locus
+    ## Population aest01_1 aest06_1 aest07_1 aest10_1 aest15_1 aest18_1 aest24_1
+    ##      ALD    0.07042        .        .        .        .        .  0.04225
+    ##      BAR    0.50000        .        .        .        .        .        .
+    ##      BOB    0.06709  0.00210        .  0.00210        .  0.00210  0.00629
+    ##      BOH    0.22222        .        .  0.01852        .  0.01852  0.05556
+    ##      BUR    0.19366        .        .  0.00352        .        .  0.01761
+    ##      FRB    0.10000        .        .  0.20000        .        .        .
+    ##      FRE    0.13433        .        .  0.11194        .        .  0.01493
+    ##      FRI    0.03200        .        .  0.00800        .        .  0.00800
+    ##      GEN          .        .        .        .        .        .        .
+    ##      KON    0.21795        .  0.00427        .  0.00427        .  0.00855
+    ##      NEU    0.07895        .        .  0.02632        .        .        .
+    ##      RIE    0.04478        .        .  0.01493        .        .        .
+    ##      SCD    0.13008        .        .  0.02439        .        .  0.02439
+    ##      SCG    0.25000        .        .  0.04167        .        .  0.04167
+    ##      SCL    0.09365        .        .  0.01003  0.00334  0.00334  0.00334
+    ##      SCS    0.10000        .        .        .        .        .  0.02000
+    ##      TRO    0.08108        .        .        .        .        .  0.02703
+    ##      UEB    0.20098        .        .  0.02451  0.12255        .  0.02451
+    ##      UST    0.11628        .        .  0.02326        .        .  0.02326
+    ##      WSL          .        .        .        .        .        .        .
+    ##      Total  0.11374  0.00037  0.00037  0.01957  0.00997  0.00111  0.01256
+    ##           Locus
+    ## Population aest25_1 aest26_1 aest28_1 aest29_1 aest31_1 aest35_1 aest36_1
+    ##      ALD          .        .        .        .  0.07042        .        .
+    ##      BAR          .        .        .        .        .        .        .
+    ##      BOB    0.00419        .  0.01887        .  0.03145        .  0.00210
+    ##      BOH          .        .  0.07407  0.01852  0.07407        .        .
+    ##      BUR          .  0.02465  0.00704  0.00704  0.11620  0.00704  0.00352
+    ##      FRB          .        .  0.20000  0.05000  0.10000        .        .
+    ##      FRE          .        .  0.01866  0.00373  0.11194        .        .
+    ##      FRI          .        .  0.00800        .  0.00800        .        .
+    ##      GEN          .        .        .        .        .        .        .
+    ##      KON          .        .  0.01282  0.00427  0.14530        .  0.00855
+    ##      NEU    0.02632        .  0.05263        .  0.02632        .        .
+    ##      RIE          .        .        .        .  0.02985        .        .
+    ##      SCD          .        .  0.05691  0.01626  0.07317        .        .
+    ##      SCG          .        .  0.20833        .  0.12500        .        .
+    ##      SCL          .        .  0.63545  0.00669  0.05686        .        .
+    ##      SCS          .        .  0.02000  0.02000  0.02000        .        .
+    ##      TRO          .        .        .        .  0.02703        .        .
+    ##      UEB    0.00490        .  0.05882  0.01471  0.15686        .        .
+    ##      UST          .        .  0.04651  0.02326  0.04651        .        .
+    ##      WSL          .        .        .        .        .        .        .
+    ##      Total  0.00148  0.00258  0.09121  0.00554  0.07090  0.00074  0.00148
+    ##           Locus
+    ## Population    Mean
+    ##      ALD   0.01308
+    ##      BAR   0.03571
+    ##      BOB   0.00973
+    ##      BOH   0.03439
+    ##      BUR   0.02716
+    ##      FRB   0.04643
+    ##      FRE   0.02825
+    ##      FRI   0.00457
+    ##      GEN         .
+    ##      KON   0.02900
+    ##      NEU   0.01504
+    ##      RIE   0.00640
+    ##      SCD   0.02323
+    ##      SCG   0.04762
+    ##      SCL   0.05805
+    ##      SCS   0.01286
+    ##      TRO   0.00965
+    ##      UEB   0.04342
+    ##      UST   0.01993
+    ##      WSL         .
+    ##      Total 0.02369
+
+Clone correction
 
     ## 
     ## This is a genclone object
@@ -103,13 +177,6 @@ clone-censored data?
     ## 
     ##      1 stratum - Pop
     ##     20 populations defined - ALD, BAR, BOB, ..., UEB, UST, WSL
-
-``` r
-#see grunwaldlab.github.io/population_genetics_in_R/Population_Strata_html
-cc <- locus_table(clonecorrect_data, info=FALSE)
-mp <- locus_table(myData, info = FALSE)
-mp-cc
-```
 
     ##           summary
     ## locus      allele      1-D     Hexp Evenness
@@ -129,12 +196,8 @@ mp-cc
     ##   aest36_1      .  0.01563  0.01507  0.07482
     ##   mean          .  0.04098  0.04031  0.05035
 
-``` r
-locus_diff <- mp-cc
-barplot(locus_diff[,"1-D"], ylab="Change in Simpson's Index",xlab="Locus", main = "Comparison of clone-corrected vs. uncorrected data")
-```
-
 ![](Truffles-First-Steps_files/figure-gfm/compare%20diversity%20between%20corrected%20and%20uncorrected-1.png)<!-- -->
+
 The graph shows a decrease of diversity for most markers when
 clone-correcting the data (increase of Simpson index means a decrease of
 genotypic diversity).
