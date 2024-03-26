@@ -34,6 +34,7 @@ library(rnaturalearth)
 library(envalysis)
 library(forcats)
 library(poppr)
+library(treemap)
 T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_2024.xlsx")
 coord <- read_excel("Koordinaten_2024.xlsx")
 ```
@@ -111,8 +112,23 @@ When dealing with clonal populations, analyses are typically conducted with and 
 
 Question: Will allelic diversity increase or decrease with clone-censored data?
 
-```{r subsetting data, eval=FALSE, include=FALSE}
+```{r load genalex data and first examinations, echo=FALSE}
 myData <- read.genalex("Daten_Genalex.csv",sep=";")
+myData #stratum "Pop" is already defined.
+#If I need to include the stratum "Year", I can use the following, would need to include it in the excel file though. Also the treemap will be more interesting once we have more strata.
+#splitStrata(myData) <- ~Pop/Year
+#monstrata <- strata(myData) %>%
+#  group_by(Pop) %>%
+#  summarize(count=n())
+#monstrata #entspricht aktuell noch der gleichen Tabelle wie "number_obs_all"
+#treemap(monstrata, index=nameStrata(myData),vSize="count", type="categorical")
+```
+
+```{r clone correction, echo=FALSE}
+clonecorrect_data <- clonecorrect(myData, strata=~Pop)
+clonecorrect_data
+```
+```{r poppr stuff}
 popdata <- poppr(myData)
 popdata
 #N = Number of individuals, MLG = Number of multilocus genotypes, eMLG = number of expected MLG at the smallest sample size >= 10 based on rarefaction
@@ -120,5 +136,4 @@ popdata
 #G = Stoddart & Taylor's Index of MLG diversity
 # lambda = Simpsons index, E.5 = Evenness, Hexp = Neis Expected Heterozygosity
 #Ia = Index of association, rbarD = stand. Index of association
-mlg <- mlg(popdata)
 ```

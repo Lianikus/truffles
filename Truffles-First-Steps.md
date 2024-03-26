@@ -74,6 +74,92 @@ data.
 Question: Will allelic diversity increase or decrease with
 clone-censored data?
 
+    ## 
+    ## This is a genclone object
+    ## -------------------------
+    ## Genotype information:
+    ## 
+    ##     676 original multilocus genotypes 
+    ##    2708 haploid individuals
+    ##      14 codominant loci
+    ## 
+    ## Population information:
+    ## 
+    ##       1 stratum - Pop
+    ##      20 populations defined - ALD, BAR, BOB, ..., UEB, UST, WSL
+
+    ## 
+    ## This is a genclone object
+    ## -------------------------
+    ## Genotype information:
+    ## 
+    ##    676 original multilocus genotypes 
+    ##    690 haploid individuals
+    ##     14 codominant loci
+    ## 
+    ## Population information:
+    ## 
+    ##      1 stratum - Pop
+    ##     20 populations defined - ALD, BAR, BOB, ..., UEB, UST, WSL
+
+``` r
+popdata <- poppr(myData)
+popdata
+```
+
+    ##      Pop    N MLG eMLG    SE     H     G lambda   E.5   Hexp    Ia  rbarD
+    ## 1    ALD   71  21 5.02 1.349 1.908  3.01 0.6681 0.351 0.1414 3.223 0.3235
+    ## 2    BAR    2   2 2.00 0.000 0.693  2.00 0.5000 1.000 0.3846    NA     NA
+    ## 3    BOB  477 172 8.50 1.133 4.134 21.95 0.9544 0.341 0.3425 2.157 0.1854
+    ## 4    BOH   54  38 8.90 0.986 3.398 19.97 0.9499 0.656 0.2871 1.341 0.1240
+    ## 5    BUR  284  41 5.83 1.251 2.404  6.37 0.8431 0.534 0.2610 4.980 0.4192
+    ## 6    FRB   20  14 7.91 1.041 2.441  9.09 0.8900 0.772 0.4538 5.403 0.4216
+    ## 7    FRE  268  26 3.28 1.217 1.252  1.74 0.4267 0.298 0.0738 8.693 0.7373
+    ## 8    FRI  125  16 4.14 1.064 1.612  3.40 0.7060 0.598 0.3014 4.365 0.3804
+    ## 9    GEN    5   2 2.00 0.000 0.500  1.47 0.3200 0.725 0.1714 5.000 1.0000
+    ## 10   KON  234  49 6.90 1.297 2.852  8.70 0.8851 0.472 0.2168 1.070 0.0922
+    ## 11   NEU   38  11 4.37 1.179 1.492  2.55 0.6080 0.450 0.1089 2.088 0.2622
+    ## 12   RIE   67  44 9.29 0.771 3.630 31.84 0.9686 0.840 0.4284 0.870 0.0753
+    ## 13   SCD  123  58 6.92 1.447 3.054  6.20 0.8388 0.258 0.2766 2.332 0.2256
+    ## 14   SCG   24  14 7.62 1.064 2.438  9.29 0.8924 0.793 0.2724 1.856 0.1613
+    ## 15   SCL  299  65 5.08 1.380 2.258  3.38 0.7041 0.278 0.1080 2.629 0.2494
+    ## 16   SCS   50  11 3.30 1.157 1.082  1.71 0.4152 0.364 0.0846 4.079 0.3958
+    ## 17   TRO   37   9 4.21 1.087 1.440  2.72 0.6326 0.535 0.1523 2.474 0.3468
+    ## 18   UEB  204  62 7.51 1.293 3.221 11.70 0.9145 0.445 0.1684 0.571 0.0621
+    ## 19   UST   43  30 8.87 0.951 3.209 19.06 0.9475 0.760 0.3908 0.947 0.0762
+    ## 20   WSL  283   5 1.30 0.505 0.173  1.07 0.0621 0.351 0.0145 4.281 0.5054
+    ## 21 Total 2708 676 9.04 0.945 4.971 38.79 0.9742 0.264 0.6329 2.459 0.1895
+    ##      File
+    ## 1  myData
+    ## 2  myData
+    ## 3  myData
+    ## 4  myData
+    ## 5  myData
+    ## 6  myData
+    ## 7  myData
+    ## 8  myData
+    ## 9  myData
+    ## 10 myData
+    ## 11 myData
+    ## 12 myData
+    ## 13 myData
+    ## 14 myData
+    ## 15 myData
+    ## 16 myData
+    ## 17 myData
+    ## 18 myData
+    ## 19 myData
+    ## 20 myData
+    ## 21 myData
+
+``` r
+#N = Number of individuals, MLG = Number of multilocus genotypes, eMLG = number of expected MLG at the smallest sample size >= 10 based on rarefaction
+#SE = Standard error based on eMLG, H = Shannon-Wiener Index of MLG diversity
+#G = Stoddart & Taylor's Index of MLG diversity
+# lambda = Simpsons index, E.5 = Evenness, Hexp = Neis Expected Heterozygosity
+#Ia = Index of association, rbarD = stand. Index of association
+```
+
 <div id="refs" class="references csl-bib-body hanging-indent">
 
 <div id="ref-legendreComparisonMantelTest2010" class="csl-entry">
