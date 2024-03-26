@@ -123,11 +123,22 @@ myData #stratum "Pop" is already defined.
 #monstrata #entspricht aktuell noch der gleichen Tabelle wie "number_obs_all"
 #treemap(monstrata, index=nameStrata(myData),vSize="count", type="categorical")
 ```
+#Clone correction
 
 ```{r clone correction, echo=FALSE}
 clonecorrect_data <- clonecorrect(myData, strata=~Pop)
 clonecorrect_data
 ```
+```{r compare diversity between corrected and uncorrected}
+#see grunwaldlab.github.io/population_genetics_in_R/Population_Strata_html
+cc <- locus_table(clonecorrect_data, info=FALSE)
+mp <- locus_table(myData, info = FALSE)
+mp-cc
+locus_diff <- mp-cc
+barplot(locus_diff[,"1-D"], ylab="Change in Simpson's Index",xlab="Locus", main = "Comparison of clone-corrected vs. uncorrected data")
+```
+The graph shows a decrease of diversity for most markers when clone-correcting the data (increase of Simpson index means a decrease of genotypic diversity).
+
 ```{r poppr stuff}
 popdata <- poppr(myData)
 popdata

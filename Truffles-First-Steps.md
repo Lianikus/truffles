@@ -88,6 +88,8 @@ clone-censored data?
     ##       1 stratum - Pop
     ##      20 populations defined - ALD, BAR, BOB, ..., UEB, UST, WSL
 
+\#Clone correction
+
     ## 
     ## This is a genclone object
     ## -------------------------
@@ -101,6 +103,41 @@ clone-censored data?
     ## 
     ##      1 stratum - Pop
     ##     20 populations defined - ALD, BAR, BOB, ..., UEB, UST, WSL
+
+``` r
+#see grunwaldlab.github.io/population_genetics_in_R/Population_Strata_html
+cc <- locus_table(clonecorrect_data, info=FALSE)
+mp <- locus_table(myData, info = FALSE)
+mp-cc
+```
+
+    ##           summary
+    ## locus      allele      1-D     Hexp Evenness
+    ##   aest01_1      .  0.03161  0.03058  0.08373
+    ##   aest06_1      .  0.14621  0.14571  0.05797
+    ##   aest07_1      .  0.06025  0.05966  0.00091
+    ##   aest10_1      .  0.04087  0.04005  0.05927
+    ##   aest15_1      .  0.14840  0.14824  0.12356
+    ##   aest18_1      .  0.01211  0.01135  0.03571
+    ##   aest24_1      .  0.06898  0.06849  0.06678
+    ##   aest25_1      .  0.02541  0.02480 -0.00906
+    ##   aest26_1      . -0.02265 -0.02347  0.01175
+    ##   aest28_1      . -0.03892 -0.03995 -0.00317
+    ##   aest29_1      .  0.05603  0.05537  0.04754
+    ##   aest31_1      . -0.02566 -0.02656  0.04152
+    ##   aest35_1      .  0.05544  0.05496  0.11352
+    ##   aest36_1      .  0.01563  0.01507  0.07482
+    ##   mean          .  0.04098  0.04031  0.05035
+
+``` r
+locus_diff <- mp-cc
+barplot(locus_diff[,"1-D"], ylab="Change in Simpson's Index",xlab="Locus", main = "Comparison of clone-corrected vs. uncorrected data")
+```
+
+![](Truffles-First-Steps_files/figure-gfm/compare%20diversity%20between%20corrected%20and%20uncorrected-1.png)<!-- -->
+The graph shows a decrease of diversity for most markers when
+clone-correcting the data (increase of Simpson index means a decrease of
+genotypic diversity).
 
 ``` r
 popdata <- poppr(myData)
