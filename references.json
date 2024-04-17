@@ -504,5 +504,837 @@
 				]
 			]
 		}
+	},
+	{
+		"id": "kamvarPopprPackageGenetic2014",
+		"type": "article-journal",
+		"abstract": "Many microbial, fungal, or oomcyete populations violate assumptions for population genetic analysis because these populations are clonal, admixed, partially clonal, and/or sexual. Furthermore, few tools exist that are specifically designed for analyzing data from clonal populations, making analysis difficult and haphazard. We developed the R package poppr providing unique tools for analysis of data from admixed, clonal, mixed, and/or sexual populations. Currently, poppr can be used for dominant/codominant and haploid/diploid genetic data. Data can be imported from several formats including GenAlEx formatted text files and can be analyzed on a user-defined hierarchy that includes unlimited levels of subpopulation structure and clone censoring. New functions include calculation of Bruvo's distance for microsatellites, batch-analysis of the index of association with several indices of genotypic diversity, and graphing including dendrograms with bootstrap support and minimum spanning networks. While functions for genotypic diversity and clone censoring are specific for clonal populations, several functions found in poppr are also valuable to analysis of any populations. A manual with documentation and examples is provided. Poppr is open source and major releases are available on CRAN: http://cran.r-project.org/package=poppr. More supporting documentation and tutorials can be found under 'resources' at: http://grunwaldlab.cgrb.oregonstate.edu/.",
+		"container-title": "PeerJ",
+		"DOI": "10.7717/peerj.281",
+		"ISSN": "2167-8359",
+		"journalAbbreviation": "PeerJ",
+		"language": "eng",
+		"note": "PMID: 24688859\nPMCID: PMC3961149",
+		"page": "e281",
+		"source": "PubMed",
+		"title": "Poppr: an R package for genetic analysis of populations with clonal, partially clonal, and/or sexual reproduction",
+		"title-short": "Poppr",
+		"volume": "2",
+		"author": [
+			{
+				"family": "Kamvar",
+				"given": "Zhian N."
+			},
+			{
+				"family": "Tabima",
+				"given": "Javier F."
+			},
+			{
+				"family": "Grünwald",
+				"given": "Niklaus J."
+			}
+		],
+		"issued": {
+			"date-parts": [
+				[
+					"2014"
+				]
+			]
+		}
+	},
+	{
+		"id": "milgroomRecombinationMultilocusStructure1996a",
+		"type": "article-journal",
+		"abstract": "This review examines the relationship between recombination and the multilocus structure of populations. This discussion of population structure is based on the pattern of genetic variation within populations, especially the frequencies of multilocus genotypes, which can be used for making inferences about recombination. Three questions are addressed: Is population structure consistent with a random mating hypothesis? Is there evidence for recombination? How frequently does recombination occur?",
+		"container-title": "Annual Review of Phytopathology",
+		"DOI": "10.1146/annurev.phyto.34.1.457",
+		"ISSN": "0066-4286",
+		"journalAbbreviation": "Annu Rev Phytopathol",
+		"language": "eng",
+		"note": "PMID: 15012552",
+		"page": "457-477",
+		"source": "PubMed",
+		"title": "Recombination and the multilocus structure of fungal populations",
+		"volume": "34",
+		"author": [
+			{
+				"family": "Milgroom",
+				"given": "M. G."
+			}
+		],
+		"issued": {
+			"date-parts": [
+				[
+					"1996"
+				]
+			]
+		}
+	},
+	{
+		"id": "mclaughlinSearchFungalTree2009",
+		"type": "article-journal",
+		"abstract": "The Fungi comprise a diverse kingdom of eukaryotes that are characterized by a typically filamentous but sometimes unicellular vegetative form, and heterotrophic, absorptive nutrition. Their simple morphologies and variable ecological strategies have confounded efforts to elucidate their limits, phylogenetic relationships, and diversity. Here we review progress in developing a phylogenetic classification of Fungi since Darwin's On the Origin of Species. Knowledge of phylogenetic relationships has been driven by the available characters that have ranged from morphological and ultrastructural to biochemical and genomic. With the availability of multiple gene phylogenies a well-corroborated phylogenetic classification has now begun to emerge. In the process some fungus-like heterotrophs have been shown to belong elsewhere, and several groups of enigmatic eukaryotic microbes have been added to the Fungi.",
+		"container-title": "Trends in Microbiology",
+		"DOI": "10.1016/j.tim.2009.08.001",
+		"ISSN": "0966-842X",
+		"issue": "11",
+		"journalAbbreviation": "Trends in Microbiology",
+		"page": "488-497",
+		"source": "ScienceDirect",
+		"title": "The search for the fungal tree of life",
+		"URL": "https://www.sciencedirect.com/science/article/pii/S0966842X0900170X",
+		"volume": "17",
+		"author": [
+			{
+				"family": "McLaughlin",
+				"given": "David J."
+			},
+			{
+				"family": "Hibbett",
+				"given": "David S."
+			},
+			{
+				"family": "Lutzoni",
+				"given": "François"
+			},
+			{
+				"family": "Spatafora",
+				"given": "Joseph W."
+			},
+			{
+				"family": "Vilgalys",
+				"given": "Rytas"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2024",
+					3,
+					26
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2009",
+					11,
+					1
+				]
+			]
+		}
+	},
+	{
+		"id": "molinierBurgundyTruffleTuber2016",
+		"type": "chapter",
+		"abstract": "Tuber aestivum (Vittadini, Monographia tuberacearum, 1831) is an ectomycorrhizal fungus that establishes a symbiosis with various host tree species, such as oak, beech, and hazel. The mycorrhizas of T. aestivum show a characteristic tangled hairy feature, due to the presence of many curled, interwoven cystidia. Morphological features of the ascocarps include a black peridium and a white-ochre to dark-brown gleba color, depending on the maturity. In 1887, Chatin separated T. aestivum into two distinct species through a novel description of Tuber uncinatum on the basis of morphological characteristics. Recent phylogenetic analyses suggest that existing morphological differences between T. uncinatum and T. aestivum do not reflect two different species and support the use of T. aestivum as the only scientific name. With a distribution throughout Europe and as far east as the Caucasian regions, T. aestivum shows ecological polymorphism, with different maturity periods and a broad range of ecological preferences depending on the geographical location.",
+		"container-title": "True Truffle (Tuber spp.) in the World: Soil Ecology, Systematics and Biochemistry",
+		"event-place": "Cham",
+		"ISBN": "978-3-319-31436-5",
+		"language": "en",
+		"note": "DOI: 10.1007/978-3-319-31436-5_3",
+		"page": "33-47",
+		"publisher": "Springer International Publishing",
+		"publisher-place": "Cham",
+		"source": "Springer Link",
+		"title": "The Burgundy Truffle (Tuber aestivum syn. uncinatum): A Truffle Species with a Wide Habitat Range over Europe",
+		"title-short": "The Burgundy Truffle (Tuber aestivum syn. uncinatum)",
+		"URL": "https://doi.org/10.1007/978-3-319-31436-5_3",
+		"author": [
+			{
+				"family": "Molinier",
+				"given": "Virginie"
+			},
+			{
+				"family": "Peter",
+				"given": "Martina"
+			},
+			{
+				"family": "Stobbe",
+				"given": "Ulrich"
+			},
+			{
+				"family": "Egli",
+				"given": "Simon"
+			}
+		],
+		"editor": [
+			{
+				"family": "Zambonelli",
+				"given": "Alessandra"
+			},
+			{
+				"family": "Iotti",
+				"given": "Mirco"
+			},
+			{
+				"family": "Murat",
+				"given": "Claude"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2024",
+					3,
+					26
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2016"
+				]
+			]
+		}
+	},
+	{
+		"id": "miyauchiLargescaleGenomeSequencing2020",
+		"type": "article-journal",
+		"abstract": "Mycorrhizal fungi are mutualists that play crucial roles in nutrient acquisition in terrestrial ecosystems. Mycorrhizal symbioses arose repeatedly across multiple lineages of Mucoromycotina, Ascomycota, and Basidiomycota. Considerable variation exists in the capacity of mycorrhizal fungi to acquire carbon from soil organic matter. Here, we present a combined analysis of 135 fungal genomes from 73 saprotrophic, endophytic and pathogenic species, and 62 mycorrhizal species, including 29 new mycorrhizal genomes. This study samples ecologically dominant fungal guilds for which there were previously no symbiotic genomes available, including ectomycorrhizal Russulales, Thelephorales and Cantharellales. Our analyses show that transitions from saprotrophy to symbiosis involve (1) widespread losses of degrading enzymes acting on lignin and cellulose, (2) co-option of genes present in saprotrophic ancestors to fulfill new symbiotic functions, (3) diversification of novel, lineage-specific symbiosis-induced genes, (4) proliferation of transposable elements and (5) divergent genetic innovations underlying the convergent origins of the ectomycorrhizal guild.",
+		"container-title": "Nature Communications",
+		"DOI": "10.1038/s41467-020-18795-w",
+		"ISSN": "2041-1723",
+		"issue": "1",
+		"journalAbbreviation": "Nat Commun",
+		"language": "en",
+		"license": "2020 The Author(s)",
+		"note": "publisher: Nature Publishing Group",
+		"page": "5125",
+		"source": "www.nature.com",
+		"title": "Large-scale genome sequencing of mycorrhizal fungi provides insights into the early evolution of symbiotic traits",
+		"URL": "https://www.nature.com/articles/s41467-020-18795-w",
+		"volume": "11",
+		"author": [
+			{
+				"family": "Miyauchi",
+				"given": "Shingo"
+			},
+			{
+				"family": "Kiss",
+				"given": "Enikő"
+			},
+			{
+				"family": "Kuo",
+				"given": "Alan"
+			},
+			{
+				"family": "Drula",
+				"given": "Elodie"
+			},
+			{
+				"family": "Kohler",
+				"given": "Annegret"
+			},
+			{
+				"family": "Sánchez-García",
+				"given": "Marisol"
+			},
+			{
+				"family": "Morin",
+				"given": "Emmanuelle"
+			},
+			{
+				"family": "Andreopoulos",
+				"given": "Bill"
+			},
+			{
+				"family": "Barry",
+				"given": "Kerrie W."
+			},
+			{
+				"family": "Bonito",
+				"given": "Gregory"
+			},
+			{
+				"family": "Buée",
+				"given": "Marc"
+			},
+			{
+				"family": "Carver",
+				"given": "Akiko"
+			},
+			{
+				"family": "Chen",
+				"given": "Cindy"
+			},
+			{
+				"family": "Cichocki",
+				"given": "Nicolas"
+			},
+			{
+				"family": "Clum",
+				"given": "Alicia"
+			},
+			{
+				"family": "Culley",
+				"given": "David"
+			},
+			{
+				"family": "Crous",
+				"given": "Pedro W."
+			},
+			{
+				"family": "Fauchery",
+				"given": "Laure"
+			},
+			{
+				"family": "Girlanda",
+				"given": "Mariangela"
+			},
+			{
+				"family": "Hayes",
+				"given": "Richard D."
+			},
+			{
+				"family": "Kéri",
+				"given": "Zsófia"
+			},
+			{
+				"family": "LaButti",
+				"given": "Kurt"
+			},
+			{
+				"family": "Lipzen",
+				"given": "Anna"
+			},
+			{
+				"family": "Lombard",
+				"given": "Vincent"
+			},
+			{
+				"family": "Magnuson",
+				"given": "Jon"
+			},
+			{
+				"family": "Maillard",
+				"given": "François"
+			},
+			{
+				"family": "Murat",
+				"given": "Claude"
+			},
+			{
+				"family": "Nolan",
+				"given": "Matt"
+			},
+			{
+				"family": "Ohm",
+				"given": "Robin A."
+			},
+			{
+				"family": "Pangilinan",
+				"given": "Jasmyn"
+			},
+			{
+				"family": "Pereira",
+				"given": "Maíra de Freitas"
+			},
+			{
+				"family": "Perotto",
+				"given": "Silvia"
+			},
+			{
+				"family": "Peter",
+				"given": "Martina"
+			},
+			{
+				"family": "Pfister",
+				"given": "Stephanie"
+			},
+			{
+				"family": "Riley",
+				"given": "Robert"
+			},
+			{
+				"family": "Sitrit",
+				"given": "Yaron"
+			},
+			{
+				"family": "Stielow",
+				"given": "J. Benjamin"
+			},
+			{
+				"family": "Szöllősi",
+				"given": "Gergely"
+			},
+			{
+				"family": "Žifčáková",
+				"given": "Lucia"
+			},
+			{
+				"family": "Štursová",
+				"given": "Martina"
+			},
+			{
+				"family": "Spatafora",
+				"given": "Joseph W."
+			},
+			{
+				"family": "Tedersoo",
+				"given": "Leho"
+			},
+			{
+				"family": "Vaario",
+				"given": "Lu-Min"
+			},
+			{
+				"family": "Yamada",
+				"given": "Akiyoshi"
+			},
+			{
+				"family": "Yan",
+				"given": "Mi"
+			},
+			{
+				"family": "Wang",
+				"given": "Pengfei"
+			},
+			{
+				"family": "Xu",
+				"given": "Jianping"
+			},
+			{
+				"family": "Bruns",
+				"given": "Tom"
+			},
+			{
+				"family": "Baldrian",
+				"given": "Petr"
+			},
+			{
+				"family": "Vilgalys",
+				"given": "Rytas"
+			},
+			{
+				"family": "Dunand",
+				"given": "Christophe"
+			},
+			{
+				"family": "Henrissat",
+				"given": "Bernard"
+			},
+			{
+				"family": "Grigoriev",
+				"given": "Igor V."
+			},
+			{
+				"family": "Hibbett",
+				"given": "David"
+			},
+			{
+				"family": "Nagy",
+				"given": "László G."
+			},
+			{
+				"family": "Martin",
+				"given": "Francis M."
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2024",
+					3,
+					26
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2020",
+					10,
+					12
+				]
+			]
+		}
+	},
+	{
+		"id": "moserEcologicalIndicatorsTuber2017",
+		"type": "article-journal",
+		"abstract": "Although Tuber aestivum is widely distributed across Europe, little is known about its biology and ecology. We assess the vegetation composition of wild T. aestivum sites and use this information to characterise suitable habitats in Fagus sylvatica, Carpinus betulus and Ostrya carpinifolia (FCO) forests. Plant species composition at 16 naturally colonised T. aestivum sites in southwestern Germany and Switzerland was compared with that of 232 reference sites in Swiss FCO forest communities. The vegetation composition of truffle sites exhibits a high proportion of herb and shrub species that are indicators of a warm and dry climate, alkaline soil, and open tree canopy and thus typically occur in thermophilous FCO communities on calcareous bedrock. We conclude that T. aestivum is associated with a set of key species in addition to known host species. Based on their floristic composition, we identified FCO forest communities with high and low suitability for T. aestivum.",
+		"container-title": "Fungal Ecology",
+		"DOI": "10.1016/j.funeco.2017.06.002",
+		"ISSN": "1754-5048",
+		"journalAbbreviation": "Fungal Ecology",
+		"page": "59-66",
+		"source": "ScienceDirect",
+		"title": "Ecological indicators of <i>Tuber aestivum</i> habitats in temperate European beech forests",
+		"URL": "https://www.sciencedirect.com/science/article/pii/S1754504817300776",
+		"volume": "29",
+		"author": [
+			{
+				"family": "Moser",
+				"given": "Barbara"
+			},
+			{
+				"family": "Büntgen",
+				"given": "Ulf"
+			},
+			{
+				"family": "Molinier",
+				"given": "Virginie"
+			},
+			{
+				"family": "Peter",
+				"given": "Martina"
+			},
+			{
+				"family": "Sproll",
+				"given": "Ludger"
+			},
+			{
+				"family": "Stobbe",
+				"given": "Ulrich"
+			},
+			{
+				"family": "Tegel",
+				"given": "Willy"
+			},
+			{
+				"family": "Egli",
+				"given": "Simon"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2024",
+					4,
+					2
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2017",
+					10,
+					1
+				]
+			]
+		}
+	},
+	{
+		"id": "buntgenDroughtinducedDeclineMediterranean2012",
+		"type": "article-journal",
+		"container-title": "Nature Climate Change",
+		"DOI": "10.1038/nclimate1733",
+		"ISSN": "1758-6798",
+		"issue": "12",
+		"journalAbbreviation": "Nature Clim Change",
+		"language": "en",
+		"license": "2012 Springer Nature Limited",
+		"note": "publisher: Nature Publishing Group",
+		"page": "827-829",
+		"source": "www.nature.com",
+		"title": "Drought-induced decline in Mediterranean truffle harvest",
+		"URL": "https://www.nature.com/articles/nclimate1733",
+		"volume": "2",
+		"author": [
+			{
+				"family": "Büntgen",
+				"given": "Ulf"
+			},
+			{
+				"family": "Egli",
+				"given": "Simon"
+			},
+			{
+				"family": "Camarero",
+				"given": "J. Julio"
+			},
+			{
+				"family": "Fischer",
+				"given": "Erich M."
+			},
+			{
+				"family": "Stobbe",
+				"given": "Ulrich"
+			},
+			{
+				"family": "Kauserud",
+				"given": "Håvard"
+			},
+			{
+				"family": "Tegel",
+				"given": "Willy"
+			},
+			{
+				"family": "Sproll",
+				"given": "Ludger"
+			},
+			{
+				"family": "Stenseth",
+				"given": "Nils C."
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2024",
+					4,
+					2
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2012",
+					12
+				]
+			]
+		}
+	},
+	{
+		"id": "vieiraMicrosatelliteMarkersWhat2016",
+		"type": "article-journal",
+		"abstract": "Microsatellites or Single Sequence Repeats (SSRs) are extensively employed in plant\ngenetics studies, using both low and high throughput genotyping approaches. Motivated\nby the importance of these sequences over the last decades this review aims to\naddress some theoretical aspects of SSRs, including definition, characterization and\nbiological function. The methodologies for the development of SSR loci, genotyping\nand their applications as molecular markers are also reviewed. Finally, two data\nsurveys are presented. The first was conducted using the main database of Web of\nScience, prospecting for articles published over the period from 2010 to 2015,\nresulting in approximately 930 records. The second survey was focused on papers that\naimed at SSR marker development, published in the American Journal of Botany's Primer\nNotes and Protocols in Plant Sciences (over 2013 up to 2015), resulting in a total of\n87 publications. This scenario confirms the current relevance of SSRs and indicates\ntheir continuous utilization in plant science.",
+		"container-title": "Genetics and Molecular Biology",
+		"DOI": "10.1590/1678-4685-GMB-2016-0027",
+		"ISSN": "1415-4757",
+		"issue": "3",
+		"journalAbbreviation": "Genet Mol Biol",
+		"note": "PMID: 27561112\nPMCID: PMC5004837",
+		"page": "312-328",
+		"source": "PubMed Central",
+		"title": "Microsatellite markers: what they mean and why they are so useful",
+		"title-short": "Microsatellite markers",
+		"URL": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5004837/",
+		"volume": "39",
+		"author": [
+			{
+				"family": "Vieira",
+				"given": "Maria Lucia Carneiro"
+			},
+			{
+				"family": "Santini",
+				"given": "Luciane"
+			},
+			{
+				"family": "Diniz",
+				"given": "Augusto Lima"
+			},
+			{
+				"family": "Munhoz",
+				"given": "Carla de Freitas"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2024",
+					4,
+					2
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2016"
+				]
+			]
+		}
+	},
+	{
+		"id": "kirkApplicationsImplicationsNeutral2011",
+		"type": "article-journal",
+		"abstract": "The field of molecular ecology has expanded enormously in the past two decades, largely because of the growing ease with which neutral molecular genetic data can be obtained from virtually any taxonomic group. However, there is also a growing awareness that neutral molecular data can provide only partial insight into parameters such as genetic diversity, local adaptation, evolutionary potential, effective population size, and taxonomic designations. Here we review some of the applications of neutral versus adaptive markers in molecular ecology, discuss some of the advantages that can be obtained by supplementing studies of molecular ecology with data from non-neutral molecular markers, and summarize new methods that are enabling researchers to generate data from genes that are under selection.",
+		"container-title": "International Journal of Molecular Sciences",
+		"DOI": "10.3390/ijms12063966",
+		"ISSN": "1422-0067",
+		"issue": "6",
+		"journalAbbreviation": "Int J Mol Sci",
+		"note": "PMID: 21747718\nPMCID: PMC3131602",
+		"page": "3966-3988",
+		"source": "PubMed Central",
+		"title": "Applications and Implications of Neutral versus Non-neutral Markers in Molecular Ecology",
+		"URL": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3131602/",
+		"volume": "12",
+		"author": [
+			{
+				"family": "Kirk",
+				"given": "Heather"
+			},
+			{
+				"family": "Freeland",
+				"given": "Joanna R."
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2024",
+					4,
+					2
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2011",
+					6,
+					14
+				]
+			]
+		}
+	},
+	{
+		"id": "qinLifeCyclePhylogeography2022",
+		"type": "article-journal",
+		"abstract": "True truffle (Tuber spp.) is one group of ascomycetes with great economic importance. During the last 30 years, numerous fine-scale population genetics studies were conducted on different truffle species, aiming to answer several key questions regarding their life cycles; these questions are important for their cultivation. It is now evident that truffles are heterothallic, but with a prevalent haploid lifestyle. Strains forming ectomycorrhizas and germinating ascospores act as maternal and paternal partners respectively. At the same time, a number of large-scale studies were carried out, highlighting the influences of the last glaciation and river isolations on the genetic structure of truffles. A retreat to southern refugia during glaciation, and a northward expansion post glaciation, were revealed in all studied European truffles. The Mediterranean Sea, acting as a barrier, has led to the existence of several refugia in different peninsulas for a single species. Similarly, large rivers in southwestern China act as physical barriers to gene flow for truffles in this region. Further studies can pay special attention to population genetics of species with a wide distribution range, such as T. himalayense, and the correlation between truffle genetic structure and the community composition of truffle-associated bacteria.",
+		"container-title": "Genes",
+		"DOI": "10.3390/genes13010145",
+		"ISSN": "2073-4425",
+		"issue": "1",
+		"journalAbbreviation": "Genes (Basel)",
+		"note": "PMID: 35052485\nPMCID: PMC8775154",
+		"page": "145",
+		"source": "PubMed Central",
+		"title": "Life Cycle and Phylogeography of True Truffles",
+		"URL": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8775154/",
+		"volume": "13",
+		"author": [
+			{
+				"family": "Qin",
+				"given": "Jiao"
+			},
+			{
+				"family": "Feng",
+				"given": "Bang"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2024",
+					4,
+					10
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2022",
+					1,
+					14
+				]
+			]
+		}
+	},
+	{
+		"id": "gryndlerTuberAestivumAssociation2014",
+		"type": "article-journal",
+		"abstract": "Mycorrhizal fungi provide direct and functional interconnection of soil environment with their host plant roots. Colonization of non-host plants have occasionally been described, but its intensity and functional significance in complex plant communities remain generally unknown. Here, the abundance of ectomycorrhizal fungus Tuber aestivum was measured in the roots of host and non-host (non-ectomycorrhizal) plants in a naturally occurring T. aestivum colony using a quantitative PCR approach. The roots of non-host plant species found inside the brûlé area were extensively colonized by T. aestivum mycelium, although the levels were significantly lower than those found in host Carpinus betulus roots. However, fungal biomass concentration in the non-host roots was one to two orders of magnitude higher than that in the surrounding soil. This indicates existence of an important biotic interaction between T. aestivum mycelium and the non-host, mostly herbaceous plants. Roots, either host or non-host, thus probably constitute hot spots of T. aestivum activity in the soil ecosystem with as yet uncovered functional significance.",
+		"container-title": "Mycorrhiza",
+		"DOI": "10.1007/s00572-014-0580-9",
+		"ISSN": "1432-1890",
+		"issue": "8",
+		"journalAbbreviation": "Mycorrhiza",
+		"language": "eng",
+		"note": "PMID: 24756631",
+		"page": "603-610",
+		"source": "PubMed",
+		"title": "Tuber aestivum association with non-host roots",
+		"volume": "24",
+		"author": [
+			{
+				"family": "Gryndler",
+				"given": "Milan"
+			},
+			{
+				"family": "Cerná",
+				"given": "Lucie"
+			},
+			{
+				"family": "Bukovská",
+				"given": "Petra"
+			},
+			{
+				"family": "Hršelová",
+				"given": "Hana"
+			},
+			{
+				"family": "Jansa",
+				"given": "Jan"
+			}
+		],
+		"issued": {
+			"date-parts": [
+				[
+					"2014",
+					11
+				]
+			]
+		}
+	},
+	{
+		"id": "schneider-maunouryTwoEctomycorrhizalTruffles2020",
+		"type": "article-journal",
+		"abstract": "Serendipitous findings and studies on Tuber species suggest that some ectomycorrhizal fungi, beyond their complex interaction with ectomycorrhizal hosts, also colonise roots of nonectomycorrhizal plants in a loose way called endophytism. Here, we investigate endophytism of T. melanosporum and T. aestivum. We visualised endophytic T. melanosporum hyphae by fluorescent in situ hybridisation on nonectomycorrhizal plants. For the two Tuber species, microsatellite genotyping investigated the endophytic presence of the individuals whose mating produced nearby ascocarps. We quantified the expression of four T. aestivum genes in roots of endophyted, non-ectomycorrhizal plants. Tuber melanosporum hyphae colonised the apoplast of healthy roots, confirming endophytism. Endophytic Tuber melanosporum and T. aestivum contributed to nearby ascocarps, but only as maternal parents (forming the flesh). Paternal individuals (giving only genes found in meiotic spores of ascocarps) were not detected. Gene expression of T. aestivum in non-ectomycorrhizal plants confirmed a living status. Tuber species, and likely other ectomycorrhizal fungi found in nonectomycorrhizal plant roots in this study, can be root endophytes. This is relevant for the ecology (brûlé formation) and commercial production of truffles. Evolutionarily speaking, endophytism may be an ancestral trait in some ectomycorrhizal fungi that evolved from root endophytes.",
+		"container-title": "The New Phytologist",
+		"DOI": "10.1111/nph.16321",
+		"ISSN": "1469-8137",
+		"issue": "6",
+		"journalAbbreviation": "New Phytol",
+		"language": "eng",
+		"note": "PMID: 31733103",
+		"page": "2542-2556",
+		"source": "PubMed",
+		"title": "Two ectomycorrhizal truffles, Tuber melanosporum and T. aestivum, endophytically colonise roots of non-ectomycorrhizal plants in natural environments",
+		"volume": "225",
+		"author": [
+			{
+				"family": "Schneider-Maunoury",
+				"given": "Laure"
+			},
+			{
+				"family": "Deveau",
+				"given": "Aurélie"
+			},
+			{
+				"family": "Moreno",
+				"given": "Myriam"
+			},
+			{
+				"family": "Todesco",
+				"given": "Flora"
+			},
+			{
+				"family": "Belmondo",
+				"given": "Simone"
+			},
+			{
+				"family": "Murat",
+				"given": "Claude"
+			},
+			{
+				"family": "Courty",
+				"given": "Pierre-Emmanuel"
+			},
+			{
+				"family": "Jąkalski",
+				"given": "Marcin"
+			},
+			{
+				"family": "Selosse",
+				"given": "Marc-André"
+			}
+		],
+		"issued": {
+			"date-parts": [
+				[
+					"2020",
+					3
+				]
+			]
+		}
 	}
 ]

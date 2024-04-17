@@ -1,0 +1,71 @@
+---
+title: "Disposition"
+author: "Lia Baumann"
+date: "2024-04-17"
+output: github_document
+bibliography: references.json
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Topic
+"Burgundy truffle monitoring"
+
+## Research question(s) and hypotheses
+Prelim.:
+What is the population structure of the truffles?
+Are MLGs perennial?
+Differences between or within populations? Interactions... etc?
+
+## Research aims
+To learn about the population structure and life cycle of truffles.
+
+## A review of the current state of research
+- Truffles in general
+- T. aestivum specifically
+- results of WSL
+
+## Identification of gaps in the field of research, motivation for the research and justification of the added scientific value for the field of study
+- Monitoring data rare, unique
+
+## Materials and Methods
+- describe data collection
+- describe molecular preparation
+
+## Expected results
+
+## Risk assessment
+
+## Project schedule
+- Data collection almost finished
+- Data analysis: splitting into different parts
+
+## Budget plan
+- Costs: personnel, analyses
+
+## References
+
+The basis for the research about Truffle Monitoring data is described in detail in the following publications:
+@molinierFirstIdentificationPolymorphic2013
+@molinierSSRbasedIdentificationGenetic2016
+@molinierFinescaleGeneticStructure2016
+@staubliHiddenFairyRings2022
+@steidingerFallSummerTruffle2022
+@legendreComparisonMantelTest2010
+@kamvarPopprPackageGenetic2014
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
