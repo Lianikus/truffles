@@ -36,6 +36,10 @@ library(forcats)
 library(poppr)
 library(treemap)
 library(pegas)
+library(adegenet)
+library(devtools)
+install_github("jgx65/hierfstat")
+library(hierfstat)
 T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_2024.xlsx")
 coord <- read_excel("Koordinaten_2024.xlsx")
 ```
@@ -114,7 +118,7 @@ When dealing with clonal populations, analyses are typically conducted with and 
 Question: Will allelic diversity increase or decrease with clone-censored data?
 
 ```{r load genalex data and first examinations, echo=FALSE}
-myData <- read.genalex("Daten_Genalex.csv",sep=";")
+myData <- read.genalex("Daten_Genalex.csv",ploidy=1,sep=";")
 myData #stratum "Pop" is already defined.
 #If I need to include the stratum "Year", I can use the following, would need to include it in the excel file though. Also the treemap will be more interesting once we have more strata.
 #splitStrata(myData) <- ~Pop/Year
@@ -123,6 +127,34 @@ myData #stratum "Pop" is already defined.
 #  summarize(count=n())
 #monstrata #entspricht aktuell noch der gleichen Tabelle wie "number_obs_all"
 #treemap(monstrata, index=nameStrata(myData),vSize="count", type="categorical")
+myData_genind <- read.genalex("Daten_Genalex.csv",genclone=FALSE, ploidy=1, sep=";")
+myData_genind
+
+barplot(table(pop(myData_genind)), col=funky(17), las=3,
+xlab="Population", ylab="Sample size")
+
+summary(myData_genind)
+temp <- summary(myData_genind)
+temp
+barplot(myData_genind$loc.n.all,table(locNames(myData_genind)),col=funky(17),las=3,xlab="locNames",ylab="Number of alleles")
+temp$Hexp
+plot(temp$Hexp, temp$Hobs, pch=20, cex=3, xlim=c(.4,1), ylim=c(.4,1))
+abline(0,1,lty=2)
+```
+
+
+```{r first pca}
+x.pops <- tab(myData_genind, freq=TRUE, NA.method="mean")
+pca.pops <- dudi.pca(x.pops,center=TRUE, scale=FALSE)
+
+s.class(pca.pops$li, fac=pop(myData_genind), col=funky(15))
+```
+
+```{r Fstat}
+library("hierfstat")
+library(adegenet)
+fstat(myData_genind)
+gstat.randtest(myData_genind)
 ```
 
 Show missing data
@@ -159,4 +191,8 @@ popdata
 #G = Stoddart & Taylor's Index of MLG diversity
 # lambda = Simpsons index, E.5 = Evenness, Hexp = Neis Expected Heterozygosity
 #Ia = Index of association, rbarD = stand. Index of association
+```
+
+```{r pca}
+aboot(myData)
 ```

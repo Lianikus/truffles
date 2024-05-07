@@ -8,8 +8,8 @@ Lia Baumann
 The basis for the research about Truffle Monitoring data is described in
 detail in these publications: Virginie Molinier et al. (2013) Virgine
 Molinier et al. (2016) Virginie Molinier et al. (2016) Staubli et al.
-(2022) Steidinger et al. (2022) Legendre and Fortin (2010)
-(**kamvarPopprPackageGenetic2014?**)
+(2022) Steidinger et al. (2022) Legendre and Fortin (2010) Kamvar,
+Tabima, and Grünwald (2014)
 
 ## Monitoring Sites
 
@@ -74,6 +74,85 @@ data.
 Question: Will allelic diversity increase or decrease with
 clone-censored data?
 
+    ## /// GENIND OBJECT /////////
+    ## 
+    ##  // 2,708 individuals; 14 loci; 127 alleles; size: 1.5 Mb
+    ## 
+    ##  // Basic content
+    ##    @tab:  2708 x 127 matrix of allele counts
+    ##    @loc.n.all: number of alleles per locus (range: 5-24)
+    ##    @loc.fac: locus factor for the 127 columns of @tab
+    ##    @all.names: list of allele names for each locus
+    ##    @ploidy: ploidy of each individual  (range: 1-1)
+    ##    @type:  codom
+    ##    @call: read.genalex(genalex = "Daten_Genalex.csv", ploidy = 1, genclone = FALSE, 
+    ##     sep = ";")
+    ## 
+    ##  // Optional content
+    ##    @pop: population of each individual (group size range: 2-477)
+    ##    @strata: a data frame with 1 columns ( Pop )
+
+![](Truffles-First-Steps_files/figure-gfm/load%20genalex%20data%20and%20first%20examinations-1.png)<!-- -->
+
+    ## 
+    ## // Number of individuals: 2708
+    ## // Group sizes: 71 2 477 54 284 20 268 125 5 234 38 67 123 24 299 50 37 204 43 283
+    ## // Number of alleles per locus: 9 7 6 9 6 5 10 5 12 24 9 10 7 8
+    ## // Number of alleles per group: 35 19 68 38 51 39 42 43 20 40 28 44 37 31 54 34 23 43 38 26
+    ## // Percentage of missing data: 2.37 %
+    ## // Observed heterozygosity: 0
+
+    ## 
+    ## // Number of individuals: 2708
+    ## // Group sizes: 71 2 477 54 284 20 268 125 5 234 38 67 123 24 299 50 37 204 43 283
+    ## // Number of alleles per locus: 9 7 6 9 6 5 10 5 12 24 9 10 7 8
+    ## // Number of alleles per group: 35 19 68 38 51 39 42 43 20 40 28 44 37 31 54 34 23 43 38 26
+    ## // Percentage of missing data: 2.37 %
+    ## // Observed heterozygosity: 0
+
+    ## NULL
+
+![](Truffles-First-Steps_files/figure-gfm/load%20genalex%20data%20and%20first%20examinations-2.png)<!-- -->
+
+Show missing data
+
+Clone correction
+
+The graph shows a decrease of diversity for most markers when
+clone-correcting the data (increase of Simpson index means a decrease of
+genotypic diversity).
+
+Next step: I want to compare genetic diversity across years and show it
+for populations. So I need to combine the sample and assign the sampling
+date. I have several ideas how to do it. 1. –\> Join Genalex file with
+monitoring file on the sampling column. –\> then read it in as a
+genclone and genind file again. 2. –\> Filter monitoring file with
+genalex file to exclude the rows not matching –\> choose columns that I
+want to process as a new file and read in as genclone and genind file
+again.
+
+``` r
+genalex_dates <- read.csv("Daten_Genalex.csv",sep=";", header=FALSE)
+T_all_dates <- T_all %>%
+  mutate(Sampling_month = month(Sampling_date)) %>%
+  select(Code_Analyses_2024,Sampling_month, Sampling_year)
+genalex_dates <- left_join(genalex_dates,T_all_dates,by=c("V1"="Code_Analyses_2024"))
+
+genalex_dates <- genalex_dates %>%
+  unite(col="pop_date",c("V1","Sampling_month","Sampling_year"),sep="_")
+#correct column names
+genalex_dates$pop_date[genalex_dates$pop_date =="2708_NA_NA"] <- "2708"
+genalex_dates$pop_date[genalex_dates$pop_date =="_NA_NA"] <- ""
+genalex_dates$pop_date[genalex_dates$pop_date =="pop_NA_NA"] <- "pop"
+
+#jetzt als csv Datei neu reinladen
+#write.table(genalex_dates, col.names=FALSE, sep=",", "C:/Users/liaba/OneDrive - Eidg. Forschungsanstalt WSL/R/truffles/genalex_dates.csv")
+
+microsats_dates <- read.genalex("genalex_dates.csv",ploidy=1)
+splitStrata(microsats_dates) <- ~Pop/Month/Year
+microsats_dates
+```
+
     ## 
     ## This is a genclone object
     ## -------------------------
@@ -85,174 +164,1635 @@ clone-censored data?
     ## 
     ## Population information:
     ## 
-    ##       1 stratum - Pop
-    ##      20 populations defined - ALD, BAR, BOB, ..., UEB, UST, WSL
-
-Show missing data
-
-![](Truffles-First-Steps_files/figure-gfm/missing%20data-1.png)<!-- -->
-
-    ##           Locus
-    ## Population aest01_1 aest06_1 aest07_1 aest10_1 aest15_1 aest18_1 aest24_1
-    ##      ALD    0.07042        .        .        .        .        .  0.04225
-    ##      BAR    0.50000        .        .        .        .        .        .
-    ##      BOB    0.06709  0.00210        .  0.00210        .  0.00210  0.00629
-    ##      BOH    0.22222        .        .  0.01852        .  0.01852  0.05556
-    ##      BUR    0.19366        .        .  0.00352        .        .  0.01761
-    ##      FRB    0.10000        .        .  0.20000        .        .        .
-    ##      FRE    0.13433        .        .  0.11194        .        .  0.01493
-    ##      FRI    0.03200        .        .  0.00800        .        .  0.00800
-    ##      GEN          .        .        .        .        .        .        .
-    ##      KON    0.21795        .  0.00427        .  0.00427        .  0.00855
-    ##      NEU    0.07895        .        .  0.02632        .        .        .
-    ##      RIE    0.04478        .        .  0.01493        .        .        .
-    ##      SCD    0.13008        .        .  0.02439        .        .  0.02439
-    ##      SCG    0.25000        .        .  0.04167        .        .  0.04167
-    ##      SCL    0.09365        .        .  0.01003  0.00334  0.00334  0.00334
-    ##      SCS    0.10000        .        .        .        .        .  0.02000
-    ##      TRO    0.08108        .        .        .        .        .  0.02703
-    ##      UEB    0.20098        .        .  0.02451  0.12255        .  0.02451
-    ##      UST    0.11628        .        .  0.02326        .        .  0.02326
-    ##      WSL          .        .        .        .        .        .        .
-    ##      Total  0.11374  0.00037  0.00037  0.01957  0.00997  0.00111  0.01256
-    ##           Locus
-    ## Population aest25_1 aest26_1 aest28_1 aest29_1 aest31_1 aest35_1 aest36_1
-    ##      ALD          .        .        .        .  0.07042        .        .
-    ##      BAR          .        .        .        .        .        .        .
-    ##      BOB    0.00419        .  0.01887        .  0.03145        .  0.00210
-    ##      BOH          .        .  0.07407  0.01852  0.07407        .        .
-    ##      BUR          .  0.02465  0.00704  0.00704  0.11620  0.00704  0.00352
-    ##      FRB          .        .  0.20000  0.05000  0.10000        .        .
-    ##      FRE          .        .  0.01866  0.00373  0.11194        .        .
-    ##      FRI          .        .  0.00800        .  0.00800        .        .
-    ##      GEN          .        .        .        .        .        .        .
-    ##      KON          .        .  0.01282  0.00427  0.14530        .  0.00855
-    ##      NEU    0.02632        .  0.05263        .  0.02632        .        .
-    ##      RIE          .        .        .        .  0.02985        .        .
-    ##      SCD          .        .  0.05691  0.01626  0.07317        .        .
-    ##      SCG          .        .  0.20833        .  0.12500        .        .
-    ##      SCL          .        .  0.63545  0.00669  0.05686        .        .
-    ##      SCS          .        .  0.02000  0.02000  0.02000        .        .
-    ##      TRO          .        .        .        .  0.02703        .        .
-    ##      UEB    0.00490        .  0.05882  0.01471  0.15686        .        .
-    ##      UST          .        .  0.04651  0.02326  0.04651        .        .
-    ##      WSL          .        .        .        .        .        .        .
-    ##      Total  0.00148  0.00258  0.09121  0.00554  0.07090  0.00074  0.00148
-    ##           Locus
-    ## Population    Mean
-    ##      ALD   0.01308
-    ##      BAR   0.03571
-    ##      BOB   0.00973
-    ##      BOH   0.03439
-    ##      BUR   0.02716
-    ##      FRB   0.04643
-    ##      FRE   0.02825
-    ##      FRI   0.00457
-    ##      GEN         .
-    ##      KON   0.02900
-    ##      NEU   0.01504
-    ##      RIE   0.00640
-    ##      SCD   0.02323
-    ##      SCG   0.04762
-    ##      SCL   0.05805
-    ##      SCS   0.01286
-    ##      TRO   0.00965
-    ##      UEB   0.04342
-    ##      UST   0.01993
-    ##      WSL         .
-    ##      Total 0.02369
-
-Clone correction
-
-    ## 
-    ## This is a genclone object
-    ## -------------------------
-    ## Genotype information:
-    ## 
-    ##    676 original multilocus genotypes 
-    ##    690 haploid individuals
-    ##     14 codominant loci
-    ## 
-    ## Population information:
-    ## 
-    ##      1 stratum - Pop
-    ##     20 populations defined - ALD, BAR, BOB, ..., UEB, UST, WSL
-
-    ##           summary
-    ## locus      allele      1-D     Hexp Evenness
-    ##   aest01_1      .  0.03161  0.03058  0.08373
-    ##   aest06_1      .  0.14621  0.14571  0.05797
-    ##   aest07_1      .  0.06025  0.05966  0.00091
-    ##   aest10_1      .  0.04087  0.04005  0.05927
-    ##   aest15_1      .  0.14840  0.14824  0.12356
-    ##   aest18_1      .  0.01211  0.01135  0.03571
-    ##   aest24_1      .  0.06898  0.06849  0.06678
-    ##   aest25_1      .  0.02541  0.02480 -0.00906
-    ##   aest26_1      . -0.02265 -0.02347  0.01175
-    ##   aest28_1      . -0.03892 -0.03995 -0.00317
-    ##   aest29_1      .  0.05603  0.05537  0.04754
-    ##   aest31_1      . -0.02566 -0.02656  0.04152
-    ##   aest35_1      .  0.05544  0.05496  0.11352
-    ##   aest36_1      .  0.01563  0.01507  0.07482
-    ##   mean          .  0.04098  0.04031  0.05035
-
-![](Truffles-First-Steps_files/figure-gfm/compare%20diversity%20between%20corrected%20and%20uncorrected-1.png)<!-- -->
-
-The graph shows a decrease of diversity for most markers when
-clone-correcting the data (increase of Simpson index means a decrease of
-genotypic diversity).
+    ##       3 strata - Pop, Month, Year
+    ##     506 populations defined - 
+    ## ALD_3_2011, ALD_6_2011, ALD_7_2011, ..., WSL_11_2020, WSL_6_2021, WSL_7_2021
 
 ``` r
-popdata <- poppr(myData)
-popdata
+#treemap:
+monstrata <- strata(microsats_dates) %>%     
+  group_by(Pop,Month,Year) %>%
+  summarize(Count = n())
 ```
 
-    ##      Pop    N MLG eMLG    SE     H     G lambda   E.5   Hexp    Ia  rbarD
-    ## 1    ALD   71  21 5.02 1.349 1.908  3.01 0.6681 0.351 0.1414 3.223 0.3235
-    ## 2    BAR    2   2 2.00 0.000 0.693  2.00 0.5000 1.000 0.3846    NA     NA
-    ## 3    BOB  477 172 8.50 1.133 4.134 21.95 0.9544 0.341 0.3425 2.157 0.1854
-    ## 4    BOH   54  38 8.90 0.986 3.398 19.97 0.9499 0.656 0.2871 1.341 0.1240
-    ## 5    BUR  284  41 5.83 1.251 2.404  6.37 0.8431 0.534 0.2610 4.980 0.4192
-    ## 6    FRB   20  14 7.91 1.041 2.441  9.09 0.8900 0.772 0.4538 5.403 0.4216
-    ## 7    FRE  268  26 3.28 1.217 1.252  1.74 0.4267 0.298 0.0738 8.693 0.7373
-    ## 8    FRI  125  16 4.14 1.064 1.612  3.40 0.7060 0.598 0.3014 4.365 0.3804
-    ## 9    GEN    5   2 2.00 0.000 0.500  1.47 0.3200 0.725 0.1714 5.000 1.0000
-    ## 10   KON  234  49 6.90 1.297 2.852  8.70 0.8851 0.472 0.2168 1.070 0.0922
-    ## 11   NEU   38  11 4.37 1.179 1.492  2.55 0.6080 0.450 0.1089 2.088 0.2622
-    ## 12   RIE   67  44 9.29 0.771 3.630 31.84 0.9686 0.840 0.4284 0.870 0.0753
-    ## 13   SCD  123  58 6.92 1.447 3.054  6.20 0.8388 0.258 0.2766 2.332 0.2256
-    ## 14   SCG   24  14 7.62 1.064 2.438  9.29 0.8924 0.793 0.2724 1.856 0.1613
-    ## 15   SCL  299  65 5.08 1.380 2.258  3.38 0.7041 0.278 0.1080 2.629 0.2494
-    ## 16   SCS   50  11 3.30 1.157 1.082  1.71 0.4152 0.364 0.0846 4.079 0.3958
-    ## 17   TRO   37   9 4.21 1.087 1.440  2.72 0.6326 0.535 0.1523 2.474 0.3468
-    ## 18   UEB  204  62 7.51 1.293 3.221 11.70 0.9145 0.445 0.1684 0.571 0.0621
-    ## 19   UST   43  30 8.87 0.951 3.209 19.06 0.9475 0.760 0.3908 0.947 0.0762
-    ## 20   WSL  283   5 1.30 0.505 0.173  1.07 0.0621 0.351 0.0145 4.281 0.5054
-    ## 21 Total 2708 676 9.04 0.945 4.971 38.79 0.9742 0.264 0.6329 2.459 0.1895
-    ##      File
-    ## 1  myData
-    ## 2  myData
-    ## 3  myData
-    ## 4  myData
-    ## 5  myData
-    ## 6  myData
-    ## 7  myData
-    ## 8  myData
-    ## 9  myData
-    ## 10 myData
-    ## 11 myData
-    ## 12 myData
-    ## 13 myData
-    ## 14 myData
-    ## 15 myData
-    ## 16 myData
-    ## 17 myData
-    ## 18 myData
-    ## 19 myData
-    ## 20 myData
-    ## 21 myData
+    ## `summarise()` has grouped output by 'Pop', 'Month'. You can override using the
+    ## `.groups` argument.
 
 ``` r
+monstrata
+```
+
+    ## # A tibble: 506 × 4
+    ## # Groups:   Pop, Month [174]
+    ##    Pop   Month Year  Count
+    ##    <fct> <fct> <fct> <int>
+    ##  1 ALD   3     2011      4
+    ##  2 ALD   3     2012      2
+    ##  3 ALD   3     2013      2
+    ##  4 ALD   6     2011      2
+    ##  5 ALD   7     2011      2
+    ##  6 ALD   7     2014      1
+    ##  7 ALD   8     2011      3
+    ##  8 ALD   8     2014      2
+    ##  9 ALD   10    2011      2
+    ## 10 ALD   10    2012      1
+    ## # ℹ 496 more rows
+
+``` r
+library(treemap)
+treemap(dtf = monstrata, index = nameStrata(microsats_dates), vSize = "Count",
+        type = "categorical", vColor = "Pop", title = "Truffles")
+```
+
+![](Truffles-First-Steps_files/figure-gfm/add%20dates%20into%20microsat%20file-1.png)<!-- -->
+
+## Genotype accumulation curve
+
+A genotype accumulation curve is a tool that allows you to assess how
+much power you have to discriminate between unique individuals given a
+random sample of n loci. This analysis is particularly important for
+clonal organisms to confirm that a plateau has been reached in the
+number of loci necessary to discriminate individuals. We specified
+sample = 1000 in our function call. This means that for each boxplot, n
+loci were randomly sampled 1000 times in order to create the
+distribution. Since this data has been curated, we can see that we have
+reached the plateau with 13 loci.
+
+``` r
+gac <- genotype_curve(microsats_dates, sample = 1000, quiet = TRUE)
+```
+
+![](Truffles-First-Steps_files/figure-gfm/genotype%20accumulation%20curve-1.png)<!-- -->
+
+We have anything between 5 and 24 alleles per locus. aest28_01 has the
+highest Simpson diversity (0.80) and aest10_1 as well as aest36_1 have
+the most evenly distributed alleles (0.88).
+
+``` r
+(microsats_lt <- locus_table(microsats_dates))
+```
+
+    ## 
+    ## allele = Number of observed alleles
+    ## 1-D = Simpson index
+    ## Hexp = Nei's 1978 gene diversity
+    ## ------------------------------------------
+
+    ##           summary
+    ## locus      allele   1-D  Hexp Evenness
+    ##   aest01_1   9.00  0.74  0.74     0.87
+    ##   aest06_1   7.00  0.66  0.66     0.62
+    ##   aest07_1   6.00  0.63  0.63     0.80
+    ##   aest10_1   9.00  0.77  0.77     0.88
+    ##   aest15_1   6.00  0.35  0.35     0.57
+    ##   aest18_1   5.00  0.71  0.71     0.86
+    ##   aest24_1  10.00  0.52  0.52     0.51
+    ##   aest25_1   5.00  0.59  0.60     0.77
+    ##   aest26_1  12.00  0.73  0.73     0.85
+    ##   aest28_1  24.00  0.80  0.80     0.76
+    ##   aest29_1   9.00  0.67  0.67     0.77
+    ##   aest31_1  10.00  0.65  0.65     0.86
+    ##   aest35_1   7.00  0.52  0.52     0.70
+    ##   aest36_1   8.00  0.53  0.53     0.88
+    ##   mean       9.07  0.63  0.63     0.76
+
+``` r
+info_table(microsats_dates, type = "missing", plot = TRUE)
+```
+
+![](Truffles-First-Steps_files/figure-gfm/allele%20frequencies,%20missing%20data,%20ploidy-1.png)<!-- -->
+
+    ##              Locus
+    ## Population    aest01_1 aest06_1 aest07_1 aest10_1 aest15_1 aest18_1 aest24_1
+    ##   ALD_3_2011         .        .        .        .        .        .        .
+    ##   ALD_6_2011         .        .        .        .        .        .        .
+    ##   ALD_7_2011         .        .        .        .        .        .  0.50000
+    ##   ALD_8_2011         .        .        .        .        .        .        .
+    ##   ALD_10_2011        .        .        .        .        .        .        .
+    ##   ALD_11_2011        .        .        .        .        .        .        .
+    ##   ALD_12_2011        .        .        .        .        .        .        .
+    ##   ALD_1_2012         .        .        .        .        .        .        .
+    ##   ALD_2_2012         .        .        .        .        .        .        .
+    ##   ALD_3_2012   0.50000        .        .        .        .        .        .
+    ##   ALD_10_2012        .        .        .        .        .        .        .
+    ##   ALD_11_2012        .        .        .        .        .        .        .
+    ##   ALD_12_2012        .        .        .        .        .        .        .
+    ##   ALD_1_2013         .        .        .        .        .        .        .
+    ##   ALD_2_2013         .        .        .        .        .        .        .
+    ##   ALD_3_2013   0.50000        .        .        .        .        .        .
+    ##   ALD_10_2013        .        .        .        .        .        .        .
+    ##   ALD_4_2011         .        .        .        .        .        .        .
+    ##   ALD_11_2013        .        .        .        .        .        .        .
+    ##   ALD_12_2013  0.25000        .        .        .        .        .        .
+    ##   ALD_1_2014   0.50000        .        .        .        .        .  1.00000
+    ##   ALD_2_2014         .        .        .        .        .        .        .
+    ##   ALD_5_2011         .        .        .        .        .        .        .
+    ##   ALD_7_2014         .        .        .        .        .        .        .
+    ##   ALD_8_2014         .        .        .        .        .        .        .
+    ##   ALD_9_2014         .        .        .        .        .        .        .
+    ##   ALD_10_2014        .        .        .        .        .        .        .
+    ##   ALD_1_2015         .        .        .        .        .        .        .
+    ##   ALD_12_2015  0.25000        .        .        .        .        .        .
+    ##   BAR_5_2014   1.00000        .        .        .        .        .        .
+    ##   BAR_6_2014         .        .        .        .        .        .        .
+    ##   BOB_8_2011         .        .        .        .        .        .        .
+    ##   BOB_2_2012         .        .        .        .        .        .        .
+    ##   BOB_1_2015         .        .        .        .        .        .        .
+    ##   BOB_3_2015   0.25000        .        .        .        .        .        .
+    ##   BOB_6_2015         .        .        .        .        .        .        .
+    ##   BOB_8_2015   0.23077        .        .        .        .        .        .
+    ##   BOB_3_2012         .        .        .        .        .        .        .
+    ##   BOB_10_2015  0.50000        .        .        .        .        .        .
+    ##   BOB_1_2016         .        .        .        .        .        .        .
+    ##   BOB_2_2016   1.00000        .        .        .        .        .        .
+    ##   BOB_11_2012        .        .        .        .        .        .        .
+    ##   BOB_9_2014         .        .        .        .        .        .  0.12500
+    ##   BOB_10_2013  0.02564        .        .        .        .  0.02564        .
+    ##   BOB_5_2012         .        .        .        .        .        .        .
+    ##   BOB_7_2012   0.14286        .        .        .        .        .        .
+    ##   BOB_6_2016   1.00000        .        .        .        .        .        .
+    ##   BOB_7_2016         .        .        .        .        .        .        .
+    ##   BOB_8_2016   0.28571        .        .        .        .        .        .
+    ##   BOB_9_2016         .        .        .        .        .        .        .
+    ##   BOB_10_2016        .        .        .        .        .        .        .
+    ##   BOB_9_2011         .        .        .        .        .        .        .
+    ##   BOB_11_2016  0.07692  0.07692        .        .        .        .        .
+    ##   BOB_8_2012         .        .        .        .        .        .        .
+    ##   BOB_12_2016        .        .        .        .        .        .        .
+    ##   BOB_9_2012   0.18182        .        .        .        .        .        .
+    ##   BOB_6_2017         .        .        .        .        .        .        .
+    ##   BOB_7_2017         .        .        .        .        .        .        .
+    ##   BOB_8_2017         .        .        .        .        .        .        .
+    ##   BOB_9_2017         .        .        .        .        .        .        .
+    ##   BOB_10_2011        .        .        .        .        .        .        .
+    ##   BOB_10_2017  0.05556        .        .        .        .        .        .
+    ##   BOB_11_2017        .        .        .        .        .        .        .
+    ##   BOB_10_2012        .        .        .        .        .        .  0.14286
+    ##   BOB_11_2011        .        .        .        .        .        .        .
+    ##   BOB_12_2017        .        .        .        .        .        .        .
+    ##   BOB_1_2018         .        .        .        .        .        .        .
+    ##   BOB_3_2018         .        .        .        .        .        .        .
+    ##   BOB_4_2018         .        .        .        .        .        .        .
+    ##   BOB_6_2018         .        .        .        .        .        .        .
+    ##   BOB_8_2018         .        .        .        .        .        .        .
+    ##   BOB_1_2013         .        .        .        .        .        .        .
+    ##   BOB_9_2018         .        .        .        .        .        .        .
+    ##   BOB_2_2013   1.00000        .        .  1.00000        .        .        .
+    ##   BOB_5_2013   0.50000        .        .        .        .        .        .
+    ##   BOB_10_2018  0.38095        .        .        .        .        .        .
+    ##   BOB_12_2011        .        .        .        .        .        .        .
+    ##   BOB_6_2013   1.00000        .        .        .        .        .        .
+    ##   BOB_8_2013         .        .        .        .        .        .        .
+    ##   BOB_9_2019         .        .        .        .        .        .        .
+    ##   BOB_9_2013         .        .        .        .        .        .        .
+    ##   BOB_12_2013        .        .        .        .        .        .        .
+    ##   BOB_1_2014         .        .        .        .        .        .        .
+    ##   BOB_2_2014         .        .        .        .        .        .        .
+    ##   BOB_3_2014         .        .        .        .        .        .        .
+    ##   BOB_7_2014   0.25000        .        .        .        .        .  0.12500
+    ##   BOB_8_2014         .        .        .        .        .        .        .
+    ##   BOB_10_2014  0.33333        .        .        .        .        .        .
+    ##   BOB_11_2014  0.27273        .        .        .        .        .        .
+    ##   BOB_12_2014        .        .        .        .        .        .        .
+    ##   BOH_5_2011         .        .        .        .        .        .        .
+    ##   BOH_10_2011        .        .        .        .        .        .        .
+    ##   BOH_12_2011        .        .        .        .        .        .        .
+    ##   BOH_3_2012   1.00000        .        .        .        .        .        .
+    ##   BOH_8_2012         .        .        .        .        .        .        .
+    ##   BOH_9_2012   0.33333        .        .        .        .        .        .
+    ##   BOH_6_2011         .        .        .        .        .        .        .
+    ##   BOH_10_2012        .        .        .        .        .        .        .
+    ##   BOH_11_2012  0.33333        .        .  0.16667        .  0.16667  0.16667
+    ##   BOH_8_2011         .        .        .        .        .        .        .
+    ##   BOH_9_2013   0.40000        .        .        .        .        .  0.20000
+    ##   BOH_10_2013  0.50000        .        .        .        .        .        .
+    ##   BOH_9_2011         .        .        .        .        .        .        .
+    ##   BOH_11_2013        .        .        .        .        .        .        .
+    ##   BOH_7_2014   0.50000        .        .        .        .        .        .
+    ##   BOH_8_2014         .        .        .        .        .        .        .
+    ##   BOH_9_2014         .        .        .        .        .        .        .
+    ##   BOH_11_2014        .        .        .        .        .        .        .
+    ##   BOH_9_2015   1.00000        .        .        .        .        .        .
+    ##   BOH_10_2015  1.00000        .        .        .        .        .  1.00000
+    ##   BUR_7_2013         .        .        .        .        .        .        .
+    ##   BUR_9_2013         .        .        .        .        .        .        .
+    ##   BUR_8_2016   0.83333        .        .        .        .        .  0.16667
+    ##   BUR_9_2016   0.21053        .        .        .        .        .        .
+    ##   BUR_10_2016  0.61538        .        .        .        .        .  0.07692
+    ##   BUR_12_2016  1.00000        .        .        .        .        .        .
+    ##   BUR_6_2018         .        .        .        .        .        .        .
+    ##   BUR_8_2018   0.12500        .        .        .        .        .        .
+    ##   BUR_9_2018   0.09091        .        .        .        .        .        .
+    ##   BUR_10_2013  0.11364        .        .        .        .        .  0.04545
+    ##   BUR_10_2018  0.05263        .        .        .        .        .        .
+    ##   BUR_11_2018  0.50000        .        .        .        .        .        .
+    ##   BUR_7_2019   1.00000        .        .        .        .        .        .
+    ##   BUR_8_2019         .        .        .        .        .        .        .
+    ##   BUR_9_2019   0.85714        .        .  0.14286        .        .  0.14286
+    ##   BUR_10_2019  0.75000        .        .        .        .        .        .
+    ##   BUR_11_2019  1.00000        .        .        .        .        .        .
+    ##   BUR_12_2019  0.80000        .        .        .        .        .        .
+    ##   BUR_1_2020   1.00000        .        .        .        .        .        .
+    ##   BUR_5_2020         .        .        .        .        .        .        .
+    ##   BUR_6_2020         .        .        .        .        .        .        .
+    ##   BUR_7_2020         .        .        .        .        .        .        .
+    ##   BUR_8_2020         .        .        .        .        .        .        .
+    ##   BUR_10_2020        .        .        .        .        .        .        .
+    ##   BUR_11_2020        .        .        .        .        .        .        .
+    ##   BUR_12_2020        .        .        .        .        .        .        .
+    ##   BUR_8_2021         .        .        .        .        .        .        .
+    ##   BUR_9_2021         .        .        .        .        .        .        .
+    ##   BUR_10_2021        .        .        .        .        .        .        .
+    ##   BUR_8_2013         .        .        .        .        .        .        .
+    ##   BUR_11_2021        .        .        .        .        .        .        .
+    ##   BUR_12_2021        .        .        .        .        .        .        .
+    ##   BUR_11_2013  0.11111        .        .        .        .        .        .
+    ##   BUR_12_2013        .        .        .        .        .        .        .
+    ##   BUR_8_2014         .        .        .        .        .        .        .
+    ##   BUR_9_2014         .        .        .        .        .        .        .
+    ##   BUR_10_2014  0.33333        .        .        .        .        .        .
+    ##   BUR_11_2014        .        .        .        .        .        .        .
+    ##   BUR_12_2014  0.50000        .        .        .        .        .        .
+    ##   BUR_9_2015   0.20000        .        .        .        .        .        .
+    ##   BUR_11_2015        .        .        .        .        .        .        .
+    ##   BUR_7_2016   1.00000        .        .        .        .        .        .
+    ##   FRB_10_2011        .        .        .        .        .        .        .
+    ##   FRB_2_2013         .        .        .  0.50000        .        .        .
+    ##   FRB_10_2013        .        .        .        .        .        .        .
+    ##   FRB_12_2013        .        .        .        .        .        .        .
+    ##   FRB_1_2014         .        .        .  1.00000        .        .        .
+    ##   FRB_2_2014         .        .        .        .        .        .        .
+    ##   FRB_5_2014   1.00000        .        .        .        .        .        .
+    ##   FRB_8_2014         .        .        .        .        .        .        .
+    ##   FRB_12_2014  1.00000        .        .        .        .        .        .
+    ##   FRB_5_2015         .        .        .  1.00000        .        .        .
+    ##   FRB_12_2011        .        .        .        .        .        .        .
+    ##   FRB_10_2012        .        .        .        .        .        .        .
+    ##   FRB_11_2012        .        .        .  0.33333        .        .        .
+    ##   FRE_1_2011         .        .        .        .        .        .        .
+    ##   FRE_6_2011         .        .        .  0.50000        .        .        .
+    ##   FRE_7_2016   0.12903        .        .  0.12903        .        .  0.03226
+    ##   FRE_7_2011         .        .        .        .        .        .        .
+    ##   FRE_10_2016  0.32258        .        .  0.22581        .        .  0.03226
+    ##   FRE_11_2016        .        .        .        .        .        .        .
+    ##   FRE_7_2017   0.04082        .        .  0.06122        .        .  0.02041
+    ##   FRE_8_2011         .        .        .        .        .        .        .
+    ##   FRE_10_2011        .        .        .        .        .        .        .
+    ##   FRE_3_2011         .        .        .        .        .        .        .
+    ##   FRE_9_2017   0.13953        .        .  0.06977        .        .        .
+    ##   FRE_11_2011  0.33333        .        .        .        .        .        .
+    ##   FRE_10_2017  0.34783        .        .  0.21739        .        .        .
+    ##   FRE_12_2011        .        .        .  1.00000        .        .        .
+    ##   FRE_1_2012         .        .        .        .        .        .        .
+    ##   FRE_3_2012         .        .        .        .        .        .        .
+    ##   FRE_6_2012         .        .        .        .        .        .        .
+    ##   FRE_7_2012         .        .        .        .        .        .        .
+    ##   FRE_8_2012   0.25000        .        .        .        .        .        .
+    ##   FRE_9_2012         .        .        .        .        .        .        .
+    ##   FRE_10_2012        .        .        .        .        .        .        .
+    ##   FRE_11_2012        .        .        .        .        .        .        .
+    ##   FRE_12_2012        .        .        .        .        .        .        .
+    ##   FRE_1_2013         .        .        .        .        .        .        .
+    ##   FRE_4_2011         .        .        .  0.50000        .        .        .
+    ##   FRE_6_2013         .        .        .  1.00000        .        .        .
+    ##   FRE_7_2013         .        .        .        .        .        .        .
+    ##   FRE_8_2013         .        .        .        .        .        .        .
+    ##   FRE_9_2013         .        .        .        .        .        .        .
+    ##   FRE_10_2013        .        .        .  0.33333        .        .        .
+    ##   FRE_11_2013        .        .        .        .        .        .        .
+    ##   FRE_12_2013        .        .        .        .        .        .        .
+    ##   FRE_2_2014         .        .        .  0.50000        .        .        .
+    ##   FRE_4_2014   0.50000        .        .        .        .        .        .
+    ##   FRE_5_2014   0.33333        .        .        .        .        .        .
+    ##   FRE_7_2014         .        .        .        .        .        .        .
+    ##   FRE_8_2014   0.50000        .        .  0.50000        .        .  0.50000
+    ##   FRE_5_2011         .        .        .        .        .        .        .
+    ##   FRE_10_2014        .        .        .        .        .        .        .
+    ##   FRE_11_2014        .        .        .        .        .        .        .
+    ##   FRE_12_2014        .        .        .        .        .        .        .
+    ##   FRE_3_2015         .        .        .        .        .        .        .
+    ##   FRE_8_2015         .        .        .        .        .        .        .
+    ##   FRE_10_2015  1.00000        .        .        .        .        .        .
+    ##   FRE_11_2015        .        .        .        .        .        .        .
+    ##   FRE_12_2015        .        .        .        .        .        .        .
+    ##   FRE_9_2015         .        .        .        .        .        .        .
+    ##   FRI_10_2013  0.08333        .        .        .        .        .        .
+    ##   FRI_10_2017        .        .        .        .        .        .        .
+    ##   FRI_11_2017        .        .        .        .        .        .        .
+    ##   FRI_12_2017        .        .        .        .        .        .        .
+    ##   FRI_1_2018         .        .        .        .        .        .        .
+    ##   FRI_11_2013        .        .        .        .        .        .        .
+    ##   FRI_12_2013        .        .        .        .        .        .        .
+    ##   FRI_3_2014         .        .        .        .        .        .        .
+    ##   FRI_9_2014         .        .        .        .        .        .        .
+    ##   FRI_1_2015         .        .        .  0.50000        .        .        .
+    ##   FRI_9_2016         .        .        .        .        .        .        .
+    ##   FRI_11_2016  0.11111        .        .        .        .        .  0.11111
+    ##   FRI_8_2017         .        .        .        .        .        .        .
+    ##   FRI_9_2017         .        .        .        .        .        .        .
+    ##   GEN_NA_NA          .        .        .        .        .        .        .
+    ##   GEN_8_2020         .        .        .        .        .        .        .
+    ##   GEN_12_2021        .        .        .        .        .        .        .
+    ##   GEN_1_2022         .        .        .        .        .        .        .
+    ##   KON_9_2013         .        .        .        .        .        .        .
+    ##   KON_10_2014        .        .        .        .        .        .        .
+    ##   KON_12_2016  0.46154        .        .        .        .        .        .
+    ##   KON_2_2017   0.80000        .        .        .        .        .        .
+    ##   KON_7_2017   1.00000        .  0.25000        .        .        .        .
+    ##   KON_9_2017   0.20000        .        .        .        .        .        .
+    ##   KON_10_2017  0.40000        .        .        .        .        .        .
+    ##   KON_11_2017        .        .        .        .        .        .        .
+    ##   KON_12_2017        .        .        .        .        .        .        .
+    ##   KON_11_2014        .        .        .        .        .        .        .
+    ##   KON_1_2018         .        .        .        .        .        .        .
+    ##   KON_7_2018   1.00000        .        .        .        .        .        .
+    ##   KON_8_2018         .        .        .        .        .        .        .
+    ##   KON_9_2018   0.07692        .        .        .        .        .        .
+    ##   KON_10_2018  0.10526        .        .        .        .        .        .
+    ##   KON_12_2014        .        .        .        .        .        .        .
+    ##   KON_12_2018        .        .        .        .        .        .        .
+    ##   KON_7_2019   0.50000        .        .        .        .        .        .
+    ##   KON_8_2019   0.66667        .        .        .        .        .        .
+    ##   KON_9_2019         .        .        .        .        .        .        .
+    ##   KON_10_2019        .        .        .        .        .        .        .
+    ##   KON_11_2013        .        .        .        .        .        .        .
+    ##   KON_1_2015         .        .        .        .        .        .        .
+    ##   KON_11_2019  0.11111        .        .        .        .        .        .
+    ##   KON_3_2016   1.00000        .        .        .        .        .        .
+    ##   KON_1_2020         .        .        .        .        .        .        .
+    ##   KON_7_2020         .        .        .        .        .        .        .
+    ##   KON_8_2020         .        .        .        .        .        .        .
+    ##   KON_9_2020         .        .        .        .        .        .        .
+    ##   KON_10_2020        .        .        .        .        .        .        .
+    ##   KON_8_2016   0.50000        .        .        .        .        .        .
+    ##   KON_11_2020        .        .        .        .        .        .        .
+    ##   KON_12_2020        .        .        .        .        .        .        .
+    ##   KON_8_2021         .        .        .        .        .        .        .
+    ##   KON_10_2021  0.12500        .        .        .        .        .        .
+    ##   KON_11_2021        .        .        .        .        .        .        .
+    ##   KON_12_2021        .        .        .        .        .        .        .
+    ##   KON_9_2016   0.83333        .        .        .        .        .        .
+    ##   KON_10_2016  0.47826        .        .        .  0.04348        .  0.04348
+    ##   KON_12_2013        .        .        .        .        .        .        .
+    ##   KON_2_2014   1.00000        .        .        .        .        .        .
+    ##   KON_9_2014         .        .        .        .        .        .        .
+    ##   KON_11_2016  0.55556        .        .        .        .        .  0.11111
+    ##   NEU_8_2013         .        .        .        .        .        .        .
+    ##   NEU_10_2014        .        .        .        .        .        .        .
+    ##   NEU_11_2014        .        .        .        .        .        .        .
+    ##   NEU_10_2015        .        .        .        .        .        .        .
+    ##   NEU_8_2016   0.50000        .        .        .        .        .        .
+    ##   NEU_9_2016         .        .        .        .        .        .        .
+    ##   NEU_9_2013         .        .        .        .        .        .        .
+    ##   NEU_10_2016  0.20000        .        .        .        .        .        .
+    ##   NEU_10_2013        .        .        .        .        .        .        .
+    ##   NEU_2_2017         .        .        .        .        .        .        .
+    ##   NEU_11_2013        .        .        .        .        .        .        .
+    ##   NEU_7_2020         .        .        .        .        .        .        .
+    ##   NEU_8_2020         .        .        .        .        .        .        .
+    ##   NEU_9_2020         .        .        .        .        .        .        .
+    ##   NEU_10_2021        .        .        .        .        .        .        .
+    ##   NEU_11_2021        .        .        .        .        .        .        .
+    ##   NEU_12_2013  0.50000        .        .  0.50000        .        .        .
+    ##   RIE_3_2011         .        .        .        .        .        .        .
+    ##   RIE_8_2011         .        .        .        .        .        .        .
+    ##   RIE_10_2011        .        .        .        .        .        .        .
+    ##   RIE_11_2011        .        .        .        .        .        .        .
+    ##   RIE_12_2011        .        .        .        .        .        .        .
+    ##   RIE_2_2012         .        .        .        .        .        .        .
+    ##   RIE_3_2012         .        .        .        .        .        .        .
+    ##   RIE_10_2012        .        .        .        .        .        .        .
+    ##   RIE_11_2012        .        .        .        .        .        .        .
+    ##   RIE_12_2012        .        .        .        .        .        .        .
+    ##   RIE_1_2013         .        .        .        .        .        .        .
+    ##   RIE_2_2013         .        .        .        .        .        .        .
+    ##   RIE_3_2013         .        .        .        .        .        .        .
+    ##   RIE_10_2013        .        .        .        .        .        .        .
+    ##   RIE_11_2013        .        .        .        .        .        .        .
+    ##   RIE_12_2013  0.25000        .        .        .        .        .        .
+    ##   RIE_1_2014   0.33333        .        .        .        .        .        .
+    ##   RIE_4_2011         .        .        .        .        .        .        .
+    ##   RIE_2_2014         .        .        .        .        .        .        .
+    ##   RIE_9_2014         .        .        .        .        .        .        .
+    ##   RIE_10_2014        .        .        .        .        .        .        .
+    ##   RIE_11_2014        .        .        .        .        .        .        .
+    ##   RIE_12_2014        .        .        .        .        .        .        .
+    ##   RIE_1_2015         .        .        .        .        .        .        .
+    ##   RIE_2_2015         .        .        .        .        .        .        .
+    ##   RIE_10_2015  1.00000        .        .        .        .        .        .
+    ##   RIE_12_2015        .        .        .        .        .        .        .
+    ##   RIE_6_2011         .        .        .        .        .        .        .
+    ##   RIE_7_2011         .        .        .  1.00000        .        .        .
+    ##   SCD_7_2012         .        .        .        .        .        .        .
+    ##   SCD_9_2012   0.06667        .        .        .        .        .  0.06667
+    ##   SCD_10_2016        .        .        .        .        .        .        .
+    ##   SCD_11_2016        .        .        .        .        .        .        .
+    ##   SCD_12_2016        .        .        .        .        .        .        .
+    ##   SCD_10_2017        .        .        .        .        .        .        .
+    ##   SCD_10_2012        .        .        .        .        .        .        .
+    ##   SCD_11_2012  0.14286        .        .        .        .        .        .
+    ##   SCD_12_2012        .        .        .        .        .        .        .
+    ##   SCD_8_2013   0.66667        .        .        .        .        .        .
+    ##   SCD_9_2013   0.50000        .        .        .        .        .        .
+    ##   SCD_10_2013  0.33333        .        .        .        .        .        .
+    ##   SCD_11_2013        .        .        .        .        .        .        .
+    ##   SCD_1_2014         .        .        .        .        .        .        .
+    ##   SCD_3_2014         .        .        .        .        .        .        .
+    ##   SCD_7_2014         .        .        .        .        .        .        .
+    ##   SCD_9_2014         .        .        .        .        .        .        .
+    ##   SCD_11_2014  1.00000        .        .  0.50000        .        .  0.50000
+    ##   SCD_7_2015         .        .        .        .        .        .        .
+    ##   SCD_8_2015   0.25000        .        .        .        .        .        .
+    ##   SCD_9_2015   0.16667        .        .  0.33333        .        .        .
+    ##   SCD_10_2015  0.75000        .        .        .        .        .  0.25000
+    ##   SCD_11_2015        .        .        .        .        .        .        .
+    ##   SCD_2_2016   1.00000        .        .        .        .        .        .
+    ##   SCD_8_2016   0.66667        .        .        .        .        .        .
+    ##   SCD_9_2016         .        .        .        .        .        .        .
+    ##   SCG_3_2011         .        .        .        .        .        .        .
+    ##   SCG_2_2012         .        .        .        .        .        .        .
+    ##   SCG_3_2012   0.50000        .        .  0.50000        .        .        .
+    ##   SCG_7_2011         .        .        .        .        .        .        .
+    ##   SCG_11_2011        .        .        .        .        .        .        .
+    ##   SCG_10_2012        .        .        .        .        .        .        .
+    ##   SCG_11_2012  0.66667        .        .        .        .        .  0.33333
+    ##   SCG_1_2013   0.50000        .        .        .        .        .        .
+    ##   SCG_1_2014         .        .        .        .        .        .        .
+    ##   SCG_6_2014         .        .        .        .        .        .        .
+    ##   SCG_11_2014  1.00000        .        .        .        .        .        .
+    ##   SCL_7_2012   0.04762        .        .  0.01190        .        .        .
+    ##   SCL_9_2014         .        .        .        .        .        .        .
+    ##   SCL_10_2014  0.50000        .        .        .        .        .        .
+    ##   SCL_6_2015   0.50000        .        .        .        .        .        .
+    ##   SCL_7_2015         .        .        .        .        .        .        .
+    ##   SCL_9_2012         .        .        .        .        .        .        .
+    ##   SCL_10_2012  0.14286        .        .        .        .        .        .
+    ##   SCL_8_2016   0.53333        .        .        .        .        .        .
+    ##   SCL_9_2016   0.20000        .        .        .        .        .        .
+    ##   SCL_10_2016  0.16129        .        .  0.03226  0.03226        .        .
+    ##   SCL_11_2012        .        .        .        .        .        .        .
+    ##   SCL_4_2012         .        .        .        .        .        .        .
+    ##   SCL_11_2016        .        .        .        .        .        .        .
+    ##   SCL_12_2016        .        .        .        .        .        .        .
+    ##   SCL_2_2017         .        .        .        .        .        .        .
+    ##   SCL_6_2017   0.33333        .        .        .        .        .        .
+    ##   SCL_12_2012        .        .        .        .        .        .        .
+    ##   SCL_7_2017         .        .        .        .        .        .        .
+    ##   SCL_1_2013         .        .        .        .        .        .        .
+    ##   SCL_8_2017         .        .        .        .        .        .        .
+    ##   SCL_7_2013   0.12500        .        .  0.12500        .        .        .
+    ##   SCL_9_2017         .        .        .        .        .        .        .
+    ##   SCL_10_2017        .        .        .        .        .        .        .
+    ##   SCL_11_2017        .        .        .        .        .        .        .
+    ##   SCL_12_2017        .        .        .        .        .        .        .
+    ##   SCL_6_2018         .        .        .        .        .        .        .
+    ##   SCL_7_2018         .        .        .        .        .        .        .
+    ##   SCL_8_2018   0.14286        .        .        .        .        .        .
+    ##   SCL_8_2013         .        .        .        .        .        .  0.50000
+    ##   SCL_10_2013        .        .        .        .        .        .        .
+    ##   SCL_1_2014         .        .        .        .        .  1.00000        .
+    ##   SCL_4_2014         .        .        .        .        .        .        .
+    ##   SCL_6_2014         .        .        .        .        .        .        .
+    ##   SCL_7_2014   0.04167        .        .        .        .        .        .
+    ##   SCL_8_2014         .        .        .        .        .        .        .
+    ##   SCS_8_2013         .        .        .        .        .        .        .
+    ##   SCS_1_2014   0.50000        .        .        .        .        .        .
+    ##   SCS_5_2014         .        .        .        .        .        .        .
+    ##   SCS_7_2014         .        .        .        .        .        .        .
+    ##   SCS_8_2014         .        .        .        .        .        .        .
+    ##   SCS_9_2014         .        .        .        .        .        .        .
+    ##   SCS_11_2014        .        .        .        .        .        .        .
+    ##   SCS_12_2014        .        .        .        .        .        .  0.33333
+    ##   SCS_1_2016         .        .        .        .        .        .        .
+    ##   SCS_8_2016   0.16667        .        .        .        .        .        .
+    ##   SCS_9_2016         .        .        .        .        .        .        .
+    ##   SCS_10_2013  0.25000        .        .        .        .        .        .
+    ##   SCS_10_2016  0.16667        .        .        .        .        .        .
+    ##   SCS_9_2017   0.33333        .        .        .        .        .        .
+    ##   SCS_NA_2016        .        .        .        .        .        .        .
+    ##   SCS_11_2013        .        .        .        .        .        .        .
+    ##   TRO_3_2011         .        .        .        .        .        .        .
+    ##   TRO_11_2011        .        .        .        .        .        .        .
+    ##   TRO_12_2011        .        .        .        .        .        .        .
+    ##   TRO_1_2012         .        .        .        .        .        .        .
+    ##   TRO_2_2012         .        .        .        .        .        .        .
+    ##   TRO_3_2012         .        .        .        .        .        .        .
+    ##   TRO_11_2012        .        .        .        .        .        .        .
+    ##   TRO_12_2012        .        .        .        .        .        .        .
+    ##   TRO_1_2013   0.25000        .        .        .        .        .        .
+    ##   TRO_2_2013   0.50000        .        .        .        .        .  0.50000
+    ##   TRO_3_2013         .        .        .        .        .        .        .
+    ##   TRO_4_2011   0.50000        .        .        .        .        .        .
+    ##   TRO_8_2011         .        .        .        .        .        .        .
+    ##   TRO_10_2011        .        .        .        .        .        .        .
+    ##   UEB_7_2012         .        .        .        .        .        .        .
+    ##   UEB_8_2015   0.42857        .        .        .        .        .        .
+    ##   UEB_9_2015   0.15385        .        .        .        .        .  0.15385
+    ##   UEB_3_2013         .        .        .        .        .        .        .
+    ##   UEB_10_2015        .        .        .        .        .        .        .
+    ##   UEB_10_2011        .        .        .        .        .        .        .
+    ##   UEB_4_2013         .        .        .        .        .        .        .
+    ##   UEB_5_2013         .        .        .        .        .        .        .
+    ##   UEB_10_2013        .        .        .        .        .        .        .
+    ##   UEB_8_2013         .        .        .        .        .        .        .
+    ##   UEB_9_2013         .        .        .        .        .        .        .
+    ##   UEB_7_2016   1.00000        .        .        .  1.00000        .        .
+    ##   UEB_8_2016   1.00000        .        .        .  1.00000        .        .
+    ##   UEB_9_2016   1.00000        .        .        .  1.00000        .        .
+    ##   UEB_10_2016  1.00000        .        .        .  1.00000        .        .
+    ##   UEB_11_2013  0.16667        .        .        .        .        .        .
+    ##   UEB_11_2016  1.00000        .        .        .  1.00000        .        .
+    ##   UEB_12_2016  1.00000        .        .        .  1.00000        .        .
+    ##   UEB_6_2017   1.00000        .        .        .  1.00000        .        .
+    ##   UEB_8_2012         .        .        .  0.50000        .        .        .
+    ##   UEB_7_2017   1.00000        .        .        .  1.00000        .        .
+    ##   UEB_1_2018   1.00000        .        .        .  1.00000        .        .
+    ##   UEB_9_2019         .        .        .        .        .        .        .
+    ##   UEB_12_2013  0.50000        .        .        .        .        .        .
+    ##   UEB_1_2014         .        .        .        .        .        .        .
+    ##   UEB_2_2014         .        .        .        .        .        .        .
+    ##   UEB_3_2014         .        .        .        .        .        .        .
+    ##   UEB_5_2014         .        .        .  0.33333        .        .  0.33333
+    ##   UEB_6_2014   0.50000        .        .        .        .        .        .
+    ##   UEB_9_2012         .        .        .        .        .        .        .
+    ##   UEB_7_2014   0.18182        .        .  0.18182        .        .  0.18182
+    ##   UEB_8_2014         .        .        .        .        .        .        .
+    ##   UEB_9_2014   0.14286        .        .        .        .        .        .
+    ##   UEB_10_2014  0.33333        .        .        .        .        .        .
+    ##   UEB_11_2014  0.16667        .        .        .        .        .        .
+    ##   UEB_12_2014        .        .        .        .        .        .        .
+    ##   UEB_1_2015   0.20000        .        .        .        .        .        .
+    ##   UEB_2_2013         .        .        .        .        .        .        .
+    ##   UEB_2_2015         .        .        .        .        .        .        .
+    ##   UEB_3_2015   0.12500        .        .        .        .        .        .
+    ##   UEB_5_2015         .        .        .        .        .        .        .
+    ##   UEB_6_2015         .        .        .  1.00000        .        .        .
+    ##   UEB_7_2015   1.00000        .        .        .        .        .        .
+    ##   UST_9_2013   0.12500        .        .        .        .        .        .
+    ##   UST_10_2013  0.20000        .        .        .        .        .        .
+    ##   UST_11_2013  0.16667        .        .  0.08333        .        .        .
+    ##   UST_12_2013        .        .        .        .        .        .        .
+    ##   UST_1_2014         .        .        .        .        .        .  0.33333
+    ##   UST_3_2014         .        .        .        .        .        .        .
+    ##   UST_8_2014         .        .        .        .        .        .        .
+    ##   UST_9_2014         .        .        .        .        .        .        .
+    ##   WSL_9_2012         .        .        .        .        .        .        .
+    ##   WSL_8_2016         .        .        .        .        .        .        .
+    ##   WSL_9_2016         .        .        .        .        .        .        .
+    ##   WSL_10_2016        .        .        .        .        .        .        .
+    ##   WSL_11_2016        .        .        .        .        .        .        .
+    ##   WSL_12_2016        .        .        .        .        .        .        .
+    ##   WSL_3_2017         .        .        .        .        .        .        .
+    ##   WSL_7_2017         .        .        .        .        .        .        .
+    ##   WSL_8_2017         .        .        .        .        .        .        .
+    ##   WSL_9_2017         .        .        .        .        .        .        .
+    ##   WSL_10_2017        .        .        .        .        .        .        .
+    ##   WSL_11_2017        .        .        .        .        .        .        .
+    ##   WSL_1_2018         .        .        .        .        .        .        .
+    ##   WSL_3_2018         .        .        .        .        .        .        .
+    ##   WSL_5_2018         .        .        .        .        .        .        .
+    ##   WSL_6_2018         .        .        .        .        .        .        .
+    ##   WSL_7_2018         .        .        .        .        .        .        .
+    ##   WSL_8_2018         .        .        .        .        .        .        .
+    ##   WSL_9_2018         .        .        .        .        .        .        .
+    ##   WSL_6_2019         .        .        .        .        .        .        .
+    ##   WSL_7_2019         .        .        .        .        .        .        .
+    ##   WSL_8_2019         .        .        .        .        .        .        .
+    ##   WSL_9_2019         .        .        .        .        .        .        .
+    ##   WSL_10_2019        .        .        .        .        .        .        .
+    ##   WSL_4_2020         .        .        .        .        .        .        .
+    ##   WSL_5_2020         .        .        .        .        .        .        .
+    ##   WSL_6_2020         .        .        .        .        .        .        .
+    ##   WSL_7_2020         .        .        .        .        .        .        .
+    ##   WSL_8_2020         .        .        .        .        .        .        .
+    ##   WSL_9_2020         .        .        .        .        .        .        .
+    ##   WSL_10_2020        .        .        .        .        .        .        .
+    ##   WSL_11_2020        .        .        .        .        .        .        .
+    ##   WSL_6_2021         .        .        .        .        .        .        .
+    ##   WSL_7_2021         .        .        .        .        .        .        .
+    ##   Total        0.11374  0.00037  0.00037  0.01957  0.00997  0.00111  0.01256
+    ##              Locus
+    ## Population    aest25_1 aest26_1 aest28_1 aest29_1 aest31_1 aest35_1 aest36_1
+    ##   ALD_3_2011         .        .        .        .        .        .        .
+    ##   ALD_6_2011         .        .        .        .        .        .        .
+    ##   ALD_7_2011         .        .        .        .        .        .        .
+    ##   ALD_8_2011         .        .        .        .        .        .        .
+    ##   ALD_10_2011        .        .        .        .        .        .        .
+    ##   ALD_11_2011        .        .        .        .        .        .        .
+    ##   ALD_12_2011        .        .        .        .        .        .        .
+    ##   ALD_1_2012         .        .        .        .        .        .        .
+    ##   ALD_2_2012         .        .        .        .        .        .        .
+    ##   ALD_3_2012         .        .        .        .        .        .        .
+    ##   ALD_10_2012        .        .        .        .        .        .        .
+    ##   ALD_11_2012        .        .        .        .        .        .        .
+    ##   ALD_12_2012        .        .        .        .        .        .        .
+    ##   ALD_1_2013         .        .        .        .        .        .        .
+    ##   ALD_2_2013         .        .        .        .        .        .        .
+    ##   ALD_3_2013         .        .        .        .        .        .        .
+    ##   ALD_10_2013        .        .        .        .        .        .        .
+    ##   ALD_4_2011         .        .        .        .        .        .        .
+    ##   ALD_11_2013        .        .        .        .        .        .        .
+    ##   ALD_12_2013        .        .        .        .  0.25000        .        .
+    ##   ALD_1_2014         .        .        .        .  0.50000        .        .
+    ##   ALD_2_2014         .        .        .        .        .        .        .
+    ##   ALD_5_2011         .        .        .        .        .        .        .
+    ##   ALD_7_2014         .        .        .        .  1.00000        .        .
+    ##   ALD_8_2014         .        .        .        .        .        .        .
+    ##   ALD_9_2014         .        .        .        .        .        .        .
+    ##   ALD_10_2014        .        .        .        .        .        .        .
+    ##   ALD_1_2015         .        .        .        .        .        .        .
+    ##   ALD_12_2015        .        .        .        .  0.50000        .        .
+    ##   BAR_5_2014         .        .        .        .        .        .        .
+    ##   BAR_6_2014         .        .        .        .        .        .        .
+    ##   BOB_8_2011         .        .        .        .        .        .        .
+    ##   BOB_2_2012         .        .        .        .        .        .        .
+    ##   BOB_1_2015         .        .  0.33333        .  0.33333        .        .
+    ##   BOB_3_2015         .        .        .        .        .        .        .
+    ##   BOB_6_2015         .        .        .        .        .        .        .
+    ##   BOB_8_2015         .        .  0.07692        .  0.15385        .        .
+    ##   BOB_3_2012         .        .        .        .        .        .        .
+    ##   BOB_10_2015        .        .  0.50000        .  0.50000        .        .
+    ##   BOB_1_2016         .        .        .        .        .        .        .
+    ##   BOB_2_2016         .        .  1.00000        .        .        .        .
+    ##   BOB_11_2012        .        .        .        .        .        .        .
+    ##   BOB_9_2014         .        .  0.12500        .  0.12500        .        .
+    ##   BOB_10_2013        .        .  0.02564        .        .        .        .
+    ##   BOB_5_2012         .        .        .        .        .        .        .
+    ##   BOB_7_2012         .        .        .        .        .        .        .
+    ##   BOB_6_2016         .        .        .        .  1.00000        .        .
+    ##   BOB_7_2016         .        .        .        .        .        .        .
+    ##   BOB_8_2016         .        .        .        .  0.14286        .        .
+    ##   BOB_9_2016         .        .        .        .        .        .        .
+    ##   BOB_10_2016        .        .        .        .        .        .        .
+    ##   BOB_9_2011         .        .        .        .        .        .        .
+    ##   BOB_11_2016        .        .        .        .        .        .  0.07692
+    ##   BOB_8_2012         .        .        .        .        .        .        .
+    ##   BOB_12_2016        .        .        .        .        .        .        .
+    ##   BOB_9_2012   0.09091        .        .        .        .        .        .
+    ##   BOB_6_2017         .        .        .        .        .        .        .
+    ##   BOB_7_2017         .        .        .        .        .        .        .
+    ##   BOB_8_2017         .        .        .        .        .        .        .
+    ##   BOB_9_2017         .        .        .        .        .        .        .
+    ##   BOB_10_2011        .        .        .        .        .        .        .
+    ##   BOB_10_2017        .        .        .        .        .        .        .
+    ##   BOB_11_2017        .        .        .        .        .        .        .
+    ##   BOB_10_2012        .        .        .        .        .        .        .
+    ##   BOB_11_2011        .        .        .        .        .        .        .
+    ##   BOB_12_2017        .        .        .        .        .        .        .
+    ##   BOB_1_2018         .        .        .        .        .        .        .
+    ##   BOB_3_2018         .        .        .        .        .        .        .
+    ##   BOB_4_2018         .        .        .        .        .        .        .
+    ##   BOB_6_2018         .        .        .        .        .        .        .
+    ##   BOB_8_2018         .        .        .        .  0.05263        .        .
+    ##   BOB_1_2013         .        .        .        .        .        .        .
+    ##   BOB_9_2018         .        .        .        .        .        .        .
+    ##   BOB_2_2013         .        .        .        .        .        .        .
+    ##   BOB_5_2013         .        .  0.50000        .  0.50000        .        .
+    ##   BOB_10_2018        .        .        .        .  0.23810        .        .
+    ##   BOB_12_2011        .        .        .        .        .        .        .
+    ##   BOB_6_2013         .        .        .        .        .        .        .
+    ##   BOB_8_2013         .        .        .        .        .        .        .
+    ##   BOB_9_2019         .        .        .        .        .        .        .
+    ##   BOB_9_2013         .        .        .        .        .        .        .
+    ##   BOB_12_2013        .        .  0.20000        .        .        .        .
+    ##   BOB_1_2014         .        .        .        .        .        .        .
+    ##   BOB_2_2014         .        .        .        .        .        .        .
+    ##   BOB_3_2014         .        .        .        .        .        .        .
+    ##   BOB_7_2014   0.12500        .        .        .  0.12500        .        .
+    ##   BOB_8_2014         .        .        .        .        .        .        .
+    ##   BOB_10_2014        .        .        .        .        .        .        .
+    ##   BOB_11_2014        .        .  0.09091        .        .        .        .
+    ##   BOB_12_2014        .        .        .        .        .        .        .
+    ##   BOH_5_2011         .        .        .        .        .        .        .
+    ##   BOH_10_2011        .        .        .        .        .        .        .
+    ##   BOH_12_2011        .        .        .        .        .        .        .
+    ##   BOH_3_2012         .        .        .        .        .        .        .
+    ##   BOH_8_2012         .        .        .        .        .        .        .
+    ##   BOH_9_2012         .        .        .  0.16667  0.33333        .        .
+    ##   BOH_6_2011         .        .        .        .        .        .        .
+    ##   BOH_10_2012        .        .        .        .        .        .        .
+    ##   BOH_11_2012        .        .        .        .        .        .        .
+    ##   BOH_8_2011         .        .        .        .        .        .        .
+    ##   BOH_9_2013         .        .        .        .        .        .        .
+    ##   BOH_10_2013        .        .        .        .        .        .        .
+    ##   BOH_9_2011         .        .  0.33333        .        .        .        .
+    ##   BOH_11_2013        .        .        .        .        .        .        .
+    ##   BOH_7_2014         .        .  0.50000        .        .        .        .
+    ##   BOH_8_2014         .        .        .        .        .        .        .
+    ##   BOH_9_2014         .        .        .        .        .        .        .
+    ##   BOH_11_2014        .        .        .        .        .        .        .
+    ##   BOH_9_2015         .        .  1.00000        .  0.50000        .        .
+    ##   BOH_10_2015        .        .        .        .  1.00000        .        .
+    ##   BUR_7_2013         .        .        .        .        .        .        .
+    ##   BUR_9_2013         .        .        .        .        .        .        .
+    ##   BUR_8_2016         .        .        .        .  0.83333        .        .
+    ##   BUR_9_2016         .        .        .        .        .        .        .
+    ##   BUR_10_2016        .        .        .        .  0.23077        .        .
+    ##   BUR_12_2016        .        .        .        .  1.00000        .        .
+    ##   BUR_6_2018         .        .        .        .        .        .        .
+    ##   BUR_8_2018         .        .        .        .  0.25000        .        .
+    ##   BUR_9_2018         .        .        .        .        .  0.09091  0.09091
+    ##   BUR_10_2013        .        .        .  0.02273  0.09091        .        .
+    ##   BUR_10_2018        .  0.10526        .        .        .        .        .
+    ##   BUR_11_2018        .        .        .        .  0.50000        .        .
+    ##   BUR_7_2019         .        .        .        .        .        .        .
+    ##   BUR_8_2019         .        .        .        .        .        .        .
+    ##   BUR_9_2019         .        .        .        .  0.42857        .        .
+    ##   BUR_10_2019        .        .        .        .  0.50000        .        .
+    ##   BUR_11_2019        .        .        .        .  0.50000  0.25000        .
+    ##   BUR_12_2019        .        .        .        .  0.40000        .        .
+    ##   BUR_1_2020         .        .        .        .  1.00000        .        .
+    ##   BUR_5_2020         .        .        .        .        .        .        .
+    ##   BUR_6_2020         .        .        .        .        .        .        .
+    ##   BUR_7_2020         .        .        .        .        .        .        .
+    ##   BUR_8_2020         .        .  0.04348        .        .        .        .
+    ##   BUR_10_2020        .        .        .        .        .        .        .
+    ##   BUR_11_2020        .        .        .        .        .        .        .
+    ##   BUR_12_2020        .        .        .        .        .        .        .
+    ##   BUR_8_2021         .        .        .        .        .        .        .
+    ##   BUR_9_2021         .  0.33333        .        .        .        .        .
+    ##   BUR_10_2021        .  0.23077        .        .        .        .        .
+    ##   BUR_8_2013         .        .        .        .        .        .        .
+    ##   BUR_11_2021        .  0.33333        .        .        .        .        .
+    ##   BUR_12_2021        .        .        .        .        .        .        .
+    ##   BUR_11_2013        .        .        .  0.11111  0.11111        .        .
+    ##   BUR_12_2013        .        .        .        .        .        .        .
+    ##   BUR_8_2014         .        .        .        .        .        .        .
+    ##   BUR_9_2014         .        .        .        .        .        .        .
+    ##   BUR_10_2014        .        .        .        .        .        .        .
+    ##   BUR_11_2014        .        .        .        .        .        .        .
+    ##   BUR_12_2014        .        .  0.50000        .  0.50000        .        .
+    ##   BUR_9_2015         .        .        .        .        .        .        .
+    ##   BUR_11_2015        .        .        .        .        .        .        .
+    ##   BUR_7_2016         .        .        .        .  1.00000        .        .
+    ##   FRB_10_2011        .        .        .        .        .        .        .
+    ##   FRB_2_2013         .        .        .        .        .        .        .
+    ##   FRB_10_2013        .        .        .        .        .        .        .
+    ##   FRB_12_2013        .        .        .        .        .        .        .
+    ##   FRB_1_2014         .        .        .  1.00000        .        .        .
+    ##   FRB_2_2014         .        .        .        .        .        .        .
+    ##   FRB_5_2014         .        .  1.00000        .  1.00000        .        .
+    ##   FRB_8_2014         .        .  1.00000        .        .        .        .
+    ##   FRB_12_2014        .        .  1.00000        .        .        .        .
+    ##   FRB_5_2015         .        .        .        .        .        .        .
+    ##   FRB_12_2011        .        .        .        .        .        .        .
+    ##   FRB_10_2012        .        .        .        .        .        .        .
+    ##   FRB_11_2012        .        .  0.33333        .  0.33333        .        .
+    ##   FRE_1_2011         .        .        .        .        .        .        .
+    ##   FRE_6_2011         .        .        .        .        .        .        .
+    ##   FRE_7_2016         .        .        .        .  0.16129        .        .
+    ##   FRE_7_2011         .        .        .        .        .        .        .
+    ##   FRE_10_2016        .        .        .        .  0.35484        .        .
+    ##   FRE_11_2016        .        .        .        .        .        .        .
+    ##   FRE_7_2017         .        .        .        .  0.04082        .        .
+    ##   FRE_8_2011         .        .        .        .        .        .        .
+    ##   FRE_10_2011        .        .        .        .        .        .        .
+    ##   FRE_3_2011         .        .        .        .  0.33333        .        .
+    ##   FRE_9_2017         .        .        .        .  0.09302        .        .
+    ##   FRE_11_2011        .        .        .        .        .        .        .
+    ##   FRE_10_2017        .        .        .        .  0.21739        .        .
+    ##   FRE_12_2011        .        .        .        .        .        .        .
+    ##   FRE_1_2012         .        .        .        .        .        .        .
+    ##   FRE_3_2012         .        .        .        .        .        .        .
+    ##   FRE_6_2012         .        .        .        .        .        .        .
+    ##   FRE_7_2012         .        .        .        .        .        .        .
+    ##   FRE_8_2012         .        .        .        .        .        .        .
+    ##   FRE_9_2012         .        .        .        .        .        .        .
+    ##   FRE_10_2012        .        .        .        .        .        .        .
+    ##   FRE_11_2012        .        .        .        .        .        .        .
+    ##   FRE_12_2012        .        .        .        .        .        .        .
+    ##   FRE_1_2013         .        .        .        .        .        .        .
+    ##   FRE_4_2011         .        .        .        .        .        .        .
+    ##   FRE_6_2013         .        .        .  1.00000        .        .        .
+    ##   FRE_7_2013         .        .        .        .        .        .        .
+    ##   FRE_8_2013         .        .        .        .        .        .        .
+    ##   FRE_9_2013         .        .        .        .        .        .        .
+    ##   FRE_10_2013        .        .        .        .        .        .        .
+    ##   FRE_11_2013        .        .        .        .        .        .        .
+    ##   FRE_12_2013        .        .        .        .        .        .        .
+    ##   FRE_2_2014         .        .        .        .        .        .        .
+    ##   FRE_4_2014         .        .        .        .        .        .        .
+    ##   FRE_5_2014         .        .  0.33333        .        .        .        .
+    ##   FRE_7_2014         .        .        .        .        .        .        .
+    ##   FRE_8_2014         .        .  1.00000        .        .        .        .
+    ##   FRE_5_2011         .        .        .        .        .        .        .
+    ##   FRE_10_2014        .        .        .        .        .        .        .
+    ##   FRE_11_2014        .        .        .        .  1.00000        .        .
+    ##   FRE_12_2014        .        .        .        .        .        .        .
+    ##   FRE_3_2015         .        .  0.50000        .  0.50000        .        .
+    ##   FRE_8_2015         .        .        .        .        .        .        .
+    ##   FRE_10_2015        .        .  1.00000        .        .        .        .
+    ##   FRE_11_2015        .        .        .        .        .        .        .
+    ##   FRE_12_2015        .        .        .        .        .        .        .
+    ##   FRE_9_2015         .        .        .        .        .        .        .
+    ##   FRI_10_2013        .        .        .        .  0.02778        .        .
+    ##   FRI_10_2017        .        .        .        .        .        .        .
+    ##   FRI_11_2017        .        .        .        .        .        .        .
+    ##   FRI_12_2017        .        .        .        .        .        .        .
+    ##   FRI_1_2018         .        .        .        .        .        .        .
+    ##   FRI_11_2013        .        .        .        .        .        .        .
+    ##   FRI_12_2013        .        .        .        .        .        .        .
+    ##   FRI_3_2014         .        .        .        .        .        .        .
+    ##   FRI_9_2014         .        .        .        .        .        .        .
+    ##   FRI_1_2015         .        .        .        .        .        .        .
+    ##   FRI_9_2016         .        .        .        .        .        .        .
+    ##   FRI_11_2016        .        .  0.11111        .        .        .        .
+    ##   FRI_8_2017         .        .        .        .        .        .        .
+    ##   FRI_9_2017         .        .        .        .        .        .        .
+    ##   GEN_NA_NA          .        .        .        .        .        .        .
+    ##   GEN_8_2020         .        .        .        .        .        .        .
+    ##   GEN_12_2021        .        .        .        .        .        .        .
+    ##   GEN_1_2022         .        .        .        .        .        .        .
+    ##   KON_9_2013         .        .        .        .        .        .        .
+    ##   KON_10_2014        .        .        .        .        .        .        .
+    ##   KON_12_2016        .        .        .        .  0.30769        .        .
+    ##   KON_2_2017         .        .        .        .  0.40000        .        .
+    ##   KON_7_2017         .        .  0.25000        .  0.75000        .  0.25000
+    ##   KON_9_2017         .        .        .        .  0.20000        .        .
+    ##   KON_10_2017        .        .        .        .        .        .        .
+    ##   KON_11_2017        .        .        .        .        .        .        .
+    ##   KON_12_2017        .        .        .        .        .        .        .
+    ##   KON_11_2014        .        .        .        .        .        .        .
+    ##   KON_1_2018         .        .        .        .        .        .        .
+    ##   KON_7_2018         .        .        .        .  1.00000        .        .
+    ##   KON_8_2018         .        .        .        .        .        .        .
+    ##   KON_9_2018         .        .        .        .        .        .        .
+    ##   KON_10_2018        .        .        .        .        .        .        .
+    ##   KON_12_2014        .        .        .        .        .        .        .
+    ##   KON_12_2018        .        .        .        .        .        .        .
+    ##   KON_7_2019         .        .        .        .  0.50000        .        .
+    ##   KON_8_2019         .        .        .        .  0.66667        .        .
+    ##   KON_9_2019         .        .        .        .  0.33333        .        .
+    ##   KON_10_2019        .        .        .        .        .        .        .
+    ##   KON_11_2013        .        .        .        .  0.33333        .        .
+    ##   KON_1_2015         .        .        .        .        .        .        .
+    ##   KON_11_2019        .        .        .        .        .        .        .
+    ##   KON_3_2016         .        .        .        .  1.00000        .        .
+    ##   KON_1_2020         .        .        .        .        .        .        .
+    ##   KON_7_2020         .        .        .        .        .        .        .
+    ##   KON_8_2020         .        .        .        .        .        .        .
+    ##   KON_9_2020         .        .        .        .        .        .        .
+    ##   KON_10_2020        .        .        .        .        .        .        .
+    ##   KON_8_2016         .        .        .        .  0.50000        .        .
+    ##   KON_11_2020        .        .        .        .        .        .        .
+    ##   KON_12_2020        .        .        .        .        .        .        .
+    ##   KON_8_2021         .        .        .        .        .        .        .
+    ##   KON_10_2021        .        .        .        .  0.12500        .        .
+    ##   KON_11_2021        .        .        .        .        .        .        .
+    ##   KON_12_2021        .        .        .        .        .        .        .
+    ##   KON_9_2016         .        .        .        .  0.50000        .        .
+    ##   KON_10_2016        .        .        .        .  0.30435        .  0.04348
+    ##   KON_12_2013        .        .  1.00000        .  1.00000        .        .
+    ##   KON_2_2014         .        .        .        .        .        .        .
+    ##   KON_9_2014         .        .  0.50000  0.50000        .        .        .
+    ##   KON_11_2016        .        .        .        .  0.33333        .        .
+    ##   NEU_8_2013         .        .        .        .        .        .        .
+    ##   NEU_10_2014        .        .  0.33333        .        .        .        .
+    ##   NEU_11_2014        .        .        .        .        .        .        .
+    ##   NEU_10_2015        .        .        .        .        .        .        .
+    ##   NEU_8_2016         .        .        .        .        .        .        .
+    ##   NEU_9_2016         .        .        .        .        .        .        .
+    ##   NEU_9_2013         .        .        .        .        .        .        .
+    ##   NEU_10_2016        .        .        .        .        .        .        .
+    ##   NEU_10_2013  1.00000        .  1.00000        .  1.00000        .        .
+    ##   NEU_2_2017         .        .        .        .        .        .        .
+    ##   NEU_11_2013        .        .        .        .        .        .        .
+    ##   NEU_7_2020         .        .        .        .        .        .        .
+    ##   NEU_8_2020         .        .        .        .        .        .        .
+    ##   NEU_9_2020         .        .        .        .        .        .        .
+    ##   NEU_10_2021        .        .        .        .        .        .        .
+    ##   NEU_11_2021        .        .        .        .        .        .        .
+    ##   NEU_12_2013        .        .        .        .        .        .        .
+    ##   RIE_3_2011         .        .        .        .        .        .        .
+    ##   RIE_8_2011         .        .        .        .        .        .        .
+    ##   RIE_10_2011        .        .        .        .        .        .        .
+    ##   RIE_11_2011        .        .        .        .        .        .        .
+    ##   RIE_12_2011        .        .        .        .        .        .        .
+    ##   RIE_2_2012         .        .        .        .        .        .        .
+    ##   RIE_3_2012         .        .        .        .        .        .        .
+    ##   RIE_10_2012        .        .        .        .        .        .        .
+    ##   RIE_11_2012        .        .        .        .        .        .        .
+    ##   RIE_12_2012        .        .        .        .        .        .        .
+    ##   RIE_1_2013         .        .        .        .        .        .        .
+    ##   RIE_2_2013         .        .        .        .        .        .        .
+    ##   RIE_3_2013         .        .        .        .        .        .        .
+    ##   RIE_10_2013        .        .        .        .        .        .        .
+    ##   RIE_11_2013        .        .        .        .        .        .        .
+    ##   RIE_12_2013        .        .        .        .        .        .        .
+    ##   RIE_1_2014         .        .        .        .        .        .        .
+    ##   RIE_4_2011         .        .        .        .        .        .        .
+    ##   RIE_2_2014         .        .        .        .        .        .        .
+    ##   RIE_9_2014         .        .        .        .        .        .        .
+    ##   RIE_10_2014        .        .        .        .        .        .        .
+    ##   RIE_11_2014        .        .        .        .        .        .        .
+    ##   RIE_12_2014        .        .        .        .        .        .        .
+    ##   RIE_1_2015         .        .        .        .  0.33333        .        .
+    ##   RIE_2_2015         .        .        .        .        .        .        .
+    ##   RIE_10_2015        .        .        .        .  1.00000        .        .
+    ##   RIE_12_2015        .        .        .        .        .        .        .
+    ##   RIE_6_2011         .        .        .        .        .        .        .
+    ##   RIE_7_2011         .        .        .        .        .        .        .
+    ##   SCD_7_2012         .        .        .        .        .        .        .
+    ##   SCD_9_2012         .        .        .  0.06667  0.06667        .        .
+    ##   SCD_10_2016        .        .  0.03125        .        .        .        .
+    ##   SCD_11_2016        .        .        .        .        .        .        .
+    ##   SCD_12_2016        .        .        .        .        .        .        .
+    ##   SCD_10_2017        .        .        .        .        .        .        .
+    ##   SCD_10_2012        .        .        .        .        .        .        .
+    ##   SCD_11_2012        .        .        .        .        .        .        .
+    ##   SCD_12_2012        .        .        .        .        .        .        .
+    ##   SCD_8_2013         .        .        .        .        .        .        .
+    ##   SCD_9_2013         .        .        .        .        .        .        .
+    ##   SCD_10_2013        .        .        .        .        .        .        .
+    ##   SCD_11_2013        .        .        .        .        .        .        .
+    ##   SCD_1_2014         .        .        .        .        .        .        .
+    ##   SCD_3_2014         .        .        .        .        .        .        .
+    ##   SCD_7_2014         .        .        .        .        .        .        .
+    ##   SCD_9_2014         .        .  0.25000        .        .        .        .
+    ##   SCD_11_2014        .        .        .        .  0.50000        .        .
+    ##   SCD_7_2015         .        .        .        .        .        .        .
+    ##   SCD_8_2015         .        .  0.25000        .  0.50000        .        .
+    ##   SCD_9_2015         .        .  0.33333        .  0.33333        .        .
+    ##   SCD_10_2015        .        .  0.25000  0.25000  0.50000        .        .
+    ##   SCD_11_2015        .        .        .        .        .        .        .
+    ##   SCD_2_2016         .        .  1.00000        .        .        .        .
+    ##   SCD_8_2016         .        .        .        .  0.33333        .        .
+    ##   SCD_9_2016         .        .        .        .        .        .        .
+    ##   SCG_3_2011         .        .        .        .        .        .        .
+    ##   SCG_2_2012         .        .        .        .        .        .        .
+    ##   SCG_3_2012         .        .  1.00000        .        .        .        .
+    ##   SCG_7_2011         .        .        .        .        .        .        .
+    ##   SCG_11_2011        .        .        .        .        .        .        .
+    ##   SCG_10_2012        .        .        .        .        .        .        .
+    ##   SCG_11_2012        .        .        .        .  0.33333        .        .
+    ##   SCG_1_2013         .        .        .        .        .        .        .
+    ##   SCG_1_2014         .        .  1.00000        .  0.50000        .        .
+    ##   SCG_6_2014         .        .        .        .        .        .        .
+    ##   SCG_11_2014        .        .  0.50000        .  0.50000        .        .
+    ##   SCL_7_2012         .        .  0.54762  0.01190  0.02381        .        .
+    ##   SCL_9_2014         .        .  0.66667        .        .        .        .
+    ##   SCL_10_2014        .        .  0.50000        .        .        .        .
+    ##   SCL_6_2015         .        .  1.00000        .  0.50000        .        .
+    ##   SCL_7_2015         .        .  0.77778        .        .        .        .
+    ##   SCL_9_2012         .        .  0.20000        .        .        .        .
+    ##   SCL_10_2012        .        .        .        .        .        .        .
+    ##   SCL_8_2016         .        .  0.93333        .  0.06667        .        .
+    ##   SCL_9_2016         .        .  0.90000        .  0.10000        .        .
+    ##   SCL_10_2016        .        .  0.77419        .  0.19355        .        .
+    ##   SCL_11_2012        .        .        .        .        .        .        .
+    ##   SCL_4_2012         .        .  0.40000        .        .        .        .
+    ##   SCL_11_2016        .        .  1.00000        .        .        .        .
+    ##   SCL_12_2016        .        .  1.00000        .        .        .        .
+    ##   SCL_2_2017         .        .  1.00000        .        .        .        .
+    ##   SCL_6_2017         .        .  1.00000        .        .        .        .
+    ##   SCL_12_2012        .        .        .        .        .        .        .
+    ##   SCL_7_2017         .        .  0.80000        .        .        .        .
+    ##   SCL_1_2013         .        .        .        .        .        .        .
+    ##   SCL_8_2017         .        .  1.00000        .        .        .        .
+    ##   SCL_7_2013         .        .  0.12500        .  0.12500        .        .
+    ##   SCL_9_2017         .        .  0.40000        .        .        .        .
+    ##   SCL_10_2017        .        .  1.00000        .        .        .        .
+    ##   SCL_11_2017        .        .  1.00000        .        .        .        .
+    ##   SCL_12_2017        .        .  1.00000        .        .        .        .
+    ##   SCL_6_2018         .        .  1.00000        .        .        .        .
+    ##   SCL_7_2018         .        .  1.00000        .        .        .        .
+    ##   SCL_8_2018         .        .  1.00000        .  0.14286        .        .
+    ##   SCL_8_2013         .        .  0.50000        .  0.50000        .        .
+    ##   SCL_10_2013        .        .  0.50000  0.50000        .        .        .
+    ##   SCL_1_2014         .        .  1.00000        .        .        .        .
+    ##   SCL_4_2014         .        .  0.71429        .  0.14286        .        .
+    ##   SCL_6_2014         .        .  0.60000        .        .        .        .
+    ##   SCL_7_2014         .        .  0.45833        .  0.08333        .        .
+    ##   SCL_8_2014         .        .  0.60000        .        .        .        .
+    ##   SCS_8_2013         .        .        .        .        .        .        .
+    ##   SCS_1_2014         .        .  0.50000  0.50000  0.50000        .        .
+    ##   SCS_5_2014         .        .        .        .        .        .        .
+    ##   SCS_7_2014         .        .        .        .        .        .        .
+    ##   SCS_8_2014         .        .        .        .        .        .        .
+    ##   SCS_9_2014         .        .        .        .        .        .        .
+    ##   SCS_11_2014        .        .        .        .        .        .        .
+    ##   SCS_12_2014        .        .        .        .        .        .        .
+    ##   SCS_1_2016         .        .        .        .        .        .        .
+    ##   SCS_8_2016         .        .        .        .        .        .        .
+    ##   SCS_9_2016         .        .        .        .        .        .        .
+    ##   SCS_10_2013        .        .        .        .        .        .        .
+    ##   SCS_10_2016        .        .        .        .        .        .        .
+    ##   SCS_9_2017         .        .        .        .        .        .        .
+    ##   SCS_NA_2016        .        .        .        .        .        .        .
+    ##   SCS_11_2013        .        .        .        .        .        .        .
+    ##   TRO_3_2011         .        .        .        .        .        .        .
+    ##   TRO_11_2011        .        .        .        .        .        .        .
+    ##   TRO_12_2011        .        .        .        .        .        .        .
+    ##   TRO_1_2012         .        .        .        .        .        .        .
+    ##   TRO_2_2012         .        .        .        .        .        .        .
+    ##   TRO_3_2012         .        .        .        .        .        .        .
+    ##   TRO_11_2012        .        .        .        .        .        .        .
+    ##   TRO_12_2012        .        .        .        .        .        .        .
+    ##   TRO_1_2013         .        .        .        .        .        .        .
+    ##   TRO_2_2013         .        .        .        .  0.50000        .        .
+    ##   TRO_3_2013         .        .        .        .        .        .        .
+    ##   TRO_4_2011         .        .        .        .        .        .        .
+    ##   TRO_8_2011         .        .        .        .        .        .        .
+    ##   TRO_10_2011        .        .        .        .        .        .        .
+    ##   UEB_7_2012         .        .        .        .        .        .        .
+    ##   UEB_8_2015         .        .  0.42857        .        .        .        .
+    ##   UEB_9_2015         .        .  0.07692        .  0.07692        .        .
+    ##   UEB_3_2013         .        .        .        .        .        .        .
+    ##   UEB_10_2015        .        .        .  1.00000        .        .        .
+    ##   UEB_10_2011        .        .        .        .        .        .        .
+    ##   UEB_4_2013         .        .        .        .        .        .        .
+    ##   UEB_5_2013         .        .        .        .        .        .        .
+    ##   UEB_10_2013        .        .        .        .        .        .        .
+    ##   UEB_8_2013         .        .        .        .        .        .        .
+    ##   UEB_9_2013         .        .        .        .        .        .        .
+    ##   UEB_7_2016         .        .        .        .  1.00000        .        .
+    ##   UEB_8_2016         .        .        .        .  1.00000        .        .
+    ##   UEB_9_2016         .        .        .        .  1.00000        .        .
+    ##   UEB_10_2016        .        .        .        .  1.00000        .        .
+    ##   UEB_11_2013        .        .        .        .        .        .        .
+    ##   UEB_11_2016        .        .        .        .  1.00000        .        .
+    ##   UEB_12_2016        .        .        .        .  1.00000        .        .
+    ##   UEB_6_2017         .        .        .        .  1.00000        .        .
+    ##   UEB_8_2012         .        .        .        .        .        .        .
+    ##   UEB_7_2017         .        .        .        .  1.00000        .        .
+    ##   UEB_1_2018         .        .        .        .  1.00000        .        .
+    ##   UEB_9_2019         .        .        .        .        .        .        .
+    ##   UEB_12_2013        .        .        .        .        .        .        .
+    ##   UEB_1_2014         .        .        .        .        .        .        .
+    ##   UEB_2_2014         .        .        .        .        .        .        .
+    ##   UEB_3_2014         .        .        .        .        .        .        .
+    ##   UEB_5_2014         .        .  0.33333        .  0.33333        .        .
+    ##   UEB_6_2014         .        .        .        .        .        .        .
+    ##   UEB_9_2012         .        .        .        .        .        .        .
+    ##   UEB_7_2014         .        .  0.27273  0.18182  0.09091        .        .
+    ##   UEB_8_2014         .        .        .        .        .        .        .
+    ##   UEB_9_2014         .        .        .        .        .        .        .
+    ##   UEB_10_2014        .        .        .        .  0.33333        .        .
+    ##   UEB_11_2014        .        .        .        .  0.16667        .        .
+    ##   UEB_12_2014        .        .        .        .        .        .        .
+    ##   UEB_1_2015         .        .  0.20000        .        .        .        .
+    ##   UEB_2_2013         .        .        .        .        .        .        .
+    ##   UEB_2_2015         .        .        .        .        .        .        .
+    ##   UEB_3_2015         .        .  0.25000        .  0.12500        .        .
+    ##   UEB_5_2015         .        .        .        .        .        .        .
+    ##   UEB_6_2015   1.00000        .  1.00000        .  1.00000        .        .
+    ##   UEB_7_2015         .        .        .        .        .        .        .
+    ##   UST_9_2013         .        .        .        .        .        .        .
+    ##   UST_10_2013        .        .        .        .        .        .        .
+    ##   UST_11_2013        .        .        .  0.08333  0.08333        .        .
+    ##   UST_12_2013        .        .  0.50000        .        .        .        .
+    ##   UST_1_2014         .        .  0.33333        .  0.33333        .        .
+    ##   UST_3_2014         .        .        .        .        .        .        .
+    ##   UST_8_2014         .        .        .        .        .        .        .
+    ##   UST_9_2014         .        .        .        .        .        .        .
+    ##   WSL_9_2012         .        .        .        .        .        .        .
+    ##   WSL_8_2016         .        .        .        .        .        .        .
+    ##   WSL_9_2016         .        .        .        .        .        .        .
+    ##   WSL_10_2016        .        .        .        .        .        .        .
+    ##   WSL_11_2016        .        .        .        .        .        .        .
+    ##   WSL_12_2016        .        .        .        .        .        .        .
+    ##   WSL_3_2017         .        .        .        .        .        .        .
+    ##   WSL_7_2017         .        .        .        .        .        .        .
+    ##   WSL_8_2017         .        .        .        .        .        .        .
+    ##   WSL_9_2017         .        .        .        .        .        .        .
+    ##   WSL_10_2017        .        .        .        .        .        .        .
+    ##   WSL_11_2017        .        .        .        .        .        .        .
+    ##   WSL_1_2018         .        .        .        .        .        .        .
+    ##   WSL_3_2018         .        .        .        .        .        .        .
+    ##   WSL_5_2018         .        .        .        .        .        .        .
+    ##   WSL_6_2018         .        .        .        .        .        .        .
+    ##   WSL_7_2018         .        .        .        .        .        .        .
+    ##   WSL_8_2018         .        .        .        .        .        .        .
+    ##   WSL_9_2018         .        .        .        .        .        .        .
+    ##   WSL_6_2019         .        .        .        .        .        .        .
+    ##   WSL_7_2019         .        .        .        .        .        .        .
+    ##   WSL_8_2019         .        .        .        .        .        .        .
+    ##   WSL_9_2019         .        .        .        .        .        .        .
+    ##   WSL_10_2019        .        .        .        .        .        .        .
+    ##   WSL_4_2020         .        .        .        .        .        .        .
+    ##   WSL_5_2020         .        .        .        .        .        .        .
+    ##   WSL_6_2020         .        .        .        .        .        .        .
+    ##   WSL_7_2020         .        .        .        .        .        .        .
+    ##   WSL_8_2020         .        .        .        .        .        .        .
+    ##   WSL_9_2020         .        .        .        .        .        .        .
+    ##   WSL_10_2020        .        .        .        .        .        .        .
+    ##   WSL_11_2020        .        .        .        .        .        .        .
+    ##   WSL_6_2021         .        .        .        .        .        .        .
+    ##   WSL_7_2021         .        .        .        .        .        .        .
+    ##   Total        0.00148  0.00258  0.09121  0.00554  0.07090  0.00074  0.00148
+    ##              Locus
+    ## Population       Mean
+    ##   ALD_3_2011        .
+    ##   ALD_6_2011        .
+    ##   ALD_7_2011  0.03571
+    ##   ALD_8_2011        .
+    ##   ALD_10_2011       .
+    ##   ALD_11_2011       .
+    ##   ALD_12_2011       .
+    ##   ALD_1_2012        .
+    ##   ALD_2_2012        .
+    ##   ALD_3_2012  0.03571
+    ##   ALD_10_2012       .
+    ##   ALD_11_2012       .
+    ##   ALD_12_2012       .
+    ##   ALD_1_2013        .
+    ##   ALD_2_2013        .
+    ##   ALD_3_2013  0.03571
+    ##   ALD_10_2013       .
+    ##   ALD_4_2011        .
+    ##   ALD_11_2013       .
+    ##   ALD_12_2013 0.03571
+    ##   ALD_1_2014  0.14286
+    ##   ALD_2_2014        .
+    ##   ALD_5_2011        .
+    ##   ALD_7_2014  0.07143
+    ##   ALD_8_2014        .
+    ##   ALD_9_2014        .
+    ##   ALD_10_2014       .
+    ##   ALD_1_2015        .
+    ##   ALD_12_2015 0.05357
+    ##   BAR_5_2014  0.07143
+    ##   BAR_6_2014        .
+    ##   BOB_8_2011        .
+    ##   BOB_2_2012        .
+    ##   BOB_1_2015  0.04762
+    ##   BOB_3_2015  0.01786
+    ##   BOB_6_2015        .
+    ##   BOB_8_2015  0.03297
+    ##   BOB_3_2012        .
+    ##   BOB_10_2015 0.10714
+    ##   BOB_1_2016        .
+    ##   BOB_2_2016  0.14286
+    ##   BOB_11_2012       .
+    ##   BOB_9_2014  0.02679
+    ##   BOB_10_2013 0.00549
+    ##   BOB_5_2012        .
+    ##   BOB_7_2012  0.01020
+    ##   BOB_6_2016  0.14286
+    ##   BOB_7_2016        .
+    ##   BOB_8_2016  0.03061
+    ##   BOB_9_2016        .
+    ##   BOB_10_2016       .
+    ##   BOB_9_2011        .
+    ##   BOB_11_2016 0.01648
+    ##   BOB_8_2012        .
+    ##   BOB_12_2016       .
+    ##   BOB_9_2012  0.01948
+    ##   BOB_6_2017        .
+    ##   BOB_7_2017        .
+    ##   BOB_8_2017        .
+    ##   BOB_9_2017        .
+    ##   BOB_10_2011       .
+    ##   BOB_10_2017 0.00397
+    ##   BOB_11_2017       .
+    ##   BOB_10_2012 0.01020
+    ##   BOB_11_2011       .
+    ##   BOB_12_2017       .
+    ##   BOB_1_2018        .
+    ##   BOB_3_2018        .
+    ##   BOB_4_2018        .
+    ##   BOB_6_2018        .
+    ##   BOB_8_2018  0.00376
+    ##   BOB_1_2013        .
+    ##   BOB_9_2018        .
+    ##   BOB_2_2013  0.14286
+    ##   BOB_5_2013  0.10714
+    ##   BOB_10_2018 0.04422
+    ##   BOB_12_2011       .
+    ##   BOB_6_2013  0.07143
+    ##   BOB_8_2013        .
+    ##   BOB_9_2019        .
+    ##   BOB_9_2013        .
+    ##   BOB_12_2013 0.01429
+    ##   BOB_1_2014        .
+    ##   BOB_2_2014        .
+    ##   BOB_3_2014        .
+    ##   BOB_7_2014  0.04464
+    ##   BOB_8_2014        .
+    ##   BOB_10_2014 0.02381
+    ##   BOB_11_2014 0.02597
+    ##   BOB_12_2014       .
+    ##   BOH_5_2011        .
+    ##   BOH_10_2011       .
+    ##   BOH_12_2011       .
+    ##   BOH_3_2012  0.07143
+    ##   BOH_8_2012        .
+    ##   BOH_9_2012  0.05952
+    ##   BOH_6_2011        .
+    ##   BOH_10_2012       .
+    ##   BOH_11_2012 0.05952
+    ##   BOH_8_2011        .
+    ##   BOH_9_2013  0.04286
+    ##   BOH_10_2013 0.03571
+    ##   BOH_9_2011  0.02381
+    ##   BOH_11_2013       .
+    ##   BOH_7_2014  0.07143
+    ##   BOH_8_2014        .
+    ##   BOH_9_2014        .
+    ##   BOH_11_2014       .
+    ##   BOH_9_2015  0.17857
+    ##   BOH_10_2015 0.21429
+    ##   BUR_7_2013        .
+    ##   BUR_9_2013        .
+    ##   BUR_8_2016  0.13095
+    ##   BUR_9_2016  0.01504
+    ##   BUR_10_2016 0.06593
+    ##   BUR_12_2016 0.14286
+    ##   BUR_6_2018        .
+    ##   BUR_8_2018  0.02679
+    ##   BUR_9_2018  0.01948
+    ##   BUR_10_2013 0.01948
+    ##   BUR_10_2018 0.01128
+    ##   BUR_11_2018 0.07143
+    ##   BUR_7_2019  0.07143
+    ##   BUR_8_2019        .
+    ##   BUR_9_2019  0.11224
+    ##   BUR_10_2019 0.08929
+    ##   BUR_11_2019 0.12500
+    ##   BUR_12_2019 0.08571
+    ##   BUR_1_2020  0.14286
+    ##   BUR_5_2020        .
+    ##   BUR_6_2020        .
+    ##   BUR_7_2020        .
+    ##   BUR_8_2020  0.00311
+    ##   BUR_10_2020       .
+    ##   BUR_11_2020       .
+    ##   BUR_12_2020       .
+    ##   BUR_8_2021        .
+    ##   BUR_9_2021  0.02381
+    ##   BUR_10_2021 0.01648
+    ##   BUR_8_2013        .
+    ##   BUR_11_2021 0.02381
+    ##   BUR_12_2021       .
+    ##   BUR_11_2013 0.02381
+    ##   BUR_12_2013       .
+    ##   BUR_8_2014        .
+    ##   BUR_9_2014        .
+    ##   BUR_10_2014 0.02381
+    ##   BUR_11_2014       .
+    ##   BUR_12_2014 0.10714
+    ##   BUR_9_2015  0.01429
+    ##   BUR_11_2015       .
+    ##   BUR_7_2016  0.14286
+    ##   FRB_10_2011       .
+    ##   FRB_2_2013  0.03571
+    ##   FRB_10_2013       .
+    ##   FRB_12_2013       .
+    ##   FRB_1_2014  0.14286
+    ##   FRB_2_2014        .
+    ##   FRB_5_2014  0.21429
+    ##   FRB_8_2014  0.07143
+    ##   FRB_12_2014 0.14286
+    ##   FRB_5_2015  0.07143
+    ##   FRB_12_2011       .
+    ##   FRB_10_2012       .
+    ##   FRB_11_2012 0.07143
+    ##   FRE_1_2011        .
+    ##   FRE_6_2011  0.03571
+    ##   FRE_7_2016  0.03226
+    ##   FRE_7_2011        .
+    ##   FRE_10_2016 0.06682
+    ##   FRE_11_2016       .
+    ##   FRE_7_2017  0.01166
+    ##   FRE_8_2011        .
+    ##   FRE_10_2011       .
+    ##   FRE_3_2011  0.02381
+    ##   FRE_9_2017  0.02159
+    ##   FRE_11_2011 0.02381
+    ##   FRE_10_2017 0.05590
+    ##   FRE_12_2011 0.07143
+    ##   FRE_1_2012        .
+    ##   FRE_3_2012        .
+    ##   FRE_6_2012        .
+    ##   FRE_7_2012        .
+    ##   FRE_8_2012  0.01786
+    ##   FRE_9_2012        .
+    ##   FRE_10_2012       .
+    ##   FRE_11_2012       .
+    ##   FRE_12_2012       .
+    ##   FRE_1_2013        .
+    ##   FRE_4_2011  0.03571
+    ##   FRE_6_2013  0.14286
+    ##   FRE_7_2013        .
+    ##   FRE_8_2013        .
+    ##   FRE_9_2013        .
+    ##   FRE_10_2013 0.02381
+    ##   FRE_11_2013       .
+    ##   FRE_12_2013       .
+    ##   FRE_2_2014  0.03571
+    ##   FRE_4_2014  0.03571
+    ##   FRE_5_2014  0.04762
+    ##   FRE_7_2014        .
+    ##   FRE_8_2014  0.17857
+    ##   FRE_5_2011        .
+    ##   FRE_10_2014       .
+    ##   FRE_11_2014 0.07143
+    ##   FRE_12_2014       .
+    ##   FRE_3_2015  0.07143
+    ##   FRE_8_2015        .
+    ##   FRE_10_2015 0.14286
+    ##   FRE_11_2015       .
+    ##   FRE_12_2015       .
+    ##   FRE_9_2015        .
+    ##   FRI_10_2013 0.00794
+    ##   FRI_10_2017       .
+    ##   FRI_11_2017       .
+    ##   FRI_12_2017       .
+    ##   FRI_1_2018        .
+    ##   FRI_11_2013       .
+    ##   FRI_12_2013       .
+    ##   FRI_3_2014        .
+    ##   FRI_9_2014        .
+    ##   FRI_1_2015  0.03571
+    ##   FRI_9_2016        .
+    ##   FRI_11_2016 0.02381
+    ##   FRI_8_2017        .
+    ##   FRI_9_2017        .
+    ##   GEN_NA_NA         .
+    ##   GEN_8_2020        .
+    ##   GEN_12_2021       .
+    ##   GEN_1_2022        .
+    ##   KON_9_2013        .
+    ##   KON_10_2014       .
+    ##   KON_12_2016 0.05495
+    ##   KON_2_2017  0.08571
+    ##   KON_7_2017  0.17857
+    ##   KON_9_2017  0.02857
+    ##   KON_10_2017 0.02857
+    ##   KON_11_2017       .
+    ##   KON_12_2017       .
+    ##   KON_11_2014       .
+    ##   KON_1_2018        .
+    ##   KON_7_2018  0.14286
+    ##   KON_8_2018        .
+    ##   KON_9_2018  0.00549
+    ##   KON_10_2018 0.00752
+    ##   KON_12_2014       .
+    ##   KON_12_2018       .
+    ##   KON_7_2019  0.07143
+    ##   KON_8_2019  0.09524
+    ##   KON_9_2019  0.02381
+    ##   KON_10_2019       .
+    ##   KON_11_2013 0.02381
+    ##   KON_1_2015        .
+    ##   KON_11_2019 0.00794
+    ##   KON_3_2016  0.14286
+    ##   KON_1_2020        .
+    ##   KON_7_2020        .
+    ##   KON_8_2020        .
+    ##   KON_9_2020        .
+    ##   KON_10_2020       .
+    ##   KON_8_2016  0.07143
+    ##   KON_11_2020       .
+    ##   KON_12_2020       .
+    ##   KON_8_2021        .
+    ##   KON_10_2021 0.01786
+    ##   KON_11_2021       .
+    ##   KON_12_2021       .
+    ##   KON_9_2016  0.09524
+    ##   KON_10_2016 0.06522
+    ##   KON_12_2013 0.14286
+    ##   KON_2_2014  0.07143
+    ##   KON_9_2014  0.07143
+    ##   KON_11_2016 0.07143
+    ##   NEU_8_2013        .
+    ##   NEU_10_2014 0.02381
+    ##   NEU_11_2014       .
+    ##   NEU_10_2015       .
+    ##   NEU_8_2016  0.03571
+    ##   NEU_9_2016        .
+    ##   NEU_9_2013        .
+    ##   NEU_10_2016 0.01429
+    ##   NEU_10_2013 0.21429
+    ##   NEU_2_2017        .
+    ##   NEU_11_2013       .
+    ##   NEU_7_2020        .
+    ##   NEU_8_2020        .
+    ##   NEU_9_2020        .
+    ##   NEU_10_2021       .
+    ##   NEU_11_2021       .
+    ##   NEU_12_2013 0.07143
+    ##   RIE_3_2011        .
+    ##   RIE_8_2011        .
+    ##   RIE_10_2011       .
+    ##   RIE_11_2011       .
+    ##   RIE_12_2011       .
+    ##   RIE_2_2012        .
+    ##   RIE_3_2012        .
+    ##   RIE_10_2012       .
+    ##   RIE_11_2012       .
+    ##   RIE_12_2012       .
+    ##   RIE_1_2013        .
+    ##   RIE_2_2013        .
+    ##   RIE_3_2013        .
+    ##   RIE_10_2013       .
+    ##   RIE_11_2013       .
+    ##   RIE_12_2013 0.01786
+    ##   RIE_1_2014  0.02381
+    ##   RIE_4_2011        .
+    ##   RIE_2_2014        .
+    ##   RIE_9_2014        .
+    ##   RIE_10_2014       .
+    ##   RIE_11_2014       .
+    ##   RIE_12_2014       .
+    ##   RIE_1_2015  0.02381
+    ##   RIE_2_2015        .
+    ##   RIE_10_2015 0.14286
+    ##   RIE_12_2015       .
+    ##   RIE_6_2011        .
+    ##   RIE_7_2011  0.07143
+    ##   SCD_7_2012        .
+    ##   SCD_9_2012  0.01905
+    ##   SCD_10_2016 0.00223
+    ##   SCD_11_2016       .
+    ##   SCD_12_2016       .
+    ##   SCD_10_2017       .
+    ##   SCD_10_2012       .
+    ##   SCD_11_2012 0.01020
+    ##   SCD_12_2012       .
+    ##   SCD_8_2013  0.04762
+    ##   SCD_9_2013  0.03571
+    ##   SCD_10_2013 0.02381
+    ##   SCD_11_2013       .
+    ##   SCD_1_2014        .
+    ##   SCD_3_2014        .
+    ##   SCD_7_2014        .
+    ##   SCD_9_2014  0.01786
+    ##   SCD_11_2014 0.17857
+    ##   SCD_7_2015        .
+    ##   SCD_8_2015  0.07143
+    ##   SCD_9_2015  0.08333
+    ##   SCD_10_2015 0.14286
+    ##   SCD_11_2015       .
+    ##   SCD_2_2016  0.14286
+    ##   SCD_8_2016  0.07143
+    ##   SCD_9_2016        .
+    ##   SCG_3_2011        .
+    ##   SCG_2_2012        .
+    ##   SCG_3_2012  0.14286
+    ##   SCG_7_2011        .
+    ##   SCG_11_2011       .
+    ##   SCG_10_2012       .
+    ##   SCG_11_2012 0.09524
+    ##   SCG_1_2013  0.03571
+    ##   SCG_1_2014  0.10714
+    ##   SCG_6_2014        .
+    ##   SCG_11_2014 0.14286
+    ##   SCL_7_2012  0.04592
+    ##   SCL_9_2014  0.04762
+    ##   SCL_10_2014 0.07143
+    ##   SCL_6_2015  0.14286
+    ##   SCL_7_2015  0.05556
+    ##   SCL_9_2012  0.01429
+    ##   SCL_10_2012 0.01020
+    ##   SCL_8_2016  0.10952
+    ##   SCL_9_2016  0.08571
+    ##   SCL_10_2016 0.08525
+    ##   SCL_11_2012       .
+    ##   SCL_4_2012  0.02857
+    ##   SCL_11_2016 0.07143
+    ##   SCL_12_2016 0.07143
+    ##   SCL_2_2017  0.07143
+    ##   SCL_6_2017  0.09524
+    ##   SCL_12_2012       .
+    ##   SCL_7_2017  0.05714
+    ##   SCL_1_2013        .
+    ##   SCL_8_2017  0.07143
+    ##   SCL_7_2013  0.03571
+    ##   SCL_9_2017  0.02857
+    ##   SCL_10_2017 0.07143
+    ##   SCL_11_2017 0.07143
+    ##   SCL_12_2017 0.07143
+    ##   SCL_6_2018  0.07143
+    ##   SCL_7_2018  0.07143
+    ##   SCL_8_2018  0.09184
+    ##   SCL_8_2013  0.10714
+    ##   SCL_10_2013 0.07143
+    ##   SCL_1_2014  0.14286
+    ##   SCL_4_2014  0.06122
+    ##   SCL_6_2014  0.04286
+    ##   SCL_7_2014  0.04167
+    ##   SCL_8_2014  0.04286
+    ##   SCS_8_2013        .
+    ##   SCS_1_2014  0.14286
+    ##   SCS_5_2014        .
+    ##   SCS_7_2014        .
+    ##   SCS_8_2014        .
+    ##   SCS_9_2014        .
+    ##   SCS_11_2014       .
+    ##   SCS_12_2014 0.02381
+    ##   SCS_1_2016        .
+    ##   SCS_8_2016  0.01190
+    ##   SCS_9_2016        .
+    ##   SCS_10_2013 0.01786
+    ##   SCS_10_2016 0.01190
+    ##   SCS_9_2017  0.02381
+    ##   SCS_NA_2016       .
+    ##   SCS_11_2013       .
+    ##   TRO_3_2011        .
+    ##   TRO_11_2011       .
+    ##   TRO_12_2011       .
+    ##   TRO_1_2012        .
+    ##   TRO_2_2012        .
+    ##   TRO_3_2012        .
+    ##   TRO_11_2012       .
+    ##   TRO_12_2012       .
+    ##   TRO_1_2013  0.01786
+    ##   TRO_2_2013  0.10714
+    ##   TRO_3_2013        .
+    ##   TRO_4_2011  0.03571
+    ##   TRO_8_2011        .
+    ##   TRO_10_2011       .
+    ##   UEB_7_2012        .
+    ##   UEB_8_2015  0.06122
+    ##   UEB_9_2015  0.03297
+    ##   UEB_3_2013        .
+    ##   UEB_10_2015 0.07143
+    ##   UEB_10_2011       .
+    ##   UEB_4_2013        .
+    ##   UEB_5_2013        .
+    ##   UEB_10_2013       .
+    ##   UEB_8_2013        .
+    ##   UEB_9_2013        .
+    ##   UEB_7_2016  0.21429
+    ##   UEB_8_2016  0.21429
+    ##   UEB_9_2016  0.21429
+    ##   UEB_10_2016 0.21429
+    ##   UEB_11_2013 0.01190
+    ##   UEB_11_2016 0.21429
+    ##   UEB_12_2016 0.21429
+    ##   UEB_6_2017  0.21429
+    ##   UEB_8_2012  0.03571
+    ##   UEB_7_2017  0.21429
+    ##   UEB_1_2018  0.21429
+    ##   UEB_9_2019        .
+    ##   UEB_12_2013 0.03571
+    ##   UEB_1_2014        .
+    ##   UEB_2_2014        .
+    ##   UEB_3_2014        .
+    ##   UEB_5_2014  0.09524
+    ##   UEB_6_2014  0.03571
+    ##   UEB_9_2012        .
+    ##   UEB_7_2014  0.07792
+    ##   UEB_8_2014        .
+    ##   UEB_9_2014  0.01020
+    ##   UEB_10_2014 0.04762
+    ##   UEB_11_2014 0.02381
+    ##   UEB_12_2014       .
+    ##   UEB_1_2015  0.02857
+    ##   UEB_2_2013        .
+    ##   UEB_2_2015        .
+    ##   UEB_3_2015  0.03571
+    ##   UEB_5_2015        .
+    ##   UEB_6_2015  0.28571
+    ##   UEB_7_2015  0.07143
+    ##   UST_9_2013  0.00893
+    ##   UST_10_2013 0.01429
+    ##   UST_11_2013 0.02976
+    ##   UST_12_2013 0.03571
+    ##   UST_1_2014  0.07143
+    ##   UST_3_2014        .
+    ##   UST_8_2014        .
+    ##   UST_9_2014        .
+    ##   WSL_9_2012        .
+    ##   WSL_8_2016        .
+    ##   WSL_9_2016        .
+    ##   WSL_10_2016       .
+    ##   WSL_11_2016       .
+    ##   WSL_12_2016       .
+    ##   WSL_3_2017        .
+    ##   WSL_7_2017        .
+    ##   WSL_8_2017        .
+    ##   WSL_9_2017        .
+    ##   WSL_10_2017       .
+    ##   WSL_11_2017       .
+    ##   WSL_1_2018        .
+    ##   WSL_3_2018        .
+    ##   WSL_5_2018        .
+    ##   WSL_6_2018        .
+    ##   WSL_7_2018        .
+    ##   WSL_8_2018        .
+    ##   WSL_9_2018        .
+    ##   WSL_6_2019        .
+    ##   WSL_7_2019        .
+    ##   WSL_8_2019        .
+    ##   WSL_9_2019        .
+    ##   WSL_10_2019       .
+    ##   WSL_4_2020        .
+    ##   WSL_5_2020        .
+    ##   WSL_6_2020        .
+    ##   WSL_7_2020        .
+    ##   WSL_8_2020        .
+    ##   WSL_9_2020        .
+    ##   WSL_10_2020       .
+    ##   WSL_11_2020       .
+    ##   WSL_6_2021        .
+    ##   WSL_7_2021        .
+    ##   Total       0.02369
+
+``` r
+setPop(microsats_dates) <- ~Pop/Year
+popdata <- poppr(microsats_dates)
 #N = Number of individuals, MLG = Number of multilocus genotypes, eMLG = number of expected MLG at the smallest sample size >= 10 based on rarefaction
 #SE = Standard error based on eMLG, H = Shannon-Wiener Index of MLG diversity
 #G = Stoddart & Taylor's Index of MLG diversity
@@ -260,7 +1800,48 @@ popdata
 #Ia = Index of association, rbarD = stand. Index of association
 ```
 
-<div id="refs" class="references csl-bib-body hanging-indent">
+## Genotypic evenness
+
+Evenness is a measure of the distribution of genotype abundances,
+wherein a population with equally abundant genotypes yields a value
+equal to 1 and a population dominated by a single genotype is closer to
+zero.
+
+``` r
+M.tab <- mlg.table(microsats_dates)
+```
+
+![](Truffles-First-Steps_files/figure-gfm/genotypic%20evenness-1.png)<!-- -->
+
+## Visualize diversity
+
+``` r
+popdata_pop_year <- separate(popdata,Pop,c("Pop","Year"))
+```
+
+    ## Warning: Expected 2 pieces. Missing pieces filled with `NA` in 1 rows [114].
+
+``` r
+ggplot(popdata_pop_year,aes(Year,lambda)) +
+  geom_point() +
+  facet_wrap(vars(Pop)) +
+  theme_light() +
+  labs(y="Simpson's index", title ="Simpson's index over the years")
+```
+
+![](Truffles-First-Steps_files/figure-gfm/plot%20diversity-1.png)<!-- -->
+
+<div id="refs" class="references csl-bib-body hanging-indent"
+entry-spacing="0">
+
+<div id="ref-kamvarPopprPackageGenetic2014" class="csl-entry">
+
+Kamvar, Zhian N., Javier F. Tabima, and Niklaus J. Grünwald. 2014.
+“Poppr: an R package for genetic analysis of populations with clonal,
+partially clonal, and/or sexual reproduction.” *PeerJ* 2: e281.
+<https://doi.org/10.7717/peerj.281>.
+
+</div>
 
 <div id="ref-legendreComparisonMantelTest2010" class="csl-entry">
 

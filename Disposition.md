@@ -5,7 +5,8 @@ Lia Baumann
 
 ## Topic
 
-“Burgundy truffle monitoring”
+“Genetic structure and long-term genetic diversity assessment of
+Burgundy truffle populations in central Europe”
 
 ## Research question(s) and hypotheses
 
@@ -14,13 +15,25 @@ perennial? Differences between or within populations? Interactions… etc?
 
 ## Research aims
 
-To learn about the population structure and life cycle of truffles.
+The Burgundy truffle is an abundant ectomycorrhizal symbiont that occurs
+in a wide range of temperate climates. Despite its prized underground
+ascocarps, its complex lifecycle and possible response to anthropogenic
+climate change are largely known.We ran a citizen science monitoring of
+Burgundy truffle ascocarp production with a 3-week resolution in 23
+natural populations at the center of its European distribution over up
+to 11 years. More than 3000 truffles were genotyped using microsatellite
+markers to assess the genetic structure and diversity of these
+populations in space and time. The aims are to assess the population
+structure, compare intra- and inter populations and assess the gene flow
+and perenniality of individuals.
 
 ## A review of the current state of research
 
-- Truffles in general
-- T. aestivum specifically
-- results of WSL
+### Truffles in general
+
+### T. aestivum
+
+### Results from WSL
 
 ## Identification of gaps in the field of research, motivation for the research and justification of the added scientific value for the field of study
 
@@ -52,28 +65,8 @@ Virgine Molinier et al. (2016) Virginie Molinier et al. (2016) Staubli
 et al. (2022) Steidinger et al. (2022) Legendre and Fortin (2010)
 Kamvar, Tabima, and Grünwald (2014)
 
-``` r
-summary(cars)
-```
-
-    ##      speed           dist       
-    ##  Min.   : 4.0   Min.   :  2.00  
-    ##  1st Qu.:12.0   1st Qu.: 26.00  
-    ##  Median :15.0   Median : 36.00  
-    ##  Mean   :15.4   Mean   : 42.98  
-    ##  3rd Qu.:19.0   3rd Qu.: 56.00  
-    ##  Max.   :25.0   Max.   :120.00
-
-## Including Plots
-
-You can also embed plots, for example:
-
-![](Disposition_files/figure-gfm/pressure-1.png)<!-- -->
-
-Note that the `echo = FALSE` parameter was added to the code chunk to
-prevent printing of the R code that generated the plot.
-
-<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="refs" class="references csl-bib-body hanging-indent"
+entry-spacing="0">
 
 <div id="ref-kamvarPopprPackageGenetic2014" class="csl-entry">
 
