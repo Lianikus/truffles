@@ -1336,5 +1336,245 @@
 				]
 			]
 		}
+	},
+	{
+		"id": "pritchardDocumentationStructureSoftware",
+		"type": "article-journal",
+		"language": "en",
+		"source": "Zotero",
+		"title": "Documentation for structure software: Version 2.3",
+		"author": [
+			{
+				"family": "Pritchard",
+				"given": "Jonathan K"
+			},
+			{
+				"family": "Wen",
+				"given": "Xiaoquan"
+			},
+			{
+				"family": "Falush",
+				"given": "Daniel"
+			}
+		]
+	},
+	{
+		"id": "jombartIntroductionGeneticData",
+		"type": "article-journal",
+		"abstract": "This practical introduces basic multivariate analysis of genetic data using the adegenet and ade4 packages for the R software. We brieﬂy show how genetic marker data can be read into R and how they are stored in adegenet, and then introduce basic population genetics analysis and multivariate analyses. These topics are covered in further depth in the basics tutorial, which can be accessed from the adegenet website or by typing adegenetTutorial(\"basics\") in R.",
+		"language": "en",
+		"source": "Zotero",
+		"title": "Introduction to genetic data analysis using",
+		"author": [
+			{
+				"family": "Jombart",
+				"given": "Thibaut"
+			}
+		]
+	},
+	{
+		"id": "elhaikPrincipalComponentAnalyses2022",
+		"type": "article-journal",
+		"abstract": "Principal Component Analysis (PCA) is a multivariate analysis that reduces the complexity of datasets while preserving data covariance. The outcome can be visualized on colorful scatterplots, ideally with only a minimal loss of information. PCA applications, implemented in well-cited packages like EIGENSOFT and PLINK, are extensively used as the foremost analyses in population genetics and related fields (e.g., animal and plant or medical genetics). PCA outcomes are used to shape study design, identify, and characterize individuals and populations, and draw historical and ethnobiological conclusions on origins, evolution, dispersion, and relatedness. The replicability crisis in science has prompted us to evaluate whether PCA results are reliable, robust, and replicable. We analyzed twelve common test cases using an intuitive color-based model alongside human population data. We demonstrate that PCA results can be artifacts of the data and can be easily manipulated to generate desired outcomes. PCA adjustment also yielded unfavorable outcomes in association studies. PCA results may not be reliable, robust, or replicable as the field assumes. Our findings raise concerns about the validity of results reported in the population genetics literature and related fields that place a disproportionate reliance upon PCA outcomes and the insights derived from them. We conclude that PCA may have a biasing role in genetic investigations and that 32,000-216,000 genetic studies should be reevaluated. An alternative mixed-admixture population genetic model is discussed.",
+		"container-title": "Scientific Reports",
+		"DOI": "10.1038/s41598-022-14395-4",
+		"ISSN": "2045-2322",
+		"issue": "1",
+		"journalAbbreviation": "Sci Rep",
+		"language": "en",
+		"license": "2022 The Author(s)",
+		"note": "publisher: Nature Publishing Group",
+		"page": "14683",
+		"source": "www.nature.com",
+		"title": "Principal Component Analyses (PCA)-based findings in population genetic studies are highly biased and must be reevaluated",
+		"URL": "https://www.nature.com/articles/s41598-022-14395-4",
+		"volume": "12",
+		"author": [
+			{
+				"family": "Elhaik",
+				"given": "Eran"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2024",
+					4,
+					17
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2022",
+					8,
+					29
+				]
+			]
+		}
+	},
+	{
+		"id": "putmanChallengesAnalysisInterpretation2014",
+		"type": "article-journal",
+		"abstract": "Advancing technologies have facilitated the ever-widening application of genetic markers such as microsatellites into new systems and research questions in biology. In light of the data and experience accumulated from several years of using microsatellites, we present here a literature review that synthesizes the limitations of microsatellites in population genetic studies. With a focus on population structure, we review the widely used fixation (FST) statistics and Bayesian clustering algorithms and find that the former can be confusing and problematic for microsatellites and that the latter may be confounded by complex population models and lack power in certain cases. Clustering, multivariate analyses, and diversity-based statistics are increasingly being applied to infer population structure, but in some instances these methods lack formalization with microsatellites. Migration-specific methods perform well only under narrow constraints. We also examine the use of microsatellites for inferring effective population size, changes in population size, and deeper demographic history, and find that these methods are untested and/or highly context-dependent. Overall, each method possesses important weaknesses for use with microsatellites, and there are significant constraints on inferences commonly made using microsatellite markers in the areas of population structure, admixture, and effective population size. To ameliorate and better understand these constraints, researchers are encouraged to analyze simulated datasets both prior to and following data collection and analysis, the latter of which is formalized within the approximate Bayesian computation framework. We also examine trends in the literature and show that microsatellites continue to be widely used, especially in non-human subject areas. This review assists with study design and molecular marker selection, facilitates sound interpretation of microsatellite data while fostering respect for their practical limitations, and identifies lessons that could be applied toward emerging markers and high-throughput technologies in population genetics.",
+		"container-title": "Ecology and Evolution",
+		"DOI": "10.1002/ece3.1305",
+		"ISSN": "2045-7758",
+		"issue": "22",
+		"language": "en",
+		"note": "_eprint: https://onlinelibrary.wiley.com/doi/pdf/10.1002/ece3.1305",
+		"page": "4399-4428",
+		"source": "Wiley Online Library",
+		"title": "Challenges in analysis and interpretation of microsatellite data for population genetic studies",
+		"URL": "https://onlinelibrary.wiley.com/doi/abs/10.1002/ece3.1305",
+		"volume": "4",
+		"author": [
+			{
+				"family": "Putman",
+				"given": "Alexander I."
+			},
+			{
+				"family": "Carbone",
+				"given": "Ignazio"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2024",
+					4,
+					17
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2014"
+				]
+			]
+		}
+	},
+	{
+		"id": "roswellConceptualGuideMeasuring2021",
+		"type": "article-journal",
+		"abstract": "Three metrics of species diversity – species richness, the Shannon index and the Simpson index – are still widely used in ecology, despite decades of valid critiques leveled against them. Developing a robust diversity metric has been challenging because, unlike many variables ecologists measure, the diversity of a community often cannot be estimated in an unbiased way based on a random sample from that community. Over the past decade, ecologists have begun to incorporate two important tools for estimating diversity: coverage and Hill diversity. Coverage is a method for equalizing samples that is, on theoretical grounds, preferable to other commonly used methods such as equal-effort sampling, or rarefying datasets to equal sample size. Hill diversity comprises a spectrum of diversity metrics and is based on three key insights. First, species richness and variants of the Shannon and Simpson indices are all special cases of one general equation. Second, richness, Shannon and Simpson can be expressed on the same scale and in units of species. Third, there is no way to eliminate the effect of relative abundance from estimates of any of these diversity metrics, including species richness. Rather, a researcher must choose the relative sensitivity of the metric towards rare and common species, a concept which we describe as ‘leverage.' In this paper we explain coverage and Hill diversity, provide guidelines for how to use them together to measure species diversity, and demonstrate their use with examples from our own data. We show why researchers will obtain more robust results when they estimate the Hill diversity of equal-coverage samples, rather than using other methods such as equal-effort sampling or traditional sample rarefaction.",
+		"container-title": "Oikos",
+		"DOI": "10.1111/oik.07202",
+		"ISSN": "1600-0706",
+		"issue": "3",
+		"language": "en",
+		"note": "_eprint: https://onlinelibrary.wiley.com/doi/pdf/10.1111/oik.07202",
+		"page": "321-338",
+		"source": "Wiley Online Library",
+		"title": "A conceptual guide to measuring species diversity",
+		"URL": "https://onlinelibrary.wiley.com/doi/abs/10.1111/oik.07202",
+		"volume": "130",
+		"author": [
+			{
+				"family": "Roswell",
+				"given": "Michael"
+			},
+			{
+				"family": "Dushoff",
+				"given": "Jonathan"
+			},
+			{
+				"family": "Winfree",
+				"given": "Rachael"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2024",
+					5,
+					7
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2021"
+				]
+			]
+		}
+	},
+	{
+		"id": "buntgenEcoarchaeologicalExcavationTechniques2021",
+		"type": "article-journal",
+		"abstract": "Despite its status as a highly-prized and coveted fungi in gastronomy, many aspects of the subterranean life cycle of the Burgundy truffle (Tuber aestivum) are still unknown, because in situ observations of the formation and maturation of truffle fruitbodies remain difficult. Here, we adopted a suite of archaeological fine-scale excavating techniques to provide unique spatiotemporal snapshots of Burgundy truffle growth at three sites in southern Germany. We also recorded the relative position, fresh weight, maturity level and genotype composition of all excavated fruitbodies. Varying by a factor of thousand, the fresh weight of 73 truffle ranged from 0.1 to 103.2 g, with individual maturity levels likely representing different life cycle stages from completely unripe to fully ripe and even decaying. While only a slightly positive relationship between fruitbody weight and maturity level was found, our results suggest that genetically distinct specimens can exhibit different life cycle stages at the same period of time and under the same environmental conditions. We therefore argue that truffles are likely able to grow, mature and ripe simultaneously between early summer and late winter of the following year. Our case study should encourage further eco-archaeological truffle excavations under different biogeographic settings and at different seasons of the year to gain deeper insights into the fungi's subterranean ecology. The expected cross-disciplinary findings will help truffle hunters and farmers to improve their harvest practices and management strategies.",
+		"container-title": "Fungal Biology",
+		"DOI": "10.1016/j.funbio.2021.09.001",
+		"ISSN": "1878-6146",
+		"issue": "12",
+		"journalAbbreviation": "Fungal Biology",
+		"page": "951-961",
+		"source": "ScienceDirect",
+		"title": "Eco-archaeological excavation techniques reveal snapshots of subterranean truffle growth",
+		"URL": "https://www.sciencedirect.com/science/article/pii/S1878614621001148",
+		"volume": "125",
+		"author": [
+			{
+				"family": "Büntgen",
+				"given": "Ulf"
+			},
+			{
+				"family": "Peter",
+				"given": "Martina"
+			},
+			{
+				"family": "Tegel",
+				"given": "Willy"
+			},
+			{
+				"family": "Stobbe",
+				"given": "Ulrich"
+			},
+			{
+				"family": "Elburg",
+				"given": "Rengert"
+			},
+			{
+				"family": "Sproll",
+				"given": "Ludger"
+			},
+			{
+				"family": "Molinier",
+				"given": "Virginie"
+			},
+			{
+				"family": "Čejka",
+				"given": "Tomáš"
+			},
+			{
+				"family": "Isaac",
+				"given": "Elizabeth L."
+			},
+			{
+				"family": "Egli",
+				"given": "Simon"
+			}
+		],
+		"accessed": {
+			"date-parts": [
+				[
+					"2024",
+					5,
+					13
+				]
+			]
+		},
+		"issued": {
+			"date-parts": [
+				[
+					"2021",
+					12,
+					1
+				]
+			]
+		}
 	}
 ]

@@ -38,7 +38,6 @@ library(treemap)
 library(pegas)
 library(adegenet)
 library(devtools)
-install_github("jgx65/hierfstat")
 library(hierfstat)
 T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_2024.xlsx")
 coord <- read_excel("Koordinaten_2024.xlsx")
@@ -118,15 +117,6 @@ When dealing with clonal populations, analyses are typically conducted with and 
 Question: Will allelic diversity increase or decrease with clone-censored data?
 
 ```{r load genalex data and first examinations, echo=FALSE}
-myData <- read.genalex("Daten_Genalex.csv",ploidy=1,sep=";")
-myData #stratum "Pop" is already defined.
-#If I need to include the stratum "Year", I can use the following, would need to include it in the excel file though. Also the treemap will be more interesting once we have more strata.
-#splitStrata(myData) <- ~Pop/Year
-#monstrata <- strata(myData) %>%
-#  group_by(Pop) %>%
-#  summarize(count=n())
-#monstrata #entspricht aktuell noch der gleichen Tabelle wie "number_obs_all"
-#treemap(monstrata, index=nameStrata(myData),vSize="count", type="categorical")
 myData_genind <- read.genalex("Daten_Genalex.csv",genclone=FALSE, ploidy=1, sep=";")
 myData_genind
 
@@ -138,19 +128,19 @@ temp <- summary(myData_genind)
 temp
 barplot(myData_genind$loc.n.all,table(locNames(myData_genind)),col=funky(17),las=3,xlab="locNames",ylab="Number of alleles")
 temp$Hexp
-plot(temp$Hexp, temp$Hobs, pch=20, cex=3, xlim=c(.4,1), ylim=c(.4,1))
+#plot(temp$Hexp, temp$Hobs, pch=20, cex=3, xlim=c(.4,1), ylim=c(.4,1))
 abline(0,1,lty=2)
 ```
 
 
-```{r first pca}
+```{r first pca, eval=FALSE, include=FALSE}
 x.pops <- tab(myData_genind, freq=TRUE, NA.method="mean")
 pca.pops <- dudi.pca(x.pops,center=TRUE, scale=FALSE)
 
 s.class(pca.pops$li, fac=pop(myData_genind), col=funky(15))
 ```
 
-```{r Fstat}
+```{r Fstat, eval=FALSE, include=FALSE}
 library("hierfstat")
 library(adegenet)
 fstat(myData_genind)
@@ -159,19 +149,19 @@ gstat.randtest(myData_genind)
 
 Show missing data
 
-```{r missing data, echo=FALSE}
+```{r missing data, eval=FALSE, include=FALSE}
 info_table(myData,plot=TRUE)
 #for more stuff (removal of individuals or loci etc.): grunwaldlab.github.io/population_genetics_in_r/locus_stats.html
 ```
 
 Clone correction
 
-```{r clone correction, echo=FALSE}
+```{r clone correction, eval=FALSE, include=FALSE}
 clonecorrect_data <- clonecorrect(myData, strata=~Pop)
 clonecorrect_data
 ```
 
-```{r compare diversity between corrected and uncorrected, echo=FALSE}
+```{r compare diversity between corrected and uncorrected, eval=FALSE, include=FALSE}
 #see grunwaldlab.github.io/population_genetics_in_R/Population_Strata_html
 cc <- locus_table(clonecorrect_data, info=FALSE)
 mp <- locus_table(myData, info = FALSE)
@@ -183,9 +173,69 @@ barplot(locus_diff[,"1-D"], ylab="Change in Simpson's Index",xlab="Locus", main 
 
 The graph shows a decrease of diversity for most markers when clone-correcting the data (increase of Simpson index means a decrease of genotypic diversity).
 
-```{r poppr stuff}
-popdata <- poppr(myData)
-popdata
+
+
+Next step:
+I want to compare genetic diversity across years and show it for populations. So I need to combine the sample and assign the sampling date.
+I have several ideas how to do it.
+1.
+--> Join Genalex file with monitoring file on the sampling column.
+--> then read it in as a genclone and genind file again.
+2.
+--> Filter monitoring file with genalex file to exclude the rows not matching
+--> choose columns that I want to process as a new file and read in as genclone and genind file again.
+
+```{r add dates into microsat file}
+genalex_dates <- read.csv("Daten_Genalex.csv",sep=";", header=FALSE)
+T_all_dates <- T_all %>%
+  mutate(Sampling_month = month(Sampling_date)) %>%
+  select(Code_Analyses_2024,Sampling_month, Sampling_year)
+genalex_dates <- left_join(genalex_dates,T_all_dates,by=c("V1"="Code_Analyses_2024"))
+
+genalex_dates <- genalex_dates %>%
+  unite(col="pop_date",c("V1","Sampling_month","Sampling_year"),sep="_")
+#correct column names
+genalex_dates$pop_date[genalex_dates$pop_date =="2708_NA_NA"] <- "2708"
+genalex_dates$pop_date[genalex_dates$pop_date =="_NA_NA"] <- ""
+genalex_dates$pop_date[genalex_dates$pop_date =="pop_NA_NA"] <- "pop"
+
+#jetzt als csv Datei neu reinladen
+#write.table(genalex_dates, col.names=FALSE, sep=",", "C:/Users/liaba/OneDrive - Eidg. Forschungsanstalt WSL/R/truffles/genalex_dates.csv")
+
+microsats_dates <- read.genalex("genalex_dates.csv",ploidy=1)
+splitStrata(microsats_dates) <- ~Pop/Month/Year
+microsats_dates
+
+#treemap:
+monstrata <- strata(microsats_dates) %>%     
+  group_by(Pop,Month,Year) %>%
+  summarize(Count = n())
+monstrata
+library(treemap)
+treemap(dtf = monstrata, index = nameStrata(microsats_dates), vSize = "Count",
+        type = "categorical", vColor = "Pop", title = "Truffles")
+```
+
+
+
+## Genotype accumulation curve
+A genotype accumulation curve is a tool that allows you to assess how much power you have to discriminate between unique individuals given a random sample of n loci. This analysis is particularly important for clonal organisms to confirm that a plateau has been reached in the number of loci necessary to discriminate individuals.
+We specified sample = 1000 in our function call. This means that for each boxplot, n loci were randomly sampled 1000 times in order to create the distribution. Since this data has been curated, we can see that we have reached the plateau with 13 loci.
+ 
+```{r genotype accumulation curve}
+gac <- genotype_curve(microsats_dates, sample = 1000, quiet = TRUE)
+```
+
+We have anything between 5 and 24 alleles per locus. aest28_01 has the highest Simpson diversity (0.80) and aest10_1 as well as aest36_1 have the most evenly distributed alleles (0.88).
+```{r allele frequencies, missing data, ploidy}
+(microsats_lt <- locus_table(microsats_dates))
+info_table(microsats_dates, type = "missing", plot = TRUE)
+```
+
+
+```{r set strata to Pop}
+setPop(microsats_dates) <- ~Pop/Year
+popdata <- poppr(microsats_dates)
 #N = Number of individuals, MLG = Number of multilocus genotypes, eMLG = number of expected MLG at the smallest sample size >= 10 based on rarefaction
 #SE = Standard error based on eMLG, H = Shannon-Wiener Index of MLG diversity
 #G = Stoddart & Taylor's Index of MLG diversity
@@ -193,6 +243,21 @@ popdata
 #Ia = Index of association, rbarD = stand. Index of association
 ```
 
-```{r pca}
-aboot(myData)
+## Genotypic evenness
+
+Evenness is a measure of the distribution of genotype abundances, wherein a population with equally abundant genotypes yields a value equal to 1 and a population dominated by a single genotype is closer to zero.
+
+```{r genotypic evenness}
+M.tab <- mlg.table(microsats_dates)
+```
+
+## Visualize diversity
+
+```{r plot diversity}
+popdata_pop_year <- separate(popdata,Pop,c("Pop","Year"))
+ggplot(popdata_pop_year,aes(Year,lambda)) +
+  geom_point() +
+  facet_wrap(vars(Pop)) +
+  theme_light() +
+  labs(y="Simpson's index", title ="Simpson's index over the years")
 ```
