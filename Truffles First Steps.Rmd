@@ -39,9 +39,49 @@ library(pegas)
 library(adegenet)
 library(devtools)
 library(hierfstat)
+library(mmod)
 T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_2024.xlsx")
 coord <- read_excel("Koordinaten_2024.xlsx")
+myData <- read.genalex("Daten_Genalex.csv",genclone=TRUE, ploidy=1, sep=";")
+myData_genind <- read.genalex("Daten_Genalex.csv",genclone=FALSE, ploidy=1, sep=";")
+microsats_dates <- read.genalex("genalex_dates.csv",ploidy=1)
+splitStrata(microsats_dates) <- ~Pop/Month/Year
+clonecorrect_microsats_dates <- clonecorrect(microsats_dates, strata = NA)
+clonecorrect_data_genind <- clonecorrect(myData_genind)
+#genind2genalex(clonecorrect_microsats_dates, filename="C:/Users/liaba/OneDrive - Eidg. Forschungsanstalt WSL/R/truffles/clonecorrected_data.csv", overwrite=TRUE)
 ```
+
+#Create genalex file with dates of sampling:
+I want to compare genetic diversity across years and show it for populations. So I need to combine the sample and assign the sampling date.
+I have several ideas how to do it.
+1.
+--> Join Genalex file with monitoring file on the sampling column.
+--> then read it in as a genclone and genind file again.
+2.
+--> Filter monitoring file with genalex file to exclude the rows not matching
+--> choose columns that I want to process as a new file and read in as genclone and genind file again.
+
+```{r add dates into microsat file, eval=FALSE, include=FALSE}
+
+##Achtung hier wird eine Tabelle generiert, nur bei Datenänderungen laufen lassen!!
+
+genalex_dates <- read.csv("Daten_Genalex.csv",sep=";", header=FALSE)
+T_all_dates <- T_all %>%
+  mutate(Sampling_month = month(Sampling_date)) %>%
+  select(Code_Analyses_2024,Sampling_month, Sampling_year)
+genalex_dates <- left_join(genalex_dates,T_all_dates,by=c("V1"="Code_Analyses_2024"))
+
+genalex_dates <- genalex_dates %>%
+  unite(col="pop_date",c("V2","Sampling_month","Sampling_year"),sep="_")
+#correct column names
+genalex_dates$pop_date[genalex_dates$pop_date =="2708_NA_NA"] <- "2708"
+genalex_dates$pop_date[genalex_dates$pop_date =="_NA_NA"] <- ""
+genalex_dates$pop_date[genalex_dates$pop_date =="pop_NA_NA"] <- "pop"
+
+#jetzt als csv Datei neu reinladen
+#write.table(genalex_dates, col.names=FALSE, sep=",", "C:/Users/liaba/OneDrive - Eidg. Forschungsanstalt WSL/R/truffles/genalex_dates.csv")
+```
+
 
 ## Monitoring Sites
 
@@ -100,7 +140,6 @@ T_all_corr2 <- subset(T_all_corr1, Site_1_abrev != "GEN")
 #Idee: alle Observationen auf einer Zeitachse und nach Standort unterteilt anzeigen
 
 ```{r all observations, echo=FALSE, message=FALSE, warning=FALSE}
-
 ggplot(T_all) +
   geom_point(aes(x=Sampling_date, y= fct_rev(Site_1_abrev), color = factor(Nb_markers))) +
   scale_colour_brewer(palette= "Greens") +
@@ -110,21 +149,26 @@ ggplot(T_all) +
        colour = "Nb_markers")
 ```
 
-##Clone correction
-from https://grunwaldlab.github.io/Population_Genetics_in_R/Population_Strata.html
-When dealing with clonal populations, analyses are typically conducted with and without clone correction. Clone correction is a method of censoring a data set such that only one individual per MLG is represented per population (Milgroom, 1996; Grünwald et al., 2003; Grünwald & Hoheisel, 2006). This technique is commonly used with the index of association and genotypic diversity measures since clone corrected populations approximate behavior of sexual populations. Since we want to only observe unique genotypes per population, clone correction requires specification of the stratifications at which clones should be censored. This section will show how to clone correct at a specific stratification and also compare the results with uncorrected data.
+Show missing data
 
-Question: Will allelic diversity increase or decrease with clone-censored data?
+```{r missing data, eval=FALSE, include=FALSE}
+info_table(myData,plot=TRUE)
+#for more stuff (removal of individuals or loci etc.): grunwaldlab.github.io/population_genetics_in_r/locus_stats.html
+```
 
-```{r load genalex data and first examinations, echo=FALSE}
-myData_genind <- read.genalex("Daten_Genalex.csv",genclone=FALSE, ploidy=1, sep=";")
-myData_genind
-clonecorrect_data_genind <- clonecorrect(myData_genind)
+```{r treemap, echo=FALSE}
+#treemap:
+monstrata <- strata(microsats_dates) %>%     
+  group_by(Pop,Month,Year) %>%
+  summarize(Count = n())
+treemap(dtf = monstrata, index = nameStrata(microsats_dates), vSize = "Count",
+        type = "categorical", vColor = "Pop", title = "Truffles")
+```
 
+```{r examine genetic data as genind, echo=FALSE}
 barplot(table(pop(myData_genind)), col=funky(17), las=3,
 xlab="Population", ylab="Sample size")
 
-summary(myData_genind)
 temp <- summary(myData_genind)
 temp
 barplot(myData_genind$loc.n.all,table(locNames(myData_genind)),col=funky(17),las=3,xlab="locNames",ylab="Number of alleles")
@@ -133,6 +177,30 @@ temp$Hexp
 abline(0,1,lty=2)
 ```
 
+##Clone correction
+from https://grunwaldlab.github.io/Population_Genetics_in_R/Population_Strata.html
+When dealing with clonal populations, analyses are typically conducted with and without clone correction. Clone correction is a method of censoring a data set such that only one individual per MLG is represented per population (Milgroom, 1996; Grünwald et al., 2003; Grünwald & Hoheisel, 2006). This technique is commonly used with the index of association and genotypic diversity measures since clone corrected populations approximate behavior of sexual populations. Since we want to only observe unique genotypes per population, clone correction requires specification of the stratifications at which clones should be censored. This section will show how to clone correct at a specific stratification and also compare the results with uncorrected data.
+
+Question: Will allelic diversity increase or decrease with clone-censored data?
+
+```{r compare diversity between corrected and uncorrected, eval=FALSE, include=FALSE}
+#see grunwaldlab.github.io/population_genetics_in_R/Population_Strata_html
+cc <- locus_table(clonecorrect_data, info=FALSE)
+mp <- locus_table(myData, info = FALSE)
+mp-cc
+locus_diff <- mp-cc
+barplot(locus_diff[,"1-D"], ylab="Change in Simpson's Index",xlab="Locus", main = "Comparison of clone-corrected vs. uncorrected data")
+```
+
+The graph shows a decrease of diversity for most markers when clone-correcting the data (increase of Simpson index means a decrease of genotypic diversity).
+
+#Allele frequencies, missing data
+```{r allele frequencies, missing data, ploidy}
+(microsats_lt <- locus_table(microsats_dates))
+info_table(microsats_dates, type = "missing", plot = TRUE)
+```
+
+#PCA
 
 ```{r first pca, echo=TRUE}
 x.pops <- tab(myData_genind, freq=TRUE, NA.method="mean")
@@ -146,91 +214,6 @@ pca.pops_cc <- dudi.pca(df = x.pops_cc, center = TRUE, scale = FALSE, scannf = F
 s.class(pca.pops_cc$li, fac=pop(clonecorrect_data_genind), col=funky(15))
 ```
 
-```{r Fstat, eval=FALSE, include=FALSE}
-library("hierfstat")
-library(adegenet)
-fstat(myData_genind)
-gstat.randtest(myData_genind)
-```
-
-Show missing data
-
-```{r missing data, eval=FALSE, include=FALSE}
-info_table(myData,plot=TRUE)
-#for more stuff (removal of individuals or loci etc.): grunwaldlab.github.io/population_genetics_in_r/locus_stats.html
-```
-
-Clone correction
-
-```{r clone correction, eval=FALSE, include=FALSE}
-clonecorrect_data <- clonecorrect(myData, strata=~Pop)
-clonecorrect_data
-genind2genalex(clonecorrect_data, filename="C:/Users/liaba/OneDrive - Eidg. Forschungsanstalt WSL/R/truffles/clonecorrected_data.csv")
-```
-
-```{r compare diversity between corrected and uncorrected, eval=FALSE, include=FALSE}
-#see grunwaldlab.github.io/population_genetics_in_R/Population_Strata_html
-cc <- locus_table(clonecorrect_data, info=FALSE)
-mp <- locus_table(myData, info = FALSE)
-mp-cc
-locus_diff <- mp-cc
-barplot(locus_diff[,"1-D"], ylab="Change in Simpson's Index",xlab="Locus", main = "Comparison of clone-corrected vs. uncorrected data")
-```
-
-
-The graph shows a decrease of diversity for most markers when clone-correcting the data (increase of Simpson index means a decrease of genotypic diversity).
-
-
-
-Next step:
-I want to compare genetic diversity across years and show it for populations. So I need to combine the sample and assign the sampling date.
-I have several ideas how to do it.
-1.
---> Join Genalex file with monitoring file on the sampling column.
---> then read it in as a genclone and genind file again.
-2.
---> Filter monitoring file with genalex file to exclude the rows not matching
---> choose columns that I want to process as a new file and read in as genclone and genind file again.
-
-```{r add dates into microsat file, eval=FALSE, include=FALSE}
-
-##Achtung hier wird eine Tabelle generiert, nur bei Datenänderungen laufen lassen!!
-
-genalex_dates <- read.csv("Daten_Genalex.csv",sep=";", header=FALSE)
-T_all_dates <- T_all %>%
-  mutate(Sampling_month = month(Sampling_date)) %>%
-  select(Code_Analyses_2024,Sampling_month, Sampling_year)
-genalex_dates <- left_join(genalex_dates,T_all_dates,by=c("V1"="Code_Analyses_2024"))
-
-genalex_dates <- genalex_dates %>%
-  unite(col="pop_date",c("V2","Sampling_month","Sampling_year"),sep="_")
-#correct column names
-genalex_dates$pop_date[genalex_dates$pop_date =="2708_NA_NA"] <- "2708"
-genalex_dates$pop_date[genalex_dates$pop_date =="_NA_NA"] <- ""
-genalex_dates$pop_date[genalex_dates$pop_date =="pop_NA_NA"] <- "pop"
-
-#jetzt als csv Datei neu reinladen
-#write.table(genalex_dates, col.names=FALSE, sep=",", "C:/Users/liaba/OneDrive - Eidg. Forschungsanstalt WSL/R/truffles/genalex_dates.csv")
-```
-
-```{r read in microsats_dates}
-microsats_dates <- read.genalex("genalex_dates.csv",ploidy=1)
-splitStrata(microsats_dates) <- ~Pop/Month/Year
-microsats_dates
-```
-
-```{r treemap, echo=FALSE}
-#treemap:
-monstrata <- strata(microsats_dates) %>%     
-  group_by(Pop,Month,Year) %>%
-  summarize(Count = n())
-monstrata
-treemap(dtf = monstrata, index = nameStrata(microsats_dates), vSize = "Count",
-        type = "categorical", vColor = "Pop", title = "Truffles")
-```
-
-
-
 ## Genotype accumulation curve
 A genotype accumulation curve is a tool that allows you to assess how much power you have to discriminate between unique individuals given a random sample of n loci. This analysis is particularly important for clonal organisms to confirm that a plateau has been reached in the number of loci necessary to discriminate individuals.
 We specified sample = 1000 in our function call. This means that for each boxplot, n loci were randomly sampled 1000 times in order to create the distribution. Since this data has been curated, we can see that we have reached the plateau with 13 loci.
@@ -240,13 +223,23 @@ gac <- genotype_curve(microsats_dates, sample = 1000, quiet = TRUE)
 ```
 
 We have anything between 5 and 24 alleles per locus. aest28_01 has the highest Simpson diversity (0.80) and aest10_1 as well as aest36_1 have the most evenly distributed alleles (0.88).
-```{r allele frequencies, missing data, ploidy}
-(microsats_lt <- locus_table(microsats_dates))
-info_table(microsats_dates, type = "missing", plot = TRUE)
+
+
+##The index of association
+The index of association (IA) was originally proposed by Brown et al. (Brown, Feldman & Nevo, 1980) and implemented in the poppr R package (Kamvar, Tabima & Grünwald, 2014) using a permutation approach to assess if loci are linked as described previously by Agapow and Burt [@]. Agapow and Burt also described the index r¯d
+ that accounts for the number of loci sampled that is less biased and will be used here. The data we will use in this chapter are populations of Phytophthora infestans from North and South America (Goss et al., 2014). We will use the index of association to test the hypothesis that Mexico is the putative origin of P. infestans where populations are expected to be sexual while populations in South America are expected to be clonal.
+ Next, we will analyze the North American population with the index of association and use 999 permutations of the data in order to give us a p-value. Note that the p-value is calculated with the original observation included.
+ 
+```{r index of association and LD}
+LD_BUR <- popsub(myData, "BUR")
+ia(LD_BUR, sample = 999)
+
+setPop(clonecorrect_microsats_dates) <- ~Pop
+LD_BUR_cc <- popsub(clonecorrect_microsats_dates,"BUR")
+ia(LD_BUR_cc,sample=999)
 ```
 
-
-```{r set strata to Pop}
+```{r set strata to Pop_Year}
 setPop(microsats_dates) <- ~Pop/Year
 popdata <- poppr(microsats_dates)
 popdata
@@ -256,12 +249,26 @@ popdata
 # lambda = Simpsons index, E.5 = Evenness, Hexp = Neis Expected Heterozygosity
 #Ia = Index of association, rbarD = stand. Index of association
 ```
-
 ## Genotypic evenness
 
 Evenness is a measure of the distribution of genotype abundances, wherein a population with equally abundant genotypes yields a value equal to 1 and a population dominated by a single genotype is closer to zero.
 
 ```{r genotypic evenness}
+M.tab <- mlg.table(microsats_dates)
+```
+
+```{r set strata to Pop}
+setPop(microsats_dates) <- ~Pop
+popdata_pop <- poppr(microsats_dates)
+popdata_pop
+#N = Number of individuals, MLG = Number of multilocus genotypes, eMLG = number of expected MLG at the smallest sample size >= 10 based on rarefaction
+#SE = Standard error based on eMLG, H = Shannon-Wiener Index of MLG diversity
+#G = Stoddart & Taylor's Index of MLG diversity
+# lambda = Simpsons index, E.5 = Evenness, Hexp = Neis Expected Heterozygosity
+#Ia = Index of association, rbarD = stand. Index of association
+```
+
+```{r genotypic evenness 2}
 M.tab <- mlg.table(microsats_dates)
 ```
 
@@ -289,4 +296,39 @@ ggplot(popdata_pop_year,aes(Year,Simpson_rarefied)) +
   facet_wrap(vars(Pop)) +
   theme_light() +
   labs(y="Rarefied Simpson's index", title ="Rarefied Simpson's index over the years")
+```
+
+Assess GST
+
+Assessing genetic diversity almost always starts with an analysis of a parameter such as GST
+. There are lengthy debates as to what measure of differentiation is better (Meirmans & Hedrick, 2011). Instead of going into that lengthy debate, it would be more worthwhile to point you into the direction of a package dedicated to Modern Methods of Differentiation called mmod. We will use the data set nancycats containing 17 colonies of cats collected from Nancy, France. As cats tend to stay within small groups, we expect to see some population differentiation. In terms of these diversity measures, an index of GST=0
+ indicates no differentiation, whereas GST=1
+ indicates that populations are segregating for differing alleles.
+ Now we will use Hendrick’s standardized GST
+ to assess population structure among these populations (Hedrick, 2005).
+
+```{r hedrick Gst}
+GST <- Gst_Hedrick(myData_genind)
+barplot(GST$per.locus)
+```
+Very high differentiation!
+
+
+```{r plot persistence, message=TRUE, warning=TRUE}
+
+mlg.crosspop <- mlg.crosspop(microsats_dates,df=T)
+
+crosspop <- mlg.crosspop %>%
+  separate_wider_delim(Population,delim="_",names=c("Pop","Year"), too_few="align_end")
+
+ggplot(subset(crosspop, Pop %in% "BOB"),aes(Year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in BOB (Bohlingen Buche) over the years")
+ggplot(subset(crosspop, Pop %in% "SCL"),aes(Year,MLG)) + geom_point()  + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in SCL (Schlieren Grillplatz) over the years")
+ggplot(subset(crosspop, Pop %in% "ALD"),aes(Year,MLG)) + geom_point()  + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in ALD (Aldingen) over the years")
+ggplot(subset(crosspop, Pop %in% "BOH"),aes(Year,MLG)) + geom_point()  + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in BOH (Bohlingen Hasel) over the years")
+ggplot(subset(crosspop, Pop %in% "WSL"),aes(Year,MLG)) + geom_point()  + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in WSL over the years")
 ```

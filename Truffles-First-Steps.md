@@ -11,6 +11,15 @@ Molinier et al. (2016) Virginie Molinier et al. (2016) Staubli et al.
 (2022) Steidinger et al. (2022) Legendre and Fortin (2010) Kamvar,
 Tabima, and Grünwald (2014)
 
+\#Create genalex file with dates of sampling: I want to compare genetic
+diversity across years and show it for populations. So I need to combine
+the sample and assign the sampling date. I have several ideas how to do
+it. 1. –\> Join Genalex file with monitoring file on the sampling
+column. –\> then read it in as a genclone and genind file again. 2. –\>
+Filter monitoring file with genalex file to exclude the rows not
+matching –\> choose columns that I want to process as a new file and
+read in as genclone and genind file again.
+
 ## Monitoring Sites
 
 ![](Truffles-First-Steps_files/figure-gfm/Maps%20laden-1.png)<!-- -->
@@ -56,6 +65,27 @@ unterteilt anzeigen
 
 ![](Truffles-First-Steps_files/figure-gfm/all%20observations-1.png)<!-- -->
 
+Show missing data
+
+    ## `summarise()` has grouped output by 'Pop', 'Month'. You can override using the
+    ## `.groups` argument.
+
+![](Truffles-First-Steps_files/figure-gfm/treemap-1.png)<!-- -->
+
+![](Truffles-First-Steps_files/figure-gfm/examine%20genetic%20data%20as%20genind-1.png)<!-- -->
+
+    ## 
+    ## // Number of individuals: 2708
+    ## // Group sizes: 71 2 477 54 284 20 268 125 5 234 38 67 123 24 299 50 37 204 43 283
+    ## // Number of alleles per locus: 9 7 6 9 6 5 10 5 12 24 9 10 7 8
+    ## // Number of alleles per group: 35 19 68 38 51 39 42 43 20 40 28 44 37 31 54 34 23 43 38 26
+    ## // Percentage of missing data: 2.37 %
+    ## // Observed heterozygosity: 0
+
+    ## NULL
+
+![](Truffles-First-Steps_files/figure-gfm/examine%20genetic%20data%20as%20genind-2.png)<!-- -->
+
 \##Clone correction from
 <https://grunwaldlab.github.io/Population_Genetics_in_R/Population_Strata.html>
 When dealing with clonal populations, analyses are typically conducted
@@ -74,144 +104,11 @@ data.
 Question: Will allelic diversity increase or decrease with
 clone-censored data?
 
-    ## /// GENIND OBJECT /////////
-    ## 
-    ##  // 2,708 individuals; 14 loci; 127 alleles; size: 1.5 Mb
-    ## 
-    ##  // Basic content
-    ##    @tab:  2708 x 127 matrix of allele counts
-    ##    @loc.n.all: number of alleles per locus (range: 5-24)
-    ##    @loc.fac: locus factor for the 127 columns of @tab
-    ##    @all.names: list of allele names for each locus
-    ##    @ploidy: ploidy of each individual  (range: 1-1)
-    ##    @type:  codom
-    ##    @call: read.genalex(genalex = "Daten_Genalex.csv", ploidy = 1, genclone = FALSE, 
-    ##     sep = ";")
-    ## 
-    ##  // Optional content
-    ##    @pop: population of each individual (group size range: 2-477)
-    ##    @strata: a data frame with 1 columns ( Pop )
-
-![](Truffles-First-Steps_files/figure-gfm/load%20genalex%20data%20and%20first%20examinations-1.png)<!-- -->
-
-    ## 
-    ## // Number of individuals: 2708
-    ## // Group sizes: 71 2 477 54 284 20 268 125 5 234 38 67 123 24 299 50 37 204 43 283
-    ## // Number of alleles per locus: 9 7 6 9 6 5 10 5 12 24 9 10 7 8
-    ## // Number of alleles per group: 35 19 68 38 51 39 42 43 20 40 28 44 37 31 54 34 23 43 38 26
-    ## // Percentage of missing data: 2.37 %
-    ## // Observed heterozygosity: 0
-
-    ## 
-    ## // Number of individuals: 2708
-    ## // Group sizes: 71 2 477 54 284 20 268 125 5 234 38 67 123 24 299 50 37 204 43 283
-    ## // Number of alleles per locus: 9 7 6 9 6 5 10 5 12 24 9 10 7 8
-    ## // Number of alleles per group: 35 19 68 38 51 39 42 43 20 40 28 44 37 31 54 34 23 43 38 26
-    ## // Percentage of missing data: 2.37 %
-    ## // Observed heterozygosity: 0
-
-    ## NULL
-
-![](Truffles-First-Steps_files/figure-gfm/load%20genalex%20data%20and%20first%20examinations-2.png)<!-- -->
-
-``` r
-x.pops <- tab(myData_genind, freq=TRUE, NA.method="mean")
-pca.pops <- dudi.pca(df = x.pops, center = TRUE, scale = FALSE, scannf = FALSE, nf = 2)
-
-s.class(pca.pops$li, fac=pop(myData_genind), col=funky(15))
-```
-
-![](Truffles-First-Steps_files/figure-gfm/first%20pca-1.png)<!-- -->
-
-``` r
-#clonecorrected PCA
-x.pops_cc <- tab(clonecorrect_data_genind, freq=TRUE, NA.method="mean")
-pca.pops_cc <- dudi.pca(df = x.pops_cc, center = TRUE, scale = FALSE, scannf = FALSE, nf = 2)
-s.class(pca.pops_cc$li, fac=pop(clonecorrect_data_genind), col=funky(15))
-```
-
-![](Truffles-First-Steps_files/figure-gfm/first%20pca-2.png)<!-- -->
-
-Show missing data
-
-Clone correction
-
 The graph shows a decrease of diversity for most markers when
 clone-correcting the data (increase of Simpson index means a decrease of
 genotypic diversity).
 
-Next step: I want to compare genetic diversity across years and show it
-for populations. So I need to combine the sample and assign the sampling
-date. I have several ideas how to do it. 1. –\> Join Genalex file with
-monitoring file on the sampling column. –\> then read it in as a
-genclone and genind file again. 2. –\> Filter monitoring file with
-genalex file to exclude the rows not matching –\> choose columns that I
-want to process as a new file and read in as genclone and genind file
-again.
-
-``` r
-microsats_dates <- read.genalex("genalex_dates.csv",ploidy=1)
-splitStrata(microsats_dates) <- ~Pop/Month/Year
-microsats_dates
-```
-
-    ## 
-    ## This is a genclone object
-    ## -------------------------
-    ## Genotype information:
-    ## 
-    ##     676 original multilocus genotypes 
-    ##    2708 haploid individuals
-    ##      14 codominant loci
-    ## 
-    ## Population information:
-    ## 
-    ##       3 strata - Pop, Month, Year
-    ##     506 populations defined - 
-    ## ALD_3_2011, ALD_6_2011, ALD_7_2011, ..., WSL_11_2020, WSL_6_2021, WSL_7_2021
-
-    ## `summarise()` has grouped output by 'Pop', 'Month'. You can override using the
-    ## `.groups` argument.
-
-    ## # A tibble: 506 × 4
-    ## # Groups:   Pop, Month [173]
-    ##    Pop   Month Year  Count
-    ##    <fct> <fct> <fct> <int>
-    ##  1 ALD   3     2011      4
-    ##  2 ALD   3     2012      2
-    ##  3 ALD   3     2013      2
-    ##  4 ALD   6     2011      2
-    ##  5 ALD   7     2011      2
-    ##  6 ALD   7     2014      1
-    ##  7 ALD   8     2011      3
-    ##  8 ALD   8     2014      2
-    ##  9 ALD   10    2011      2
-    ## 10 ALD   10    2012      1
-    ## # ℹ 496 more rows
-
-![](Truffles-First-Steps_files/figure-gfm/treemap-1.png)<!-- -->
-
-## Genotype accumulation curve
-
-A genotype accumulation curve is a tool that allows you to assess how
-much power you have to discriminate between unique individuals given a
-random sample of n loci. This analysis is particularly important for
-clonal organisms to confirm that a plateau has been reached in the
-number of loci necessary to discriminate individuals. We specified
-sample = 1000 in our function call. This means that for each boxplot, n
-loci were randomly sampled 1000 times in order to create the
-distribution. Since this data has been curated, we can see that we have
-reached the plateau with 13 loci.
-
-``` r
-gac <- genotype_curve(microsats_dates, sample = 1000, quiet = TRUE)
-```
-
-![](Truffles-First-Steps_files/figure-gfm/genotype%20accumulation%20curve-1.png)<!-- -->
-
-We have anything between 5 and 24 alleles per locus. aest28_01 has the
-highest Simpson diversity (0.80) and aest10_1 as well as aest36_1 have
-the most evenly distributed alleles (0.88).
+\#Allele frequencies, missing data
 
 ``` r
 (microsats_lt <- locus_table(microsats_dates))
@@ -1775,6 +1672,85 @@ info_table(microsats_dates, type = "missing", plot = TRUE)
     ##   WSL_7_2021        .
     ##   Total       0.02369
 
+\#PCA
+
+``` r
+x.pops <- tab(myData_genind, freq=TRUE, NA.method="mean")
+pca.pops <- dudi.pca(df = x.pops, center = TRUE, scale = FALSE, scannf = FALSE, nf = 2)
+
+s.class(pca.pops$li, fac=pop(myData_genind), col=funky(15))
+```
+
+![](Truffles-First-Steps_files/figure-gfm/first%20pca-1.png)<!-- -->
+
+``` r
+#clonecorrected PCA
+x.pops_cc <- tab(clonecorrect_data_genind, freq=TRUE, NA.method="mean")
+pca.pops_cc <- dudi.pca(df = x.pops_cc, center = TRUE, scale = FALSE, scannf = FALSE, nf = 2)
+s.class(pca.pops_cc$li, fac=pop(clonecorrect_data_genind), col=funky(15))
+```
+
+![](Truffles-First-Steps_files/figure-gfm/first%20pca-2.png)<!-- -->
+
+## Genotype accumulation curve
+
+A genotype accumulation curve is a tool that allows you to assess how
+much power you have to discriminate between unique individuals given a
+random sample of n loci. This analysis is particularly important for
+clonal organisms to confirm that a plateau has been reached in the
+number of loci necessary to discriminate individuals. We specified
+sample = 1000 in our function call. This means that for each boxplot, n
+loci were randomly sampled 1000 times in order to create the
+distribution. Since this data has been curated, we can see that we have
+reached the plateau with 13 loci.
+
+``` r
+gac <- genotype_curve(microsats_dates, sample = 1000, quiet = TRUE)
+```
+
+![](Truffles-First-Steps_files/figure-gfm/genotype%20accumulation%20curve-1.png)<!-- -->
+
+We have anything between 5 and 24 alleles per locus. aest28_01 has the
+highest Simpson diversity (0.80) and aest10_1 as well as aest36_1 have
+the most evenly distributed alleles (0.88).
+
+\##The index of association The index of association (IA) was originally
+proposed by Brown et al. (Brown, Feldman & Nevo, 1980) and implemented
+in the poppr R package (Kamvar, Tabima & Grünwald, 2014) using a
+permutation approach to assess if loci are linked as described
+previously by Agapow and Burt \[@\]. Agapow and Burt also described the
+index r¯d that accounts for the number of loci sampled that is less
+biased and will be used here. The data we will use in this chapter are
+populations of Phytophthora infestans from North and South America (Goss
+et al., 2014). We will use the index of association to test the
+hypothesis that Mexico is the putative origin of P. infestans where
+populations are expected to be sexual while populations in South America
+are expected to be clonal. Next, we will analyze the North American
+population with the index of association and use 999 permutations of the
+data in order to give us a p-value. Note that the p-value is calculated
+with the original observation included.
+
+``` r
+LD_BUR <- popsub(myData, "BUR")
+ia(LD_BUR, sample = 999)
+```
+
+![](Truffles-First-Steps_files/figure-gfm/index%20of%20association%20and%20LD-1.png)<!-- -->
+
+    ##        Ia      p.Ia     rbarD      p.rD 
+    ## 4.9795896 0.0010000 0.4192208 0.0010000
+
+``` r
+setPop(clonecorrect_microsats_dates) <- ~Pop
+LD_BUR_cc <- popsub(clonecorrect_microsats_dates,"BUR")
+ia(LD_BUR_cc,sample=999)
+```
+
+![](Truffles-First-Steps_files/figure-gfm/index%20of%20association%20and%20LD-2.png)<!-- -->
+
+    ##        Ia      p.Ia     rbarD      p.rD 
+    ## 3.6986222 0.0010000 0.2869681 0.0010000
+
 ``` r
 setPop(microsats_dates) <- ~Pop/Year
 popdata <- poppr(microsats_dates)
@@ -2031,6 +2007,71 @@ M.tab <- mlg.table(microsats_dates)
 
 ![](Truffles-First-Steps_files/figure-gfm/genotypic%20evenness-1.png)<!-- -->
 
+``` r
+setPop(microsats_dates) <- ~Pop
+popdata_pop <- poppr(microsats_dates)
+popdata_pop
+```
+
+    ##      Pop    N MLG eMLG    SE     H     G lambda   E.5   Hexp    Ia  rbarD
+    ## 1    ALD   71  21 5.02 1.349 1.908  3.01 0.6681 0.351 0.1414 3.223 0.3235
+    ## 2    BAR    2   2 2.00 0.000 0.693  2.00 0.5000 1.000 0.3846    NA     NA
+    ## 3    BOB  477 172 8.50 1.133 4.134 21.95 0.9544 0.341 0.3425 2.157 0.1854
+    ## 4    BOH   54  38 8.90 0.986 3.398 19.97 0.9499 0.656 0.2871 1.341 0.1240
+    ## 5    BUR  284  41 5.83 1.251 2.404  6.37 0.8431 0.534 0.2610 4.980 0.4192
+    ## 6    FRB   20  14 7.91 1.041 2.441  9.09 0.8900 0.772 0.4538 5.403 0.4216
+    ## 7    FRE  268  26 3.28 1.217 1.252  1.74 0.4267 0.298 0.0738 8.693 0.7373
+    ## 8    FRI  125  16 4.14 1.064 1.612  3.40 0.7060 0.598 0.3014 4.365 0.3804
+    ## 9    GEN    5   2 2.00 0.000 0.500  1.47 0.3200 0.725 0.1714 5.000 1.0000
+    ## 10   KON  234  49 6.90 1.297 2.852  8.70 0.8851 0.472 0.2168 1.070 0.0922
+    ## 11   NEU   38  11 4.37 1.179 1.492  2.55 0.6080 0.450 0.1089 2.088 0.2622
+    ## 12   RIE   67  44 9.29 0.771 3.630 31.84 0.9686 0.840 0.4284 0.870 0.0753
+    ## 13   SCD  123  58 6.92 1.447 3.054  6.20 0.8388 0.258 0.2766 2.332 0.2256
+    ## 14   SCG   24  14 7.62 1.064 2.438  9.29 0.8924 0.793 0.2724 1.856 0.1613
+    ## 15   SCL  299  65 5.08 1.380 2.258  3.38 0.7041 0.278 0.1080 2.629 0.2494
+    ## 16   SCS   50  11 3.30 1.157 1.082  1.71 0.4152 0.364 0.0846 4.079 0.3958
+    ## 17   TRO   37   9 4.21 1.087 1.440  2.72 0.6326 0.535 0.1523 2.474 0.3468
+    ## 18   UEB  204  62 7.51 1.293 3.221 11.70 0.9145 0.445 0.1684 0.571 0.0621
+    ## 19   UST   43  30 8.87 0.951 3.209 19.06 0.9475 0.760 0.3908 0.947 0.0762
+    ## 20   WSL  283   5 1.30 0.505 0.173  1.07 0.0621 0.351 0.0145 4.281 0.5054
+    ## 21 Total 2708 676 9.04 0.945 4.971 38.79 0.9742 0.264 0.6329 2.459 0.1895
+    ##               File
+    ## 1  microsats_dates
+    ## 2  microsats_dates
+    ## 3  microsats_dates
+    ## 4  microsats_dates
+    ## 5  microsats_dates
+    ## 6  microsats_dates
+    ## 7  microsats_dates
+    ## 8  microsats_dates
+    ## 9  microsats_dates
+    ## 10 microsats_dates
+    ## 11 microsats_dates
+    ## 12 microsats_dates
+    ## 13 microsats_dates
+    ## 14 microsats_dates
+    ## 15 microsats_dates
+    ## 16 microsats_dates
+    ## 17 microsats_dates
+    ## 18 microsats_dates
+    ## 19 microsats_dates
+    ## 20 microsats_dates
+    ## 21 microsats_dates
+
+``` r
+#N = Number of individuals, MLG = Number of multilocus genotypes, eMLG = number of expected MLG at the smallest sample size >= 10 based on rarefaction
+#SE = Standard error based on eMLG, H = Shannon-Wiener Index of MLG diversity
+#G = Stoddart & Taylor's Index of MLG diversity
+# lambda = Simpsons index, E.5 = Evenness, Hexp = Neis Expected Heterozygosity
+#Ia = Index of association, rbarD = stand. Index of association
+```
+
+``` r
+M.tab <- mlg.table(microsats_dates)
+```
+
+![](Truffles-First-Steps_files/figure-gfm/genotypic%20evenness%202-1.png)<!-- -->
+
 ## Visualize diversity
 
 Diversity measures incorporate both genotypic richness and abundance.
@@ -2089,6 +2130,87 @@ ggplot(popdata_pop_year,aes(Year,Simpson_rarefied)) +
     ## (`geom_point()`).
 
 ![](Truffles-First-Steps_files/figure-gfm/plot%20diversity%20Simpson-2.png)<!-- -->
+
+Assess GST
+
+Assessing genetic diversity almost always starts with an analysis of a
+parameter such as GST . There are lengthy debates as to what measure of
+differentiation is better (Meirmans & Hedrick, 2011). Instead of going
+into that lengthy debate, it would be more worthwhile to point you into
+the direction of a package dedicated to Modern Methods of
+Differentiation called mmod. We will use the data set nancycats
+containing 17 colonies of cats collected from Nancy, France. As cats
+tend to stay within small groups, we expect to see some population
+differentiation. In terms of these diversity measures, an index of GST=0
+indicates no differentiation, whereas GST=1 indicates that populations
+are segregating for differing alleles. Now we will use Hendrick’s
+standardized GST to assess population structure among these populations
+(Hedrick, 2005).
+
+``` r
+GST <- Gst_Hedrick(myData_genind)
+barplot(GST$per.locus)
+```
+
+![](Truffles-First-Steps_files/figure-gfm/hedrick%20Gst-1.png)<!-- -->
+Very high differentiation!
+
+``` r
+mlg.crosspop <- mlg.crosspop(microsats_dates,df=T)
+```
+
+    ## MLG.32: (203 inds) BOB FRE
+    ## MLG.62: (3 inds) FRB FRE
+    ## MLG.99: (158 inds) SCD SCL
+    ## MLG.105: (2 inds) SCG SCL
+    ## MLG.113: (49 inds) SCD SCL
+    ## MLG.157: (8 inds) ALD TRO
+    ## MLG.174: (275 inds) SCD WSL
+    ## MLG.350: (72 inds) BOB BOH
+    ## MLG.371: (7 inds) SCG SCL
+    ## MLG.475: (38 inds) BOH UEB
+    ## MLG.478: (16 inds) BOH UEB
+    ## MLG.482: (14 inds) BOB UEB
+    ## MLG.497: (6 inds) BOH UEB
+    ## MLG.510: (3 inds) ALD RIE
+
+``` r
+crosspop <- mlg.crosspop %>%
+  separate_wider_delim(Population,delim="_",names=c("Pop","Year"), too_few="align_end")
+
+ggplot(subset(crosspop, Pop %in% "BOB"),aes(Year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in BOB (Bohlingen Buche) over the years")
+```
+
+![](Truffles-First-Steps_files/figure-gfm/plot%20persistence-1.png)<!-- -->
+
+``` r
+ggplot(subset(crosspop, Pop %in% "SCL"),aes(Year,MLG)) + geom_point()  + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in SCL (Schlieren Grillplatz) over the years")
+```
+
+![](Truffles-First-Steps_files/figure-gfm/plot%20persistence-2.png)<!-- -->
+
+``` r
+ggplot(subset(crosspop, Pop %in% "ALD"),aes(Year,MLG)) + geom_point()  + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in ALD (Aldingen) over the years")
+```
+
+![](Truffles-First-Steps_files/figure-gfm/plot%20persistence-3.png)<!-- -->
+
+``` r
+ggplot(subset(crosspop, Pop %in% "BOH"),aes(Year,MLG)) + geom_point()  + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in BOH (Bohlingen Hasel) over the years")
+```
+
+![](Truffles-First-Steps_files/figure-gfm/plot%20persistence-4.png)<!-- -->
+
+``` r
+ggplot(subset(crosspop, Pop %in% "WSL"),aes(Year,MLG)) + geom_point()  + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in WSL over the years")
+```
+
+![](Truffles-First-Steps_files/figure-gfm/plot%20persistence-5.png)<!-- -->
 
 <div id="refs" class="references csl-bib-body hanging-indent"
 entry-spacing="0">
