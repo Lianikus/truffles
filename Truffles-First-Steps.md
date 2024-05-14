@@ -114,6 +114,24 @@ clone-censored data?
 
 ![](Truffles-First-Steps_files/figure-gfm/load%20genalex%20data%20and%20first%20examinations-2.png)<!-- -->
 
+``` r
+x.pops <- tab(myData_genind, freq=TRUE, NA.method="mean")
+pca.pops <- dudi.pca(df = x.pops, center = TRUE, scale = FALSE, scannf = FALSE, nf = 2)
+
+s.class(pca.pops$li, fac=pop(myData_genind), col=funky(15))
+```
+
+![](Truffles-First-Steps_files/figure-gfm/first%20pca-1.png)<!-- -->
+
+``` r
+#clonecorrected PCA
+x.pops_cc <- tab(clonecorrect_data_genind, freq=TRUE, NA.method="mean")
+pca.pops_cc <- dudi.pca(df = x.pops_cc, center = TRUE, scale = FALSE, scannf = FALSE, nf = 2)
+s.class(pca.pops_cc$li, fac=pop(clonecorrect_data_genind), col=funky(15))
+```
+
+![](Truffles-First-Steps_files/figure-gfm/first%20pca-2.png)<!-- -->
+
 Show missing data
 
 Clone correction
@@ -132,22 +150,6 @@ want to process as a new file and read in as genclone and genind file
 again.
 
 ``` r
-genalex_dates <- read.csv("Daten_Genalex.csv",sep=";", header=FALSE)
-T_all_dates <- T_all %>%
-  mutate(Sampling_month = month(Sampling_date)) %>%
-  select(Code_Analyses_2024,Sampling_month, Sampling_year)
-genalex_dates <- left_join(genalex_dates,T_all_dates,by=c("V1"="Code_Analyses_2024"))
-
-genalex_dates <- genalex_dates %>%
-  unite(col="pop_date",c("V1","Sampling_month","Sampling_year"),sep="_")
-#correct column names
-genalex_dates$pop_date[genalex_dates$pop_date =="2708_NA_NA"] <- "2708"
-genalex_dates$pop_date[genalex_dates$pop_date =="_NA_NA"] <- ""
-genalex_dates$pop_date[genalex_dates$pop_date =="pop_NA_NA"] <- "pop"
-
-#jetzt als csv Datei neu reinladen
-#write.table(genalex_dates, col.names=FALSE, sep=",", "C:/Users/liaba/OneDrive - Eidg. Forschungsanstalt WSL/R/truffles/genalex_dates.csv")
-
 microsats_dates <- read.genalex("genalex_dates.csv",ploidy=1)
 splitStrata(microsats_dates) <- ~Pop/Month/Year
 microsats_dates
@@ -168,22 +170,11 @@ microsats_dates
     ##     506 populations defined - 
     ## ALD_3_2011, ALD_6_2011, ALD_7_2011, ..., WSL_11_2020, WSL_6_2021, WSL_7_2021
 
-``` r
-#treemap:
-monstrata <- strata(microsats_dates) %>%     
-  group_by(Pop,Month,Year) %>%
-  summarize(Count = n())
-```
-
     ## `summarise()` has grouped output by 'Pop', 'Month'. You can override using the
     ## `.groups` argument.
 
-``` r
-monstrata
-```
-
     ## # A tibble: 506 × 4
-    ## # Groups:   Pop, Month [174]
+    ## # Groups:   Pop, Month [173]
     ##    Pop   Month Year  Count
     ##    <fct> <fct> <fct> <int>
     ##  1 ALD   3     2011      4
@@ -198,13 +189,7 @@ monstrata
     ## 10 ALD   10    2012      1
     ## # ℹ 496 more rows
 
-``` r
-library(treemap)
-treemap(dtf = monstrata, index = nameStrata(microsats_dates), vSize = "Count",
-        type = "categorical", vColor = "Pop", title = "Truffles")
-```
-
-![](Truffles-First-Steps_files/figure-gfm/add%20dates%20into%20microsat%20file-1.png)<!-- -->
+![](Truffles-First-Steps_files/figure-gfm/treemap-1.png)<!-- -->
 
 ## Genotype accumulation curve
 
@@ -490,7 +475,7 @@ info_table(microsats_dates, type = "missing", plot = TRUE)
     ##   FRI_11_2016  0.11111        .        .        .        .        .  0.11111
     ##   FRI_8_2017         .        .        .        .        .        .        .
     ##   FRI_9_2017         .        .        .        .        .        .        .
-    ##   GEN_NA_NA          .        .        .        .        .        .        .
+    ##   GEN_1_2020         .        .        .        .        .        .        .
     ##   GEN_8_2020         .        .        .        .        .        .        .
     ##   GEN_12_2021        .        .        .        .        .        .        .
     ##   GEN_1_2022         .        .        .        .        .        .        .
@@ -999,7 +984,7 @@ info_table(microsats_dates, type = "missing", plot = TRUE)
     ##   FRI_11_2016        .        .  0.11111        .        .        .        .
     ##   FRI_8_2017         .        .        .        .        .        .        .
     ##   FRI_9_2017         .        .        .        .        .        .        .
-    ##   GEN_NA_NA          .        .        .        .        .        .        .
+    ##   GEN_1_2020         .        .        .        .        .        .        .
     ##   GEN_8_2020         .        .        .        .        .        .        .
     ##   GEN_12_2021        .        .        .        .        .        .        .
     ##   GEN_1_2022         .        .        .        .        .        .        .
@@ -1508,7 +1493,7 @@ info_table(microsats_dates, type = "missing", plot = TRUE)
     ##   FRI_11_2016 0.02381
     ##   FRI_8_2017        .
     ##   FRI_9_2017        .
-    ##   GEN_NA_NA         .
+    ##   GEN_1_2020        .
     ##   GEN_8_2020        .
     ##   GEN_12_2021       .
     ##   GEN_1_2022        .
@@ -1793,6 +1778,239 @@ info_table(microsats_dates, type = "missing", plot = TRUE)
 ``` r
 setPop(microsats_dates) <- ~Pop/Year
 popdata <- poppr(microsats_dates)
+popdata
+```
+
+    ##          Pop    N MLG  eMLG       SE      H     G lambda   E.5    Hexp      Ia
+    ## 1   ALD_2011   25   7  3.90 1.03e+00 1.1814  2.08 0.5184 0.477 0.15381  5.0311
+    ## 2   ALD_2012   13   5  4.08 7.30e-01 1.0438  1.99 0.4970 0.537 0.12179  3.8976
+    ## 3   ALD_2013   18   6  4.20 8.98e-01 1.3031  2.70 0.6296 0.634 0.08357  1.2687
+    ## 4   ALD_2014   10   8  8.00 0.00e+00 2.0253  7.14 0.8600 0.934 0.22500  2.1623
+    ## 5   ALD_2015    5   4  4.00 0.00e+00 1.3322  3.57 0.7200 0.922 0.07857 -0.3556
+    ## 6   BAR_2014    2   2  2.00 0.00e+00 0.6931  2.00 0.5000 1.000 0.38462      NA
+    ## 7   BOB_2011    6   5  5.00 0.00e+00 1.5607  4.50 0.7778 0.930 0.30000  3.1449
+    ## 8   BOB_2012   41  22  7.02 1.30e+00 2.5485  6.81 0.8531 0.492 0.23468  2.8460
+    ## 9   BOB_2015   23  22  9.82 3.82e-01 3.0752 21.16 0.9527 0.976 0.41007  1.5026
+    ## 10  BOB_2016   61  29  8.07 1.14e+00 3.0173 14.15 0.9293 0.676 0.34424  2.3001
+    ## 11  BOB_2014   39  33  9.46 7.02e-01 3.4013 25.78 0.9612 0.854 0.37758  1.5722
+    ## 12  BOB_2013   56  35  8.71 1.01e+00 3.2886 19.36 0.9483 0.711 0.33562  2.3075
+    ## 13  BOB_2017  149  44  7.40 1.26e+00 3.0125 11.29 0.9114 0.532 0.31883  2.6545
+    ## 14  BOB_2018   74  40  8.81 9.65e-01 3.4244 23.01 0.9565 0.741 0.36130  2.0371
+    ## 15  BOB_2019   28  16  7.38 1.17e+00 2.4653  8.52 0.8827 0.699 0.38889  2.1232
+    ## 16  BOH_2011   12  10  8.50 5.84e-01 2.2103  8.00 0.8750 0.862 0.27641  0.9894
+    ## 17  BOH_2012   19  17  9.47 5.98e-01 2.7985 15.70 0.9363 0.953 0.32479  2.2123
+    ## 18  BOH_2013    9   9  9.00 0.00e+00 2.1972  9.00 0.8889 1.000 0.22024  0.4860
+    ## 19  BOH_2014   11   7  6.55 4.98e-01 1.7678  4.84 0.7934 0.790 0.25079  0.6079
+    ## 20  BOH_2015    3   3  3.00 0.00e+00 1.0986  3.00 0.6667 1.000 0.45455  0.5000
+    ## 21  BUR_2013   74  17  4.21 1.32e+00 1.5514  2.24 0.5533 0.333 0.10676  5.9404
+    ## 22  BUR_2016   44   8  4.51 9.47e-01 1.6104  3.98 0.7490 0.745 0.11641  5.4432
+    ## 23  BUR_2018   41   8  3.64 1.00e+00 1.3173  2.78 0.6401 0.651 0.27119  6.0446
+    ## 24  BUR_2019   22   6  4.29 8.32e-01 1.4637  3.67 0.7273 0.803 0.04346  4.5952
+    ## 25  BUR_2020   61   5  2.93 7.11e-01 0.9691  2.06 0.5144 0.648 0.19257  4.6660
+    ## 26  BUR_2021   25   3  2.34 5.31e-01 0.6592  1.61 0.3808 0.659 0.31286 10.0188
+    ## 27  BUR_2014   10   8  8.00 0.00e+00 2.0253  7.14 0.8600 0.934 0.46236  5.0556
+    ## 28  BUR_2015    7   5  5.00 0.00e+00 1.4751  3.77 0.7347 0.821 0.21156  3.3425
+    ## 29  FRB_2011    4   2  2.00 0.00e+00 0.5623  1.60 0.3750 0.795 0.17857  4.0000
+    ## 30  FRB_2013    5   5  5.00 0.00e+00 1.6094  5.00 0.8000 1.000 0.44762  5.3399
+    ## 31  FRB_2014    5   5  5.00 0.00e+00 1.6094  5.00 0.8000 1.000 0.26905  0.0714
+    ## 32  FRB_2015    1   1  1.00 0.00e+00 0.0000  1.00 0.0000   NaN     NaN      NA
+    ## 33  FRB_2012    5   4  4.00 0.00e+00 1.3322  3.57 0.7200 0.922 0.43810  6.3816
+    ## 34  FRE_2011   27   5  3.37 8.04e-01 1.0415  2.08 0.5185 0.587 0.20512  9.5017
+    ## 35  FRE_2016   70   8  3.23 1.03e+00 1.0507  1.83 0.4531 0.445 0.00255  0.0000
+    ## 36  FRE_2017  115   9  2.56 9.92e-01 0.7834  1.45 0.3118 0.381 0.03058  9.0541
+    ## 37  FRE_2012   21   4  2.43 8.21e-01 0.5671  1.35 0.2585 0.457 0.20272  9.9552
+    ## 38  FRE_2013   12   5  4.48 5.84e-01 1.2343  2.57 0.6111 0.645 0.28254  9.8665
+    ## 39  FRE_2014   15   8  5.90 9.09e-01 1.7075  3.81 0.7378 0.623 0.07493  0.4057
+    ## 40  FRE_2015    8   3  3.00 0.00e+00 0.7356  1.68 0.4062 0.630 0.05867  0.2336
+    ## 41  FRI_2013   54  10  3.76 1.10e+00 1.2763  2.15 0.5350 0.445 0.16651  4.3458
+    ## 42  FRI_2017   52   5  3.32 5.89e-01 1.2211  3.07 0.6746 0.867 0.28383  3.6298
+    ## 43  FRI_2018    3   2  2.00 0.00e+00 0.6365  1.80 0.4444 0.899 0.33333  6.0000
+    ## 44  FRI_2014    4   3  3.00 0.00e+00 1.0397  2.67 0.6250 0.912 0.34524  4.9873
+    ## 45  FRI_2015    2   2  2.00 0.00e+00 0.6931  2.00 0.5000 1.000 0.00000      NA
+    ## 46  FRI_2016   10   3  3.00 0.00e+00 0.6390  1.52 0.3400 0.576 0.16825  5.4234
+    ## 47  GEN_2020    3   2  2.00 0.00e+00 0.6365  1.80 0.4444 0.899 0.28571  5.0000
+    ## 48  GEN_2021    1   1  1.00 0.00e+00 0.0000  1.00 0.0000   NaN     NaN      NA
+    ## 49  GEN_2022    1   1  1.00 0.00e+00 0.0000  1.00 0.0000   NaN     NaN      NA
+    ## 50  KON_2013    5   5  5.00 0.00e+00 1.6094  5.00 0.8000 1.000 0.10714 -0.0580
+    ## 51  KON_2014   14   9  6.93 8.49e-01 1.9652  5.44 0.8163 0.724 0.22135  1.8325
+    ## 52  KON_2016   54  20  6.40 1.27e+00 2.3764  6.69 0.8505 0.582 0.13086  1.4359
+    ## 53  KON_2017   30  18  7.12 1.24e+00 2.4295  6.25 0.8400 0.507 0.18889  0.6870
+    ## 54  KON_2018   45  13  5.03 1.23e+00 1.7672  3.22 0.6894 0.457 0.12869  1.9848
+    ## 55  KON_2019   31  12  6.51 1.09e+00 2.1906  7.12 0.8595 0.771 0.18021  0.5557
+    ## 56  KON_2015    2   2  2.00 0.00e+00 0.6931  2.00 0.5000 1.000 0.14286      NA
+    ## 57  KON_2020   25   7  4.96 8.97e-01 1.6651  4.37 0.7712 0.786 0.24643  1.5215
+    ## 58  KON_2021   28   3  2.31 5.17e-01 0.6649  1.64 0.3903 0.678 0.16239  4.6991
+    ## 59  NEU_2013    7   5  5.00 0.00e+00 1.4751  3.77 0.7347 0.821 0.08367  0.1667
+    ## 60  NEU_2014    4   3  3.00 0.00e+00 1.0397  2.67 0.6250 0.912 0.14286  1.0000
+    ## 61  NEU_2015    1   1  1.00 0.00e+00 0.0000  1.00 0.0000   NaN     NaN      NA
+    ## 62  NEU_2016   17   4  3.28 6.61e-01 0.9161  1.89 0.4706 0.593 0.10568  3.8181
+    ## 63  NEU_2017    2   1  1.00 0.00e+00 0.0000  1.00 0.0000   NaN 0.00000      NA
+    ## 64  NEU_2020    5   3  3.00 0.00e+00 0.9503  2.27 0.5600 0.802 0.14286  1.0000
+    ## 65  NEU_2021    2   2  2.00 0.00e+00 0.6931  2.00 0.5000 1.000 0.21429      NA
+    ## 66  RIE_2011   20  17  9.16 7.56e-01 2.7616 14.29 0.9300 0.896 0.40576  0.4744
+    ## 67  RIE_2012   11  10  9.18 3.86e-01 2.2719  9.31 0.8926 0.955 0.37792  0.8005
+    ## 68  RIE_2013   17  14  8.85 7.95e-01 2.5578 11.56 0.9135 0.887 0.39828  1.3089
+    ## 69  RIE_2014   13  12  9.42 4.94e-01 2.4583 11.27 0.9112 0.961 0.49833  1.1958
+    ## 70  RIE_2015    6   6  6.00 0.00e+00 1.7918  6.00 0.8333 1.000 0.41190  0.8642
+    ## 71  SCD_2012   28  25  9.64 5.40e-01 3.1837 23.06 0.9566 0.953 0.36200  0.9847
+    ## 72  SCD_2016   47   8  3.21 1.04e+00 1.0144  1.76 0.4319 0.432 0.16128  4.6628
+    ## 73  SCD_2017    3   2  2.00 0.00e+00 0.6365  1.80 0.4444 0.899 0.33333  6.0000
+    ## 74  SCD_2013    9   9  9.00 0.00e+00 2.1972  9.00 0.8889 1.000 0.38135  0.5075
+    ## 75  SCD_2014   11   7  6.55 4.98e-01 1.7678  4.84 0.7934 0.790 0.29596  2.4394
+    ## 76  SCD_2015   25  20  8.57 1.02e+00 2.7889 11.36 0.9120 0.679 0.27263  1.7211
+    ## 77  SCG_2011    9   5  5.00 0.00e+00 1.5230  4.26 0.7654 0.910 0.29960  1.8907
+    ## 78  SCG_2012    7   5  5.00 0.00e+00 1.4751  3.77 0.7347 0.821 0.02041  0.0000
+    ## 79  SCG_2013    2   2  2.00 0.00e+00 0.6931  2.00 0.5000 1.000 0.07692      NA
+    ## 80  SCG_2014    6   6  6.00 0.00e+00 1.7918  6.00 0.8333 1.000 0.39048  1.0553
+    ## 81  SCL_2012  106  30  5.50 1.32e+00 2.2257  4.39 0.7723 0.411 0.12831  2.7289
+    ## 82  SCL_2014   60  19  5.05 1.31e+00 1.9374  3.69 0.7289 0.453 0.07239  1.3656
+    ## 83  SCL_2015   11   5  4.64 4.81e-01 1.1596  2.28 0.5620 0.586 0.08528  2.7049
+    ## 84  SCL_2016   58  10  4.31 1.08e+00 1.5019  2.80 0.6427 0.515 0.04849 -0.0194
+    ## 85  SCL_2017   38   7  2.93 1.01e+00 0.8657  1.58 0.3670 0.421 0.07949  3.8716
+    ## 86  SCL_2013   13  13 10.00 7.30e-08 2.5649 13.00 0.9231 1.000 0.29757  0.6519
+    ## 87  SCL_2018   13   2  1.77 4.21e-01 0.2712  1.17 0.1420 0.531 0.00000     NaN
+    ## 88  SCS_2013    8   5  5.00 0.00e+00 1.3863  3.20 0.6875 0.733 0.12500  2.4306
+    ## 89  SCS_2014   18   6  3.78 9.72e-01 1.0379  1.86 0.4630 0.473 0.12401  4.0745
+    ## 90  SCS_2016   21   3  1.95 6.88e-01 0.3805  1.21 0.1769 0.464 0.04762  6.0000
+    ## 91  SCS_2017    3   2  2.00 0.00e+00 0.6365  1.80 0.4444 0.899 0.00000     NaN
+    ## 92  TRO_2011   17   6  4.60 8.30e-01 1.4469  3.32 0.6990 0.714 0.15847  2.1882
+    ## 93  TRO_2012   10   3  3.00 0.00e+00 0.8979  2.17 0.5400 0.807 0.16667  2.7692
+    ## 94  TRO_2013   10   4  4.00 0.00e+00 0.9404  1.92 0.4800 0.591 0.13651  3.5236
+    ## 95  UEB_2012    7   7  7.00 0.00e+00 1.9459  7.00 0.8571 1.000 0.29048  0.0989
+    ## 96  UEB_2015   39  20  6.92 1.29e+00 2.4896  7.28 0.8626 0.568 0.11977  0.6324
+    ## 97  UEB_2013   56  15  5.91 1.16e+00 2.1602  6.40 0.8438 0.704 0.14545  0.4801
+    ## 98  UEB_2011   27   7  4.81 9.06e-01 1.6201  4.03 0.7517 0.747 0.11905  0.5010
+    ## 99  UEB_2016   17   8  6.15 8.70e-01 1.8746  5.25 0.8097 0.771 0.28075  0.7825
+    ## 100 UEB_2017    6   4  4.00 0.00e+00 1.3297  3.60 0.7222 0.935 0.20000  0.2424
+    ## 101 UEB_2018    2   2  2.00 0.00e+00 0.6931  2.00 0.5000 1.000 0.27273      NA
+    ## 102 UEB_2019    3   3  3.00 0.00e+00 1.0986  3.00 0.6667 1.000 0.14286 -1.0000
+    ## 103 UEB_2014   47  25  7.22 1.30e+00 2.6871  8.27 0.8791 0.531 0.15447  1.3403
+    ## 104 UST_2013   32  22  8.52 1.02e+00 2.8968 13.84 0.9277 0.750 0.37897  1.3771
+    ## 105 UST_2014   11   9  8.36 4.81e-01 2.1458  8.07 0.8760 0.936 0.40519  0.0348
+    ## 106 WSL_2012    1   1  1.00 0.00e+00 0.0000  1.00 0.0000   NaN     NaN      NA
+    ## 107 WSL_2016   58   2  1.32 4.66e-01 0.1500  1.07 0.0666 0.441 0.00968  1.0000
+    ## 108 WSL_2017   61   2  1.16 3.70e-01 0.0836  1.03 0.0322 0.382 0.00468  1.0000
+    ## 109 WSL_2018   14   1  1.00 0.00e+00 0.0000  1.00 0.0000   NaN 0.00000     NaN
+    ## 110 WSL_2019   72   2  1.26 4.39e-01 0.1269  1.06 0.0540 0.422 0.00782  1.0000
+    ## 111 WSL_2020   73   3  1.27 4.83e-01 0.1446  1.06 0.0537 0.365 0.01957  5.7556
+    ## 112 WSL_2021    4   2  2.00 0.00e+00 0.5623  1.60 0.3750 0.795 0.28571  7.0000
+    ## 113    Total 2708 676  9.04 9.45e-01 4.9707 38.79 0.9742 0.264 0.63289  2.4592
+    ##        rbarD            File
+    ## 1    0.58947 microsats_dates
+    ## 2    0.77955 microsats_dates
+    ## 3    0.26752 microsats_dates
+    ## 4    0.27368 microsats_dates
+    ## 5   -0.35635 microsats_dates
+    ## 6         NA microsats_dates
+    ## 7    0.45153 microsats_dates
+    ## 8    0.27082 microsats_dates
+    ## 9    0.13672 microsats_dates
+    ## 10   0.21151 microsats_dates
+    ## 11   0.13298 microsats_dates
+    ## 12   0.19956 microsats_dates
+    ## 13   0.23321 microsats_dates
+    ## 14   0.19023 microsats_dates
+    ## 15   0.19512 microsats_dates
+    ## 16   0.12531 microsats_dates
+    ## 17   0.20462 microsats_dates
+    ## 18   0.06995 microsats_dates
+    ## 19   0.06809 microsats_dates
+    ## 20   0.10000 microsats_dates
+    ## 21   0.52561 microsats_dates
+    ## 22   0.53563 microsats_dates
+    ## 23   0.54306 microsats_dates
+    ## 24   0.92766 microsats_dates
+    ## 25   0.47179 microsats_dates
+    ## 26   0.84808 microsats_dates
+    ## 27   0.39003 microsats_dates
+    ## 28   0.66859 microsats_dates
+    ## 29   1.00000 microsats_dates
+    ## 30   0.44526 microsats_dates
+    ## 31   0.01466 microsats_dates
+    ## 32        NA microsats_dates
+    ## 33   0.53228 microsats_dates
+    ## 34   0.95125 microsats_dates
+    ## 35       NaN microsats_dates
+    ## 36   0.91241 microsats_dates
+    ## 37   0.99553 microsats_dates
+    ## 38   0.89797 microsats_dates
+    ## 39   0.10608 microsats_dates
+    ## 40   0.11690 microsats_dates
+    ## 41   0.65445 microsats_dates
+    ## 42   0.33092 microsats_dates
+    ## 43   1.00000 microsats_dates
+    ## 44   0.62382 microsats_dates
+    ## 45        NA microsats_dates
+    ## 46   0.90945 microsats_dates
+    ## 47   1.00000 microsats_dates
+    ## 48        NA microsats_dates
+    ## 49        NA microsats_dates
+    ## 50  -0.02903 microsats_dates
+    ## 51   0.23444 microsats_dates
+    ## 52   0.19982 microsats_dates
+    ## 53   0.06794 microsats_dates
+    ## 54   0.25862 microsats_dates
+    ## 55   0.07358 microsats_dates
+    ## 56        NA microsats_dates
+    ## 57   0.17689 microsats_dates
+    ## 58   0.94010 microsats_dates
+    ## 59   0.08357 microsats_dates
+    ## 60   0.33333 microsats_dates
+    ## 61        NA microsats_dates
+    ## 62   0.56171 microsats_dates
+    ## 63        NA microsats_dates
+    ## 64   0.25000 microsats_dates
+    ## 65        NA microsats_dates
+    ## 66   0.04817 microsats_dates
+    ## 67   0.07362 microsats_dates
+    ## 68   0.11040 microsats_dates
+    ## 69   0.11004 microsats_dates
+    ## 70   0.09692 microsats_dates
+    ## 71   0.10993 microsats_dates
+    ## 72   0.46168 microsats_dates
+    ## 73   1.00000 microsats_dates
+    ## 74   0.05691 microsats_dates
+    ## 75   0.30525 microsats_dates
+    ## 76   0.19609 microsats_dates
+    ## 77   0.27233 microsats_dates
+    ## 78       NaN microsats_dates
+    ## 79        NA microsats_dates
+    ## 80   0.10682 microsats_dates
+    ## 81   0.32902 microsats_dates
+    ## 82   0.16330 microsats_dates
+    ## 83   0.68447 microsats_dates
+    ## 84  -0.02076 microsats_dates
+    ## 85   0.73580 microsats_dates
+    ## 86   0.06695 microsats_dates
+    ## 87       NaN microsats_dates
+    ## 88   0.48839 microsats_dates
+    ## 89   0.52053 microsats_dates
+    ## 90   1.00000 microsats_dates
+    ## 91       NaN microsats_dates
+    ## 92   0.44171 microsats_dates
+    ## 93   0.69822 microsats_dates
+    ## 94   0.59443 microsats_dates
+    ## 95   0.01239 microsats_dates
+    ## 96   0.07722 microsats_dates
+    ## 97   0.07186 microsats_dates
+    ## 98   0.16752 microsats_dates
+    ## 99   0.11483 microsats_dates
+    ## 100  0.08162 microsats_dates
+    ## 101       NA microsats_dates
+    ## 102 -0.50000 microsats_dates
+    ## 103  0.14752 microsats_dates
+    ## 104  0.11007 microsats_dates
+    ## 105  0.00348 microsats_dates
+    ## 106       NA microsats_dates
+    ## 107  1.00000 microsats_dates
+    ## 108  1.00000 microsats_dates
+    ## 109      NaN microsats_dates
+    ## 110  1.00000 microsats_dates
+    ## 111  0.63951 microsats_dates
+    ## 112  1.00000 microsats_dates
+    ## 113  0.18952 microsats_dates
+
+``` r
 #N = Number of individuals, MLG = Number of multilocus genotypes, eMLG = number of expected MLG at the smallest sample size >= 10 based on rarefaction
 #SE = Standard error based on eMLG, H = Shannon-Wiener Index of MLG diversity
 #G = Stoddart & Taylor's Index of MLG diversity
@@ -1815,11 +2033,34 @@ M.tab <- mlg.table(microsats_dates)
 
 ## Visualize diversity
 
+Diversity measures incorporate both genotypic richness and abundance.
+There are three measures of genotypic diversity employed by poppr, the
+Shannon-Wiener index (H), Stoddart and Taylor’s index (G), and Simpson’s
+index (lambda). In our example, comparing the diversity of BB to FR
+shows that H is greater for FR (4.58 vs. 4.4), but G is lower (53.4
+vs. 61.7). Thus, our expectation that diversity is lower for FR than BB
+is rejected in the case of H, which is likely due to the sensitivity of
+the Shannon-Wiener index to genotypic richness in the uneven sample
+sizes, and accepted in the case of G. To be fair, the sample size used
+to calculate these diversity measures is different and is therefore not
+an appropriate comparison.
+
+For an easier statistic to grasp, we have included the Simpson index,
+which is simply one minus the sum of squared genotype frequencies. This
+measure provides an estimation of the probability that two randomly
+selected genotypes are different and scales from 0 (no genotypes are
+different) to 1 (all genotypes are different). In the data above, we can
+see that lambda is just barely higher in BB than FR (0.984 vs. 0.981).
+Since this might be an artifact of sample size, we can explore a
+correction of Simpson’s index for sample size by multiplying lambda by
+$N/(N - 1)$. Since R is vectorized, we can do this for all of our
+populations at once:
+
 ``` r
 popdata_pop_year <- separate(popdata,Pop,c("Pop","Year"))
 ```
 
-    ## Warning: Expected 2 pieces. Missing pieces filled with `NA` in 1 rows [114].
+    ## Warning: Expected 2 pieces. Missing pieces filled with `NA` in 1 rows [113].
 
 ``` r
 ggplot(popdata_pop_year,aes(Year,lambda)) +
@@ -1829,7 +2070,25 @@ ggplot(popdata_pop_year,aes(Year,lambda)) +
   labs(y="Simpson's index", title ="Simpson's index over the years")
 ```
 
-![](Truffles-First-Steps_files/figure-gfm/plot%20diversity-1.png)<!-- -->
+![](Truffles-First-Steps_files/figure-gfm/plot%20diversity%20Simpson-1.png)<!-- -->
+
+``` r
+#rarefied:
+N      <- popdata_pop_year$N      # number of samples
+lambda <- popdata_pop_year$lambda # Simpson's index
+Simpson_rarefied <- (N/(N - 1)) * lambda              # Corrected Simpson's index
+
+ggplot(popdata_pop_year,aes(Year,Simpson_rarefied)) +
+  geom_point() +
+  facet_wrap(vars(Pop)) +
+  theme_light() +
+  labs(y="Rarefied Simpson's index", title ="Rarefied Simpson's index over the years")
+```
+
+    ## Warning: Removed 5 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+![](Truffles-First-Steps_files/figure-gfm/plot%20diversity%20Simpson-2.png)<!-- -->
 
 <div id="refs" class="references csl-bib-body hanging-indent"
 entry-spacing="0">

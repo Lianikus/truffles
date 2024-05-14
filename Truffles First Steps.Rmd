@@ -119,6 +119,7 @@ Question: Will allelic diversity increase or decrease with clone-censored data?
 ```{r load genalex data and first examinations, echo=FALSE}
 myData_genind <- read.genalex("Daten_Genalex.csv",genclone=FALSE, ploidy=1, sep=";")
 myData_genind
+clonecorrect_data_genind <- clonecorrect(myData_genind)
 
 barplot(table(pop(myData_genind)), col=funky(17), las=3,
 xlab="Population", ylab="Sample size")
@@ -133,11 +134,16 @@ abline(0,1,lty=2)
 ```
 
 
-```{r first pca, eval=FALSE, include=FALSE}
+```{r first pca, echo=TRUE}
 x.pops <- tab(myData_genind, freq=TRUE, NA.method="mean")
-pca.pops <- dudi.pca(x.pops,center=TRUE, scale=FALSE)
+pca.pops <- dudi.pca(df = x.pops, center = TRUE, scale = FALSE, scannf = FALSE, nf = 2)
 
 s.class(pca.pops$li, fac=pop(myData_genind), col=funky(15))
+
+#clonecorrected PCA
+x.pops_cc <- tab(clonecorrect_data_genind, freq=TRUE, NA.method="mean")
+pca.pops_cc <- dudi.pca(df = x.pops_cc, center = TRUE, scale = FALSE, scannf = FALSE, nf = 2)
+s.class(pca.pops_cc$li, fac=pop(clonecorrect_data_genind), col=funky(15))
 ```
 
 ```{r Fstat, eval=FALSE, include=FALSE}
@@ -159,6 +165,7 @@ Clone correction
 ```{r clone correction, eval=FALSE, include=FALSE}
 clonecorrect_data <- clonecorrect(myData, strata=~Pop)
 clonecorrect_data
+genind2genalex(clonecorrect_data, filename="C:/Users/liaba/OneDrive - Eidg. Forschungsanstalt WSL/R/truffles/clonecorrected_data.csv")
 ```
 
 ```{r compare diversity between corrected and uncorrected, eval=FALSE, include=FALSE}
@@ -185,7 +192,10 @@ I have several ideas how to do it.
 --> Filter monitoring file with genalex file to exclude the rows not matching
 --> choose columns that I want to process as a new file and read in as genclone and genind file again.
 
-```{r add dates into microsat file}
+```{r add dates into microsat file, eval=FALSE, include=FALSE}
+
+##Achtung hier wird eine Tabelle generiert, nur bei Datenänderungen laufen lassen!!
+
 genalex_dates <- read.csv("Daten_Genalex.csv",sep=";", header=FALSE)
 T_all_dates <- T_all %>%
   mutate(Sampling_month = month(Sampling_date)) %>%
@@ -193,7 +203,7 @@ T_all_dates <- T_all %>%
 genalex_dates <- left_join(genalex_dates,T_all_dates,by=c("V1"="Code_Analyses_2024"))
 
 genalex_dates <- genalex_dates %>%
-  unite(col="pop_date",c("V1","Sampling_month","Sampling_year"),sep="_")
+  unite(col="pop_date",c("V2","Sampling_month","Sampling_year"),sep="_")
 #correct column names
 genalex_dates$pop_date[genalex_dates$pop_date =="2708_NA_NA"] <- "2708"
 genalex_dates$pop_date[genalex_dates$pop_date =="_NA_NA"] <- ""
@@ -201,17 +211,20 @@ genalex_dates$pop_date[genalex_dates$pop_date =="pop_NA_NA"] <- "pop"
 
 #jetzt als csv Datei neu reinladen
 #write.table(genalex_dates, col.names=FALSE, sep=",", "C:/Users/liaba/OneDrive - Eidg. Forschungsanstalt WSL/R/truffles/genalex_dates.csv")
+```
 
+```{r read in microsats_dates}
 microsats_dates <- read.genalex("genalex_dates.csv",ploidy=1)
 splitStrata(microsats_dates) <- ~Pop/Month/Year
 microsats_dates
+```
 
+```{r treemap, echo=FALSE}
 #treemap:
 monstrata <- strata(microsats_dates) %>%     
   group_by(Pop,Month,Year) %>%
   summarize(Count = n())
 monstrata
-library(treemap)
 treemap(dtf = monstrata, index = nameStrata(microsats_dates), vSize = "Count",
         type = "categorical", vColor = "Pop", title = "Truffles")
 ```
@@ -236,6 +249,7 @@ info_table(microsats_dates, type = "missing", plot = TRUE)
 ```{r set strata to Pop}
 setPop(microsats_dates) <- ~Pop/Year
 popdata <- poppr(microsats_dates)
+popdata
 #N = Number of individuals, MLG = Number of multilocus genotypes, eMLG = number of expected MLG at the smallest sample size >= 10 based on rarefaction
 #SE = Standard error based on eMLG, H = Shannon-Wiener Index of MLG diversity
 #G = Stoddart & Taylor's Index of MLG diversity
@@ -253,11 +267,26 @@ M.tab <- mlg.table(microsats_dates)
 
 ## Visualize diversity
 
-```{r plot diversity}
+Diversity measures incorporate both genotypic richness and abundance. There are three measures of genotypic diversity employed by poppr, the Shannon-Wiener index (H), Stoddart and Taylor’s index (G), and Simpson’s index (lambda). In our example, comparing the diversity of BB to FR shows that H is greater for FR (4.58 vs. 4.4), but G is lower (53.4 vs. 61.7). Thus, our expectation that diversity is lower for FR than BB is rejected in the case of H, which is likely due to the sensitivity of the Shannon-Wiener index to genotypic richness in the uneven sample sizes, and accepted in the case of G. To be fair, the sample size used to calculate these diversity measures is different and is therefore not an appropriate comparison.
+
+For an easier statistic to grasp, we have included the Simpson index, which is simply one minus the sum of squared genotype frequencies. This measure provides an estimation of the probability that two randomly selected genotypes are different and scales from 0 (no genotypes are different) to 1 (all genotypes are different). In the data above, we can see that lambda is just barely higher in BB than FR (0.984 vs. 0.981). Since this might be an artifact of sample size, we can explore a correction of Simpson’s index for sample size by multiplying lambda by \(N/(N - 1)\). Since R is vectorized, we can do this for all of our populations at once:
+
+```{r plot diversity Simpson}
 popdata_pop_year <- separate(popdata,Pop,c("Pop","Year"))
 ggplot(popdata_pop_year,aes(Year,lambda)) +
   geom_point() +
   facet_wrap(vars(Pop)) +
   theme_light() +
   labs(y="Simpson's index", title ="Simpson's index over the years")
+
+#rarefied:
+N      <- popdata_pop_year$N      # number of samples
+lambda <- popdata_pop_year$lambda # Simpson's index
+Simpson_rarefied <- (N/(N - 1)) * lambda              # Corrected Simpson's index
+
+ggplot(popdata_pop_year,aes(Year,Simpson_rarefied)) +
+  geom_point() +
+  facet_wrap(vars(Pop)) +
+  theme_light() +
+  labs(y="Rarefied Simpson's index", title ="Rarefied Simpson's index over the years")
 ```
