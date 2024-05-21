@@ -38,86 +38,85 @@ fruitbodies (i.e. ascocarps or sporocarps) known as truffles.
 
 True truffles are fungi belonging to the genus Tuber, whose species form
 symbiotic associations with roots of a wide range of ectomycorrhizal
-tree species (Benucci et al., 2011; Stobbe et al., 2012).
+tree species ((**benucci2011?**); (**stobbe2012?**)).
 
 As ectomycorrhizal fungi, truffles grant their hosts access to water and
 nutrients, protect roots from pest and disease, and interact with and
-sometimes kill understory, non-­host plants (Gryndler et al., 2014;
-Streiblová et al., 2012; Taschen et al., 2020).
+sometimes kill understory, non-­host plants ((**gryndler2014?**);
+(**streiblová2012?**); (**taschen2020?**)).
 
 With an ever-growing number of newly described truffle diversity (Tuber,
 Tuberaceae) from around the world that is clearly exceeding 200 species
-(Bonito et al., 2013; Guevara et al., 2013; Reyna and Garcia-Barreda,
-2014; Berch and Bonito, 2016; Suwannarach et al., 2017; Wan et al.,
-2017; Arthur et al., 2018; Eberhart et al., 2020), only about a dozen of
-them are of commercial importance (Boa, 2004; Bonito et al., 2010;
-Chevalier and Frochot, 2002; Hall et al., 2003).
+((**bonito2013?**); (**guevara2013?**); (**reyna2014?**);
+(**berch2016?**)), only about a dozen of them are of commercial
+importance ((Boa and Nations 2004); (**bonito2010?**);
+(**chevaliera?**)).
 
 True truffles are ectomycorrhizal fungi belonging to the genus Tuber in
 Ascomycetes. This genus, which exclusively forms hypogeous fruiting
-bodies, comprises more than 200 species all over the world (Bonito et
-al. 2013; Bonito et al. 2010), of which at least 30 naturally occur in
-Europe (Ceruti et al. 2003). Some of these species are well known for
-their organoleptic properties and their high economic value, such as
+bodies, comprises more than 200 species all over the world
+((**bonito2013?**); (**bonito2010?**)), of which at least 30 naturally
+occur in Europe ((**ceruti?**)). Some of these species are well known
+for their organoleptic properties and their high economic value, such as
 Tuber magnatum (Alba white truffle), Tuber melanosporum (Périgord black
 truffle), and Tuber aestivum Vittad. (Burgundy and summer truffles,
 depending on the harvesting period).
 
 Truffle species include the most valuable fungi on earth due to their
-use in haute cuisine (Reyna & Garcia-­Barreda, 2014).
+use in haute cuisine ((**reyna2014a?**)).
 
 More than 100 Tuber species exist in the world but only a few, such as
 *T. magnatum Picco*, *T. melanosporum* Vittad., and *T. aestivum*
 Vittad., have interesting organoleptic qualities. The first two species
 have a natural distribution restricted to limited European countries,
 but *T. aestivum* has a natural distribution across Europe (Virginie
-Molinier et al. 2013).
+Molinier et al. 2013a).
 
 Truffles are ectomycorrhizal fungi of the phylum Ascomycota and Recent
 advancements in molecular biology have contributed to a better
 understanding of evolutionary origins, population dynamics and symbiotic
-relations of different truffle species (Martin et al., 2010; Murat and
-Martin, 2016).
+relations of different truffle species ((**martin2010?**);
+(**martin2016?**)).
 
 In contrast to other high-value forest mushrooms, such as Boletus spp.,
 Cantharellus spp. and Laccaria spp., which can develop their fruitbodies
-during a few days (Moore et al., 2008; Halbwachs et al., 2016),
-hypogenous truffle fruitbodies are expected to grow more slowly (Callot,
-1999; Olivier et al., 2012; Zarivi et al., 2015). However, it is still
-unknown how much time truffles need to develop and how many generations
-of fruitbodies can occur within one ‘growing’ season between the
-formation of primordia and the realisation of a fully mature and ripe
-gleba (Büntgen et al., 2017). The species’ subterranean life cycle
-dynamics, together with complex host interactions and the lack of
-non-destructive investigation techniques (Luoma et al., 1991), are the
-main reasons for the yet little understood biotic and abiotic drivers of
-truffle growth (Pacioni et al., 2014). Localising truffles in situ is
-only possible with the help of well-trained sniffing dogs or, very
-rarely, with domestic trufflepigs (or occasionally also by searching and
-flowing truffle-specific flies, such as Suillia tuberiperda), which all
-have the olfactory sense capable of detecting the volatile aroma of
-fruitbodies from a distance of up to 50 m (Olivier et al., 2012;
-Splivallo et al., 2011; Splivallo and Cullere, 2016). Consequently, our
+during a few days ((**moore2008?**); (**halbwachs2016?**)), hypogenous
+truffle fruitbodies are expected to grow more slowly
+((**pacioni2015?**)). However, it is still unknown how much time
+truffles need to develop and how many generations of fruitbodies can
+occur within one ‘growing’ season between the formation of primordia and
+the realisation of a fully mature and ripe gleba ((**büntgen2017?**)).
+The species’ subterranean life cycle dynamics, together with complex
+host interactions and the lack of non-destructive investigation
+techniques (Luoma et al., 1991), are the main reasons for the yet little
+understood biotic and abiotic drivers of truffle growth
+((**pacioni2014?**)). Localising truffles in situ is only possible with
+the help of well-trained sniffing dogs or, very rarely, with domestic
+trufflepigs (or occasionally also by searching and flowing
+truffle-specific flies, such as Suillia tuberiperda), which all have the
+olfactory sense capable of detecting the volatile aroma of fruitbodies
+from a distance of up to 50 m ((**splivallo2016?**)). Consequently, our
 knowledge about the truffles’ hidden belowground mode of life is
-restricted to only those fruitbodies that were detected (Trappe and
-Claridge, 2010). In fact, we simply do not know how selective a harvest
-is and how well it represents the actual abundance of fruitbodies e the
-absence of evidence is no evidence of absence. Non-systematic and
-nondestructive harvests are therefore likely dominated by specific aroma
-concentrations, fruitbody dimensions and locations, as well as
-hunter/dog ability. The aroma profile of truffles seems to be influenced
-by individual genotypes (Molinier et al., 2015), and not by the
-geographical origin or maturity level (Niimi et al., 2021). Since the
-development of aromas most likely depends on the presence of specific
-bacteria (Splivallo and Cullere, 2016), no correlation between gleba
+restricted to only those fruitbodies that were detected
+((**trappe2010?**)). In fact, we simply do not know how selective a
+harvest is and how well it represents the actual abundance of
+fruitbodies e the absence of evidence is no evidence of absence.
+Non-systematic and nondestructive harvests are therefore likely
+dominated by specific aroma concentrations, fruitbody dimensions and
+locations, as well as hunter/dog ability. The aroma profile of truffles
+seems to be influenced by individual genotypes ((**molinier2015?**)),
+and not by the geographical origin or maturity level ((**niimi2021?**)).
+Since the development of aromas most likely depends on the presence of
+specific bacteria ((**splivallo2016?**)), no correlation between gleba
 colour and aroma intensity has been reported. Depending on the
 percentage of fully pigmented spores, and thus the level of maturity and
-ripening (Molinier et al., 2016b), the gleba of Burgundy truffles can
-vary from white-ochre to dark brown. Differences in the colour and
-texture of fruitbodies have been proofed useful visual criteria for
-species identification and distinction (Chatin, 1887), which may
-otherwise be considered genetically identical, such as Tuber. aestivum
-and Tuber uncinatum (Molinier et al., 2013). (Büntgen et al. (2021)).
+ripening ((Virginie Molinier et al. 2016a)), the gleba of Burgundy
+truffles can vary from white-ochre to dark brown. Differences in the
+colour and texture of fruitbodies have been proofed useful visual
+criteria for species identification and distinction ((Chatin 1887)),
+which may otherwise be considered genetically identical, such as Tuber.
+aestivum and Tuber uncinatum ((Virginie Molinier et al. 2013b)).
+(Büntgen et al. (2021)).
 
 Much remains unknown about the life history of these iconic species due
 to a lack of available data from natural truffle populations. However,
@@ -209,7 +208,7 @@ the probability that compatible cells meet, which could be beneficial
 under the assumption that sex is costly (Selosse et al. 2013). This
 segregation ofthe mating-type strains raises the question ofwhere
 paternal individuals come from and what structures they might consist of
-(Le Tacon et al., 2015). Virginie Molinier et al. (2016)
+(Le Tacon et al., 2015). Virginie Molinier et al. (2016b)
 
 Sequencing of the T. aestivum genome is currently being completed (Payen
 et al., 2014), and the first sequences have facilitated the development
@@ -226,7 +225,7 @@ orchard naturally colonized by T. aestivum indicated that genet sizes
 (up to 92 m) are larger than those of T. melanosporum (Molinier et al.
 2015a;Murat et al. 2013). However, the limited sample size did not allow
 any deep genetic structure analyses, and the mating-type genotype
-distribution was not considered. Virginie Molinier et al. (2016)
+distribution was not considered. Virginie Molinier et al. (2016b)
 
 The popularity of truffles as an exclusive ingredient of elite
 gastronomy has risen tremendously in recent years (Hall et al., 2003).
@@ -285,7 +284,7 @@ Murat et al., 2011 ). This result suggested that a DSP approach could be
 used for identifying microsatellites in Tuber species. The aim of our
 study was therefore to use DSP to identify, for the fi rst time,
 polymorphic microsatellites in the economically important truffle *T.
-aestivum* (Virginie Molinier et al. (2013)).
+aestivum* (Virginie Molinier et al. (2013a)).
 
 Among Tuber species, Tuber aestivum Vittad. has a wide distributional
 range being found naturally all over Europe. Here, we performed
@@ -358,7 +357,7 @@ possible reasons for the observed genetic patterns. Our findings
 contribute to a better understanding ofthe biology ofone ofthe most
 widespread and commercially important truffle species. This knowledge is
 critical for establishing and maintaining sustainable long-term truffle
-cultivations. Virginie Molinier et al. (2016)
+cultivations. Virginie Molinier et al. (2016b)
 
 Here, we aim at estimating the potential of using vegetation composition
 as an additional parameter to detect and describe T. aestivum habitats,
@@ -449,7 +448,7 @@ the subsequent genotyping step on ABI-3130 (Applied Biosystems, USA),
 PCR products were diluted in pure water (1/4) and then mixed with HiDi
 Formamide. As an internal size standard, GeneScan™ 500 LIZ™ dye Size
 Standard (ThermoFisher Scientific, USA) was used. Virginie Molinier et
-al. (2016)
+al. (2016b)
 
 - describe genetic analyses
 
@@ -473,7 +472,7 @@ set including one member ofeach MLG (simple clone-corrected dataset).
 For some spatial analyses (i.e. aggregation index, autocorrelation
 analyses), we assigned up to four centred location points per MLG for
 large MLGs (\>15 m) in the clone-corrected data set (partial
-clone-corrected dataset) (Fig. S2). Virginie Molinier et al. (2016)
+clone-corrected dataset) (Fig. S2). Virginie Molinier et al. (2016b)
 
 ## Expected results
 
@@ -493,6 +492,14 @@ clone-corrected dataset) (Fig. S2). Virginie Molinier et al. (2016)
 <div id="refs" class="references csl-bib-body hanging-indent"
 entry-spacing="0">
 
+<div id="ref-boaWildEdibleFungi2004" class="csl-entry">
+
+Boa, E. R., and Food and Agriculture Organization of the United Nations.
+2004. *Wild Edible Fungi: A Global Overview of Their Use and Importance
+to People*. Food & Agriculture Org.
+
+</div>
+
 <div id="ref-buntgenEcoarchaeologicalExcavationTechniques2021"
 class="csl-entry">
 
@@ -501,6 +508,14 @@ Ludger Sproll, Virginie Molinier, Tomáš Čejka, Elizabeth L. Isaac, and
 Simon Egli. 2021. “Eco-Archaeological Excavation Techniques Reveal
 Snapshots of Subterranean Truffle Growth.” *Fungal Biology* 125 (12):
 951–61. <https://doi.org/10.1016/j.funbio.2021.09.001>.
+
+</div>
+
+<div id="ref-chatin1887" class="csl-entry">
+
+Chatin, M. Ad. 1887. “Une Nouvelle Espèce De Truffe ( *Tuber Uncinatum*
+).” *Bulletin de la Société Botanique de France* 34 (6): 246–48.
+<https://doi.org/10.1080/00378941.1887.10830247>.
 
 </div>
 
@@ -518,9 +533,17 @@ Genetic Groups Within European Populations of *Tuber Aestivum* Vittad.”
 <div id="ref-molinierFinescaleGeneticStructure2016" class="csl-entry">
 
 Molinier, Virginie, Claude Murat, Andri Baltensweiler, Ulf Büntgen,
-Francis Martin, Barbara Meier, Barbara Moser, et al. 2016. “Fine-scale
-genetic structure of natural Tuber aestivum sites in southern Germany.”
-*Mycorrhiza* 26 (8): 895–907.
+Francis Martin, Barbara Meier, Barbara Moser, et al. 2016b. “Fine-scale
+genetic structure of natural *Tuber aestivum* sites in southern
+Germany.” *Mycorrhiza* 26 (8): 895–907.
+<https://doi.org/10.1007/s00572-016-0719-y>.
+
+</div>
+
+<div id="ref-molinier2016" class="csl-entry">
+
+———, et al. 2016a. “Fine-scale genetic structure of natural *Tuber
+aestivum* sites in southern Germany.” *Mycorrhiza* 26 (8): 895–907.
 <https://doi.org/10.1007/s00572-016-0719-y>.
 
 </div>
@@ -529,10 +552,19 @@ genetic structure of natural Tuber aestivum sites in southern Germany.”
 class="csl-entry">
 
 Molinier, Virginie, Claude Murat, Emmanuelle Morin, Armelle Gollotte,
-Daniel Wipf, and Francis Martin. 2013. “First Identification of
+Daniel Wipf, and Francis Martin. 2013a. “First Identification of
 Polymorphic Microsatellite Markers in the Burgundy Truffle, *Tuber
 Aestivum* (Tuberaceae)1.” *Applications in Plant Sciences* 1 (2):
 apps.1200220. <https://doi.org/10.3732/apps.1200220>.
+
+</div>
+
+<div id="ref-molinier2013" class="csl-entry">
+
+———. 2013b. “First Identification of Polymorphic Microsatellite Markers
+in the Burgundy Truffle, *Tuber Aestivum* (Tuberaceae)1.” *Applications
+in Plant Sciences* 1 (2): apps.1200220.
+<https://doi.org/10.3732/apps.1200220>.
 
 </div>
 
@@ -551,8 +583,8 @@ Forests.” *Fungal Ecology* 29 (October): 59–66.
 Steidinger, Brian S., Ulf Büntgen, Uli Stobbe, Willy Tegel, Ludger
 Sproll, Matthias Haeni, Barbara Moser, et al. 2022. “The Fall of the
 Summer Truffle: Recurring Hot, Dry Summers Result in Declining Fruitbody
-Production of Tuber Aestivum in Central Europe.” *Global Change Biology*
-28 (24): 7376–90. <https://doi.org/10.1111/gcb.16424>.
+Production of *Tuber Aestivum* in Central Europe.” *Global Change
+Biology* 28 (24): 7376–90. <https://doi.org/10.1111/gcb.16424>.
 
 </div>
 

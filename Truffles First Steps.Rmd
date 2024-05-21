@@ -40,46 +40,15 @@ library(adegenet)
 library(devtools)
 library(hierfstat)
 library(mmod)
-T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_2024.xlsx")
+T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_Mai2024.xlsx")
 coord <- read_excel("Koordinaten_2024.xlsx")
-myData <- read.genalex("Daten_Genalex.csv",genclone=TRUE, ploidy=1, sep=";")
-myData_genind <- read.genalex("Daten_Genalex.csv",genclone=FALSE, ploidy=1, sep=";")
-microsats_dates <- read.genalex("genalex_dates.csv",ploidy=1)
-splitStrata(microsats_dates) <- ~Pop/Month/Year
-clonecorrect_microsats_dates <- clonecorrect(microsats_dates, strata = NA)
-clonecorrect_data_genind <- clonecorrect(myData_genind)
+myData <- read.genalex("Daten_Genalex.csv",genclone=TRUE, ploidy=1)
+myData_genind <- read.genalex("Daten_Genalex.csv",genclone=FALSE, ploidy=1)
+splitStrata(myData) <- ~Pop/Month/SamplingYear/TruffleYear
+splitStrata(myData_genind) <- ~Pop/Month/SamplingYear/TruffleYear
+cc_myData <- clonecorrect(myData,strata=~Pop/SamplingYear)
+cc_myData_genind <- clonecorrect(myData_genind,strata=~Pop/SamplingYear)
 #genind2genalex(clonecorrect_microsats_dates, filename="C:/Users/liaba/OneDrive - Eidg. Forschungsanstalt WSL/R/truffles/clonecorrected_data.csv", overwrite=TRUE)
-```
-
-#Create genalex file with dates of sampling:
-I want to compare genetic diversity across years and show it for populations. So I need to combine the sample and assign the sampling date.
-I have several ideas how to do it.
-1.
---> Join Genalex file with monitoring file on the sampling column.
---> then read it in as a genclone and genind file again.
-2.
---> Filter monitoring file with genalex file to exclude the rows not matching
---> choose columns that I want to process as a new file and read in as genclone and genind file again.
-
-```{r add dates into microsat file, eval=FALSE, include=FALSE}
-
-##Achtung hier wird eine Tabelle generiert, nur bei Datenänderungen laufen lassen!!
-
-genalex_dates <- read.csv("Daten_Genalex.csv",sep=";", header=FALSE)
-T_all_dates <- T_all %>%
-  mutate(Sampling_month = month(Sampling_date)) %>%
-  select(Code_Analyses_2024,Sampling_month, Sampling_year)
-genalex_dates <- left_join(genalex_dates,T_all_dates,by=c("V1"="Code_Analyses_2024"))
-
-genalex_dates <- genalex_dates %>%
-  unite(col="pop_date",c("V2","Sampling_month","Sampling_year"),sep="_")
-#correct column names
-genalex_dates$pop_date[genalex_dates$pop_date =="2708_NA_NA"] <- "2708"
-genalex_dates$pop_date[genalex_dates$pop_date =="_NA_NA"] <- ""
-genalex_dates$pop_date[genalex_dates$pop_date =="pop_NA_NA"] <- "pop"
-
-#jetzt als csv Datei neu reinladen
-#write.table(genalex_dates, col.names=FALSE, sep=",", "C:/Users/liaba/OneDrive - Eidg. Forschungsanstalt WSL/R/truffles/genalex_dates.csv")
 ```
 
 
@@ -124,48 +93,44 @@ ggplot(T_all, aes(x=Sampling_year)) +
   xlab("Sampling year") +
   scale_x_discrete(limits=c(2010,2016,2021)) +
   geom_bar() +
-  facet_wrap(vars(Site_1))
+  facet_wrap(vars(Site_1_abrev))
 ```
 
-Evtl. später:
-Standorte mit weniger als 10 Samples werden entfernt.
-Dies lässt danach noch folgende Standorte für die Auswertung zu:
-
-```{r Standorte mit weniger als 10 Samples entfernen, include=FALSE}
-# of observations per site
-T_all_corr1 <- subset(T_all,Site_1_abrev!="BAR")
-T_all_corr2 <- subset(T_all_corr1, Site_1_abrev != "GEN")
-```
 
 #Idee: alle Observationen auf einer Zeitachse und nach Standort unterteilt anzeigen
 
 ```{r all observations, echo=FALSE, message=FALSE, warning=FALSE}
 ggplot(T_all) +
-  geom_point(aes(x=Sampling_date, y= fct_rev(Site_1_abrev), color = factor(Nb_markers))) +
+  geom_point(aes(x=Sampling_date, y= fct_rev(Site_1_abrev), color = factor("Nb loci"))) +
   scale_colour_brewer(palette= "Greens") +
   theme_publish(base_family = "Times") +
   labs(title = "Overview of samples in truffle monitoring dataset",
        x = "Sampling year", y = "Sampling site abbreviation",
-       colour = "Nb_markers")
+       colour = "Nb loci")
 ```
 
 Show missing data
 
-```{r missing data, eval=FALSE, include=FALSE}
-info_table(myData,plot=TRUE)
+```{r allele frequencies}
+setPop(myData) <- ~Pop
+(microsats_lt <- locus_table(myData))
+info_table(myData, type = "missing", plot = TRUE)
 #for more stuff (removal of individuals or loci etc.): grunwaldlab.github.io/population_genetics_in_r/locus_stats.html
 ```
 
 ```{r treemap, echo=FALSE}
 #treemap:
-monstrata <- strata(microsats_dates) %>%     
-  group_by(Pop,Month,Year) %>%
+monstrata <- strata(myData) %>%     
+  group_by(Pop,Month,SamplingYear, TruffleYear) %>%
   summarize(Count = n())
-treemap(dtf = monstrata, index = nameStrata(microsats_dates), vSize = "Count",
+treemap(dtf = monstrata, index = nameStrata(myData), vSize = "Count",
         type = "categorical", vColor = "Pop", title = "Truffles")
+#itreemap(dtf = monstrata, index = nameStrata(myData), vSize = "Count",
+ #       type = "categorical", vColor = "Pop", title = "Truffles")
 ```
 
 ```{r examine genetic data as genind, echo=FALSE}
+setPop(myData_genind) <- ~Pop
 barplot(table(pop(myData_genind)), col=funky(17), las=3,
 xlab="Population", ylab="Sample size")
 
@@ -174,7 +139,7 @@ temp
 barplot(myData_genind$loc.n.all,table(locNames(myData_genind)),col=funky(17),las=3,xlab="locNames",ylab="Number of alleles")
 temp$Hexp
 #plot(temp$Hexp, temp$Hobs, pch=20, cex=3, xlim=c(.4,1), ylim=c(.4,1))
-abline(0,1,lty=2)
+#abline(0,1,lty=2)
 ```
 
 ##Clone correction
@@ -185,7 +150,7 @@ Question: Will allelic diversity increase or decrease with clone-censored data?
 
 ```{r compare diversity between corrected and uncorrected, eval=FALSE, include=FALSE}
 #see grunwaldlab.github.io/population_genetics_in_R/Population_Strata_html
-cc <- locus_table(clonecorrect_data, info=FALSE)
+cc <- locus_table(cc_myData, info=FALSE)
 mp <- locus_table(myData, info = FALSE)
 mp-cc
 locus_diff <- mp-cc
@@ -194,24 +159,18 @@ barplot(locus_diff[,"1-D"], ylab="Change in Simpson's Index",xlab="Locus", main 
 
 The graph shows a decrease of diversity for most markers when clone-correcting the data (increase of Simpson index means a decrease of genotypic diversity).
 
-#Allele frequencies, missing data
-```{r allele frequencies, missing data, ploidy}
-(microsats_lt <- locus_table(microsats_dates))
-info_table(microsats_dates, type = "missing", plot = TRUE)
-```
 
 #PCA
 
 ```{r first pca, echo=TRUE}
 x.pops <- tab(myData_genind, freq=TRUE, NA.method="mean")
 pca.pops <- dudi.pca(df = x.pops, center = TRUE, scale = FALSE, scannf = FALSE, nf = 2)
-
 s.class(pca.pops$li, fac=pop(myData_genind), col=funky(15))
 
 #clonecorrected PCA
-x.pops_cc <- tab(clonecorrect_data_genind, freq=TRUE, NA.method="mean")
+x.pops_cc <- tab(cc_myData_genind, freq=TRUE, NA.method="mean")
 pca.pops_cc <- dudi.pca(df = x.pops_cc, center = TRUE, scale = FALSE, scannf = FALSE, nf = 2)
-s.class(pca.pops_cc$li, fac=pop(clonecorrect_data_genind), col=funky(15))
+s.class(pca.pops_cc$li, fac=pop(cc_myData_genind), col=funky(15))
 ```
 
 ## Genotype accumulation curve
@@ -219,10 +178,8 @@ A genotype accumulation curve is a tool that allows you to assess how much power
 We specified sample = 1000 in our function call. This means that for each boxplot, n loci were randomly sampled 1000 times in order to create the distribution. Since this data has been curated, we can see that we have reached the plateau with 13 loci.
  
 ```{r genotype accumulation curve}
-gac <- genotype_curve(microsats_dates, sample = 1000, quiet = TRUE)
+gac <- genotype_curve(myData, sample = 1000, quiet = TRUE)
 ```
-
-We have anything between 5 and 24 alleles per locus. aest28_01 has the highest Simpson diversity (0.80) and aest10_1 as well as aest36_1 have the most evenly distributed alleles (0.88).
 
 
 ##The index of association
@@ -231,17 +188,18 @@ The index of association (IA) was originally proposed by Brown et al. (Brown, Fe
  Next, we will analyze the North American population with the index of association and use 999 permutations of the data in order to give us a p-value. Note that the p-value is calculated with the original observation included.
  
 ```{r index of association and LD}
+setPop(myData) <-~Pop
 LD_BUR <- popsub(myData, "BUR")
 ia(LD_BUR, sample = 999)
 
-setPop(clonecorrect_microsats_dates) <- ~Pop
-LD_BUR_cc <- popsub(clonecorrect_microsats_dates,"BUR")
+setPop(cc_myData) <- ~Pop
+LD_BUR_cc <- popsub(cc_myData,"BUR")
 ia(LD_BUR_cc,sample=999)
 ```
 
 ```{r set strata to Pop_Year}
-setPop(microsats_dates) <- ~Pop/Year
-popdata <- poppr(microsats_dates)
+setPop(myData) <- ~Pop/SamplingYear
+popdata <- poppr(myData)
 popdata
 #N = Number of individuals, MLG = Number of multilocus genotypes, eMLG = number of expected MLG at the smallest sample size >= 10 based on rarefaction
 #SE = Standard error based on eMLG, H = Shannon-Wiener Index of MLG diversity
@@ -249,17 +207,21 @@ popdata
 # lambda = Simpsons index, E.5 = Evenness, Hexp = Neis Expected Heterozygosity
 #Ia = Index of association, rbarD = stand. Index of association
 ```
+We have anything between 5 and 24 alleles per locus. aest28_01 has the highest Simpson diversity (0.80) and aest10_1 as well as aest36_1 have the most evenly distributed alleles (0.88).
+
+
 ## Genotypic evenness
 
 Evenness is a measure of the distribution of genotype abundances, wherein a population with equally abundant genotypes yields a value equal to 1 and a population dominated by a single genotype is closer to zero.
 
 ```{r genotypic evenness}
-M.tab <- mlg.table(microsats_dates)
+M.tab <- mlg.table(myData)
+#mll(myData)
 ```
 
 ```{r set strata to Pop}
-setPop(microsats_dates) <- ~Pop
-popdata_pop <- poppr(microsats_dates)
+setPop(myData) <- ~Pop
+popdata_pop <- poppr(myData)
 popdata_pop
 #N = Number of individuals, MLG = Number of multilocus genotypes, eMLG = number of expected MLG at the smallest sample size >= 10 based on rarefaction
 #SE = Standard error based on eMLG, H = Shannon-Wiener Index of MLG diversity
@@ -269,7 +231,7 @@ popdata_pop
 ```
 
 ```{r genotypic evenness 2}
-M.tab <- mlg.table(microsats_dates)
+M.tab <- mlg.table(myData)
 ```
 
 ## Visualize diversity
@@ -279,23 +241,44 @@ Diversity measures incorporate both genotypic richness and abundance. There are 
 For an easier statistic to grasp, we have included the Simpson index, which is simply one minus the sum of squared genotype frequencies. This measure provides an estimation of the probability that two randomly selected genotypes are different and scales from 0 (no genotypes are different) to 1 (all genotypes are different). In the data above, we can see that lambda is just barely higher in BB than FR (0.984 vs. 0.981). Since this might be an artifact of sample size, we can explore a correction of Simpson’s index for sample size by multiplying lambda by \(N/(N - 1)\). Since R is vectorized, we can do this for all of our populations at once:
 
 ```{r plot diversity Simpson}
-popdata_pop_year <- separate(popdata,Pop,c("Pop","Year"))
-ggplot(popdata_pop_year,aes(Year,lambda)) +
+popdata_pop_year <- separate(popdata,Pop,c("Pop","SamplingYear"))
+ggplot(popdata_pop_year,aes(SamplingYear,lambda)) +
   geom_point() +
   facet_wrap(vars(Pop)) +
   theme_light() +
-  labs(y="Simpson's index", title ="Simpson's index over the years")
+  labs(y="Simpson's index", title ="Simpson's index over the sampling years")
 
 #rarefied:
 N      <- popdata_pop_year$N      # number of samples
 lambda <- popdata_pop_year$lambda # Simpson's index
 Simpson_rarefied <- (N/(N - 1)) * lambda              # Corrected Simpson's index
 
-ggplot(popdata_pop_year,aes(Year,Simpson_rarefied)) +
+ggplot(popdata_pop_year,aes(SamplingYear,Simpson_rarefied)) +
   geom_point() +
   facet_wrap(vars(Pop)) +
   theme_light() +
-  labs(y="Rarefied Simpson's index", title ="Rarefied Simpson's index over the years")
+  labs(y="Rarefied Simpson's index", title ="Rarefied Simpson's index over the sampling years")
+
+# TruffleYears
+setPop(myData) <- ~Pop/TruffleYear
+
+popdata_pop_year <- separate(popdata,Pop,c("Pop","SamplingYear"))
+ggplot(popdata_pop_year,aes(SamplingYear,lambda)) +
+  geom_point() +
+  facet_wrap(vars(Pop)) +
+  theme_light() +
+  labs(y="Simpson's index", title ="Simpson's index over the sampling years")
+
+#rarefied:
+N      <- popdata_pop_year$N      # number of samples
+lambda <- popdata_pop_year$lambda # Simpson's index
+Simpson_rarefied <- (N/(N - 1)) * lambda              # Corrected Simpson's index
+
+ggplot(popdata_pop_year,aes(SamplingYear,Simpson_rarefied)) +
+  geom_point() +
+  facet_wrap(vars(Pop)) +
+  theme_light() +
+  labs(y="Rarefied Simpson's index", title ="Rarefied Simpson's index over the sampling years")
 ```
 
 Assess GST
@@ -315,20 +298,20 @@ Very high differentiation!
 
 
 ```{r plot persistence, message=TRUE, warning=TRUE}
-
-mlg.crosspop <- mlg.crosspop(microsats_dates,df=T)
+setPop(myData) <- ~Pop/SamplingYear
+mlg.crosspop <- mlg.crosspop(myData,df=T)
 
 crosspop <- mlg.crosspop %>%
-  separate_wider_delim(Population,delim="_",names=c("Pop","Year"), too_few="align_end")
+  separate_wider_delim(Population,delim="_",names=c("Pop","SamplingYear"), too_few="align_end")
 
-ggplot(subset(crosspop, Pop %in% "BOB"),aes(Year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+ggplot(subset(crosspop, Pop %in% "BOB"),aes(SamplingYear,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
   labs(title ="Distribution of MLGs in BOB (Bohlingen Buche) over the years")
-ggplot(subset(crosspop, Pop %in% "SCL"),aes(Year,MLG)) + geom_point()  + geom_line(aes(group=MLG)) +
+ggplot(subset(crosspop, Pop %in% "SCL"),aes(SamplingYear,MLG)) + geom_point()  + geom_line(aes(group=MLG)) +
   labs(title ="Distribution of MLGs in SCL (Schlieren Grillplatz) over the years")
-ggplot(subset(crosspop, Pop %in% "ALD"),aes(Year,MLG)) + geom_point()  + geom_line(aes(group=MLG)) +
+ggplot(subset(crosspop, Pop %in% "ALD"),aes(SamplingYear,MLG)) + geom_point()  + geom_line(aes(group=MLG)) +
   labs(title ="Distribution of MLGs in ALD (Aldingen) over the years")
-ggplot(subset(crosspop, Pop %in% "BOH"),aes(Year,MLG)) + geom_point()  + geom_line(aes(group=MLG)) +
+ggplot(subset(crosspop, Pop %in% "BOH"),aes(SamplingYear,MLG)) + geom_point()  + geom_line(aes(group=MLG)) +
   labs(title ="Distribution of MLGs in BOH (Bohlingen Hasel) over the years")
-ggplot(subset(crosspop, Pop %in% "WSL"),aes(Year,MLG)) + geom_point()  + geom_line(aes(group=MLG)) +
+ggplot(subset(crosspop, Pop %in% "WSL"),aes(SamplingYear,MLG)) + geom_point()  + geom_line(aes(group=MLG)) +
   labs(title ="Distribution of MLGs in WSL over the years")
 ```
