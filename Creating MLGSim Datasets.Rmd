@@ -1,0 +1,50 @@
+---
+title: "Creating Analysis Files"
+author: "Lia Baumann"
+date: "2024-05-21"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## MLGSim
+
+3 Datasets herstellen:
+		○ 1x ohne Individuals mit NA
+		○ 28, 01, 31 raus (=11 markers) und danach noch Individuals mit NA raus
+		○ Vergleich 1x ohne Individuals mit NA noch die 28,01,31 raus (umgekehrte Reihenfolge)
+
+```{r MLGSim}
+library(knitr)
+library(tidyverse)
+library(poppr)
+#T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_Mai2024.xlsx")
+
+# wirf alle Individuals mit NA raus
+#myData <- read.genalex("Daten_Genalex.csv",genclone=TRUE, ploidy=1)
+#splitStrata(myData) <- ~Pop/Month/SamplingYear/TruffleYear
+setPop(myData) <- ~Pop
+Tuaest_allMarkersOnly <- myData %>%
+  missingno("geno", cutoff = 0)
+setPop(Tuaest_allMarkersOnly) <- ~Pop
+
+genind2genalex(Tuaest_allMarkersOnly, filename="C:/Users/liaba/OneDrive - Eidg. Forschungsanstalt WSL/R/truffles/Tuaest_allMarkersOnly.csv", overwrite=TRUE)
+
+# wirf Marker 01,28 und 31 raus und danach Individuals mit NA
+
+sepMarkers <- seploc(myData)
+names(sepMarkers)
+Tuaest_11_Markers_NA_Ind <- myData[loc=c("aest06_1","aest07_1","aest15_1","aest26_1","aest35_1","aest36_1","aest10_1","aest18_1","aest24_1","aest25_1","aest29_1")] %>%
+  missingno("geno", cutoff = 0)
+
+genind2genalex(Tuaest_11_Markers_NA_Ind, filename="C:/Users/liaba/OneDrive - Eidg. Forschungsanstalt WSL/R/truffles/Tuaest_11_Markers_NA_Ind.csv", overwrite=TRUE)
+setPop(Tuaest_11_Markers_NA_Ind) <- ~Pop
+
+# wirf NA raus und danach Marker 01,28,36
+Tuaest_NA_Ind_11_Markers <- Tuaest_allMarkersOnly[loc=c("aest06_1","aest07_1","aest15_1","aest26_1","aest35_1","aest36_1","aest10_1","aest18_1","aest24_1","aest25_1","aest29_1")]
+setPop(Tuaest_NA_Ind_11_Markers) <- ~Pop
+
+genind2genalex(Tuaest_NA_Ind_11_Markers, filename="C:/Users/liaba/OneDrive - Eidg. Forschungsanstalt WSL/R/truffles/Tuaest_NA_Ind_11_Markers.csv", overwrite=TRUE)
+```
