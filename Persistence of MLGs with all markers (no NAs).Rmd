@@ -2,7 +2,7 @@
 title: "Persistence of MLGs with all markers (no NAs)"
 author: "Lia Baumann"
 date: "2024-05-29"
-output: github_document
+output: html_document
 editor_options: 
   markdown: 
     wrap: 72
@@ -86,8 +86,7 @@ WSL/R/truffles/cc_TUAEST_ALLMARKERSONLY_HWE.csv")
 2.  MLG Duplikate werden entfernt
 
 cc_distinctMLGs_allMarkersOnly \<-
-cc_FullTable_Tuaest_allMarkersOnly[!duplicated(cc_FullTable_Tuaest_allMarkersOnly\$MLG),
-]
+cc_FullTable_Tuaest_allMarkersOnly[!duplicated(cc_FullTable_Tuaest_allMarkersOnly\$MLG),]
 
 3.  T_all kommt aus der Masterliste
     Tuaest_Master_genMonit_haploid_MP_Mai2024.xlsx
