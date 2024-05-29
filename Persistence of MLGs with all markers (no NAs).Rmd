@@ -3,8 +3,7 @@ title: "Persistence of MLGs with all markers (no NAs)"
 author: "Lia Baumann"
 date: "2024-05-29"
 output: 
-  html_document:
-    keep_md: true
+  github_document
 editor_options: 
   markdown: 
     wrap: 72
@@ -109,15 +108,13 @@ Sampling_year,Sampling_date)
 
 ## Looking at persistence over years
 
-Der erste Plot ist interaktiv (kann auch alle interaktiv machen, bei
-Bedarf).
 
 --\> bei LIM und BRU kommen die MLGs doppelt vor bzw. an beiden Orten...
 sollte man diese vielleicht zusammen nehmen?
 
 ```{r MLGs per year per surface}
-ggplotly(ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "BOB"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
-  labs(title ="Interactive distribution of MLGs in BOB (Bohlingen Buche) over the years") + scale_x_continuous(breaks=2010:2023))
+ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "BOB"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+  labs(title ="distribution of MLGs in BOB (Bohlingen Buche) over the years") + scale_x_continuous(breaks=2010:2023)
 
 ```
 
