@@ -48,114 +48,81 @@ bodies (i.e. ascocarps or sporocarps), known as truffles, comprises more
 than 200 species all over the world ([@bonito2010], [@bonito2013],
 [@guevara2013], [@reyna2014], [@berch2016]), of which at least 30
 naturally occur in Europe [@ceruti]. Some of these species are well
-known for their organoleptic properties and their high economic value,
+known for their organoleptic properties and their high economic value, due to their use in haute cuisine,
 such as *Tuber magnatum* (Alba white truffle), *Tuber melanosporum*
 (Périgord black truffle), and *Tuber aestivum* Vittad. (Burgundy and
 summer truffles, depending on the harvesting period)
-[@boaWildEdibleFungi2004]; [@bonito2010]; [@chevaliera]. Truffle species
-include the most valuable fungi on earth due to their use in haute
-cuisine [@reyna2014a].
+[@boaWildEdibleFungi2004]; [@bonito2010]; [@chevaliera], [@reyna2014a].
 
 As ectomycorrhizal fungi, truffles form symbiotic associations with
 roots of a wide range of ectomycorrhizal tree species [@benucci2011],
-[@stobbe2012] and grant their hosts access to water and nutrients,
-protect roots from pest and disease, and interact with and sometimes
-kill understory, non-­host plants [@gryndler2014]; [@streiblová2012];
+[@stobbe2012]. They grant their hosts access to water and nutrients,
+protect roots from disease and pest, and interact with and sometimes even
+kill understory, non-host plants [@gryndler2014]; [@streiblová2012];
 [@taschen2020]).
 
-In contrast to other high-value forest mushrooms, such as Boletus spp.,
-Cantharellus spp. and Laccaria spp., which can develop their fruitbodies
+In contrast to other high-value forest mushrooms, such as *Boletus* spp.,
+*Cantharellus* spp. and *Laccaria* spp., which can develop their fruitbodies
 during a few days [@moore2008]; [@halbwachs2016]), hypogenous truffle
 fruitbodies are expected to grow more slowly [@pacioni2015]. However, it
 is still unknown how much time truffles need to develop and how many
 generations of fruitbodies can occur within one ‘growing’ season between
 the formation of primordia and the realisation of a fully mature and
-ripe gleba [@büntgen2017]. The species' subterranean life cycle
-dynamics, together with complex host interactions and the lack of
-non-destructive investigation techniques (Luoma et al., 1991), are the
-main reasons for the yet little understood biotic and abiotic drivers of
-truffle growth [@pacioni2015b]. Localising truffles in situ is only
-possible with the help of well-trained sniffing dogs or, very rarely,
-with domestic trufflepigs (or occasionally also by searching and flowing
-truffle-specific flies, such as Suillia tuberiperda), which all have the
-olfactory sense capable of detecting the volatile aroma of fruitbodies
-from a distance of up to 50 m [@splivallo2016]. Consequently, our
-knowledge about the truffles' hidden belowground mode of life is
-restricted to only those fruitbodies that were detected [@trappe2010].
-In fact, we simply do not know how selective a harvest is and how well
+ripe gleba [@büntgen2017]. The main reasons for the still little understood abiotic and biotic drivers of
+truffle growth are the truffle's subterranean life cycle dynamics, complex host interactions and also the lack
+of non-destructive investigation techniques [@pacioni2015b].
+Finding truffles in situ is not possible without the help of well-trained sniffing dogs
+or domestic trufflepigs having the olfactory sense of detecting the volatile aroma compounds
+of truffle fruitbodies from a distance of up to 50m [@splivallo2016]. This also means
+that our knowledge about the truffle's secret and hidden way of life is restricted to
+only the fruitbodies that were managed to be detected [@trappe2010].
+
+"In fact, we simply do not know how selective a harvest is and how well
 it represents the actual abundance of fruitbodies since the absence of
-evidence is no evidence of absence. Non-systematic and nondestructive
-harvests are therefore likely dominated by specific aroma
-concentrations, fruitbody dimensions and locations, as well as
-hunter/dog ability. The aroma profile of truffles seems to be influenced
-by individual genotypes @molinier2015, and not by the geographical
-origin or maturity level @niimi2021. Since the development of aromas
-most likely depends on the presence of specific bacteria
-@splivallo2016a, no correlation between gleba colour and aroma intensity
-has been reported. Depending on the percentage of fully pigmented
-spores, and thus the level of maturity and ripening @molinier2016, the
-gleba of Burgundy truffles can vary from white-ochre to dark brown.
-Differences in the colour and texture of fruitbodies have been proofed
-useful visual criteria for species identification and distinction
-@chatin1887, which may otherwise be considered genetically identical,
-such as Tuber. aestivum and Tuber uncinatum @molinier2013.
-(@buntgenEcoarchaeologicalExcavationTechniques2021).
+evidence is no evidence of absence." @buntgenEcoarchaeologicalExcavationTechniques2021
+
 
 ### *Tuber aestivum*
 
-*T. aestivum* is indigenous to many European countries and, unlike the
-other two species, has a widespread distribution range from Sweden to
-Spain [@stobbe2013]. *T. aestivum* has also been found outside Europe in
-North Africa [@jeandroz2008]. Since the 1970s, *T. aestivum* as well as
+*T. aestivum* is indigenous to many European countries and has a widespread distribution range from Sweden to
+Spain, and has also been found outside Europe in North Africa [@stobbe2013], [@jeandroz2008]. Since the 1970s, *T. aestivum* as well as
 some other truffle species have been successfully cultivated in truffle
-orchards (Chevalier et al. 1973).
+orchards @chevalierCultivationBurgundyTruffle.
 
-To date, most studies have focused on the species’ taxonomic status
-(Mello et al. 2002;Molinier et al. 2013b;Paolocci etal. 2004;896
-Mycorrhiza (2016) 26:895–907 Weden et al. 2005), aroma profiles (Cullere
-et al. 2010;Diaz et al. 2009; Splivallo et al. 2012) and genetic
-diversity (Molinier et al. 2015b) including potential links to aroma
-(Splivallo et al., 2012;Molinier etal. 2015a). The cultivation potential
-and requirements of these species (Benucci et al. 2012; Shamekh et al.
-2014; Stobbe et al. 2013a;Stobbe et al. 2013b), including soil
-conditions (Benucci et al. 2011; Gryndler et al. 2011; Salerni et al.
-2014), have also been investigated previously.
+Most past studies have focused on the species' aroma profiles (@splivalloSmellTrufflesAroma2016,
+@TruffleVolatilesChemical), taxonomic status (@molinierFirstIdentificationPolymorphic2013), @leonardiTypificationFourMost2021@bonitoImprovedResolutionMajor2010, @bonitoHistoricalBiogeographyDiversification2013) 
+and genetic diversity (@molinierSSRbasedIdentificationGenetic2016, @molinierFinescaleSpatialGenetic2015, @staubliHiddenFairyRings2022).
 
-*-- more recent papers? LB*
-
-The small scale genetic structure and the distribution of the
-mating-type strains of *T. aestivum* remain largely unknown. The genome
-sequencing of *T. melanosporum* in 2010 (Martin et al. 2010), as well as
-numerous other studies of *T. melanosporum* (Murat et al., 2013;
-Riccioni et al. 2008; Rubini et al. 2005, 2011a, b), *T. magnatum*
+The genome sequencing of *T. melanosporum* in 2010 (@martinPerigordBlackTruffle2010), as well as
+numerous other studies of *T. melanosporum* (@TuberMelanosporumMating), *T. magnatum*
 (Paolocci et al. 2006;Riccioni et al. 2008;Rubinietal. 2005, 2011a,b)
 and *T. indicum* (Belfiori et al. 2013) have revealed that these species
-are heterothallic, as has lately been confirmed for *T. aestivum* (Payen
-et al. 2014). While homothallic species present both mating types (MAT)
-in a single genome, rendering them self-fertile, heterothallic species
-bear only one ofthe two idiomorphs in the MAT locus (Billiard et al.
-2012). The same haploid mycelium can produce male (antheridia) and
-female (ascogonia) organs, although these structures have hardly been
-observed in Tuber species (Le Tacon et al. 2015). To achieve its life
-cycle, an ascogonium has to be fertilized by a strain of the opposite
+are heterothallic. This has also been confirmed for *T. aestivum* (@payenChapterSevenTruffle2014).
+Homothallic species contain both mating types (MAT) in their genome, which makes them self-fertile,
+while heterothallic species present only one of the two types in the MAT locus (@billiardSexOutcrossingMating2012).
+To achieve its life cycle, a female type, i.e. ascogonium, has to be fertilized by a strain of the opposite
 mating type. In truffles, a fruiting body is composed of peridium, gleba
-and ascospores. The gleba is a haploid tissue consisting ofthe maternal
+and ascospores. The gleba is a haploid tissue consisting of the maternal
 parent genotype, which is usually also found as mycelia in the
-surrounding soil and on nearby ECM root tips (Murat et al. 2013; Rubini
-et al. 2011a). In contrast, ascospores originate from the recombination
+surrounding soil and on nearby ECM root tips (@muratFinescaleSpatialGenetic2013; @TuberMelanosporumMating, Rubini
+et al. 2011a). Ascospores, on the other hand, originate from the recombination
 of the maternal and paternal genotypes [@letacon2015].
 
 The popularity of truffles as an exclusive ingredient of elite
 gastronomy has risen tremendously in recent years (Hall et al., 2003).
 Not only the highly prized Alba white truffle(Tuber magnatum), and the
-Perigord black truffle(Tuber melanosporum), but also the more common
+Périgord black truffle(Tuber melanosporum), but also the more common
 Burgundy truffle(Tuber aestivum) are coveted. In contrast to T. magnatum
 and T. melanosporum, which are native to Mediterranean environments
 (Chevalier and Sourzat, 2012; Vasquez et al., 2014), T. aestivum is
 distributed across large parts of temperate Europe (Chevalier, 2010;
-Stobbe et al., 2012). According to Hall et al. (2003, 2007) this truffle
-species is the most common edible fungus in Europe. Based on inventories
-of hypogeous fungi in the region of Basel, Switzerland, it has even been
+Stobbe et al., 2012).
+
+According to Hall et al. (2003, 2007), *T. aestivum* is the most common edible fungus species
+in Europe. --> check that again!
+
+
+Based on inventories of hypogeous fungi in the region of Basel, Switzerland, it has even been
 estimated to be among the most abundant mushroom species in mixed beech
 forests on calcareous soils (Schw€arzel, 1967). Nevertheless, T.
 aestivum has only been sparsely harvested in many countries, and is even
@@ -227,15 +194,15 @@ not only exposes fruitbodies in the investigated soil layers, but also
 relates each of them to its edaphic environment, and further describes
 the obtained genotype composition.
 
-@steidingerFallSummerTruffle2022 presented 8 years (2011–­2018) of
+@steidingerFallSummerTruffle2022 presented 8 years (2011–2018) of
 citizen science monitoring data on the fruitbody production of naturally
 occurring T. aestivum populations. Using machine learning, they modeled
 how truffle productivity is influenced by soil physicochemical, fungal
-meta-­community, climate, and host tree phenology. Additionally, they
+meta-community, climate, and host tree phenology. Additionally, they
 characterized the broad species climatic envelope of European summer
 truffles. By comparing the sensitivity of summer truffle fruitbody
 productivity to interannual climate trends, they tested whether these
-center-­of-­range, keystone populations are locally sensitized to climate
+center-of-range, keystone populations are locally sensitized to climate
 change.
 
 @molinierFinescaleGeneticStructure2016 determined mating type and simple
@@ -278,7 +245,7 @@ endeavours (Büntgen and Egli, 2014; Büntgen et al., 2017).
 Interdisciplinary and international research projects are now indicating
 that Burgundy truffles (Tuber aestivum) are more widely distributed in
 ecologically suitable habitats across central Europe than previously
-recognised (Stobbe et al., 2012; Molinier et al., 2016c; Cejka et al.,
+recognised (Stobbe et al., 2012; Molinier et al., 2016c; Cejka et al.,
 2020; Puliga et al., 2021).
 
 Sequencing of the T. aestivum genome is currently being completed (Payen
@@ -300,30 +267,17 @@ distribution was not considered. @molinierFinescaleGeneticStructure2016
 
 ## Materials and Methods
 
--   Data collection
+Data collection
 
-    We selected a total of 20 natural *T. aestivum* populations from
-    within the center of its known natural geographic distribution to
-    monitor truffle fruitbody production (Figure 2a). These populations
-    were defined as spatially restricted locations of known truffle
-    occurrences ranging in size from 20 to 1000 m2, depending on the
-    contiguous area under compatible host trees where trained truffle
-    dogs found *T. aestivum* fruitbodies. Monitoring occurred every 3
-    weeks throughout the whole year by citizen scientists using dogs
-    trained to scent summer truffles.. At each site, only one and the
-    same citizen-­dog team performed the monitoring throughout the whole
-    project. For all belowground fruitbodies detected by the truffle
-    dogs, the soil was roughly removed and the species identity, mass
-    (g), and degree of maturity were assessed. The degrees of maturity
-    were divided into the following qualitative categories:
+We selected a total of 20 natural *T. aestivum* populations from within the center of its known natural geographic distribution to monitor truffle fruitbody production (Figure 2a). These populations were defined as spatially restricted locations of known truffle occurrences ranging in size from 20 to 1000 m2, depending on the contiguous area under compatible host trees where trained truffle dogs found *T. aestivum* fruitbodies. Monitoring occurred every 3 weeks throughout the whole year by citizen scientists using dogs trained to scent summer truffles.. At each site, only one and the same citizen-dog team performed the monitoring throughout the whole project. For all belowground fruitbodies detected by the truffle dogs, the soil was roughly removed and the species identity, mass (g), and degree of maturity were assessed. The degrees of maturity were divided into the following qualitative categories:
 
 1.  unripe: white, hard, no or indistinct odor
 
-2.  semi ripe: light beige-­light brown, hard, indistinct (nutty) odor
+2.  semi ripe: light beige-light brown, hard, indistinct (nutty) odor
 
 3.  ripe: brown to dark brown, hard, intense odor
 
-    (@steidingerFallSummerTruffle2022)
+(@steidingerFallSummerTruffle2022)
 
 -   Molecular preparation
 
@@ -372,7 +326,7 @@ LIZ™ dye Size Standard (ThermoFisher Scientific, USA) was used.
 
 -   Genetic analyses
 
-\- Identification of repeated multilocus genotypes
+Identification of repeated multilocus genotypes
 
 A multilocus genotype (MLG) was assigned to each fruiting body. To
 distinguish true clones from samples carrying the same MLG by chance,
@@ -395,9 +349,18 @@ each MLG (simple clone-corrected dataset).
 
 For some spatial analyses (i.e. aggregation index, autocorrelation
 analyses), we assigned up to four centred location points per MLG for
-large MLGs (\>15 m) in the clone-corrected data set (partial
+large MLGs (>15 m) in the clone-corrected data set (partial
 clone-corrected dataset) (Fig. S2).
 @molinierFinescaleGeneticStructure2016
+
+Persistence of individuals
+
+Comparison of genetic diversity (rarefied)
+
+PCAs
+
+STRUCTURE
+
 
 ## Expected results
 
@@ -445,6 +408,10 @@ genetic groups that were spatially intermingled. Forest characteristics
 and disturbances are possible reasons for the observed genetic patterns.
 
 ## Risk assessment
+
+Errors in sampling: risk low.
+Errors in sample preparation (PCRs): moderate.
+Errors in attribution of markers in GeneMapper: moderate to high.
 
 ## Project schedule
 

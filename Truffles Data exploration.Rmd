@@ -1,0 +1,318 @@
+---
+title: "Truffle Monitoring"
+author: "Lia Baumann"
+date: "2024-03-05"
+output: github_document
+bibliography: references.json
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Basis
+
+The basis for the research about Truffle Monitoring data is described in detail in these publications:
+@molinierFirstIdentificationPolymorphic2013
+@molinierSSRbasedIdentificationGenetic2016
+@molinierFinescaleGeneticStructure2016
+@staubliHiddenFairyRings2022
+@steidingerFallSummerTruffle2022
+@legendreComparisonMantelTest2010
+@kamvarPopprPackageGenetic2014
+
+
+```{r Tabellen laden, message=FALSE, warning=FALSE, include=FALSE}
+library(readxl)
+library(knitr)
+library(tidyverse)
+library(ggplot2)
+theme_set(theme_bw())
+library(sf)
+library(ggspatial)
+library(rnaturalearth)
+library(envalysis)
+library(forcats)
+library(poppr)
+library(treemap)
+library(pegas)
+library(adegenet)
+library(devtools)
+library(hierfstat)
+library(mmod)
+T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_Mai2024.xlsx")
+coord <- read_excel("Koordinaten_2024.xlsx")
+myData <- read.genalex("Daten_Genalex.csv",genclone=TRUE, ploidy=1)
+myData_genind <- read.genalex("Daten_Genalex.csv",genclone=FALSE, ploidy=1)
+splitStrata(myData) <- ~Pop/Month/SamplingYear/TruffleYear
+splitStrata(myData_genind) <- ~Pop/Month/SamplingYear/TruffleYear
+cc_myData <- clonecorrect(myData,strata=~Pop/SamplingYear)
+cc_myData_genind <- clonecorrect(myData_genind,strata=~Pop/SamplingYear)
+#genind2genalex(clonecorrect_microsats_dates, filename="C:/Users/liaba/OneDrive - Eidg. Forschungsanstalt WSL/R/truffles/clonecorrected_data.csv", overwrite=TRUE)
+```
+
+
+## Monitoring Sites
+
+```{r Maps laden, echo=FALSE, warning=FALSE}
+europe <- ne_countries(scale="medium",returnclass="sf",continent="europe")
+europe_points <- st_centroid(europe)
+europe_points <- cbind(europe,st_coordinates(st_centroid(europe$geometry)))
+
+ggplot(data=europe) + geom_sf() +
+  geom_text(data=europe_points,aes(x=X,y=Y,label = name),
+            color = "darkmagenta", fontface = "bold", check_overlap = FALSE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  #annotation_north_arrow(location = "bl",which_north = "true",
+  #                       pad_x = unit(0.5,"in"),pad_y=unit(0.5,"in"),
+  #                       style=north_arrow_fancy_orienteering) +
+  coord_sf(xlim = c(5.5,11), ylim = c(45.5,48.5), expand = FALSE) +
+  geom_point(data=coord,
+             aes(x=LON, y=LAT),shape=20,color="darkcyan", fill = "darkcyan",
+             pch = 5, size = 3)
+```
+
+The dataset was already corrected in the following way:
+- Removal of samples with less than 10 markers
+- Removal of samples with two mating types.
+
+
+# Number of samples per Site
+
+```{r erste Datensichtung, echo=FALSE}
+# of observations per site
+number_obs_all <- as.data.frame(T_all %>%
+                                  count(Site_1_abrev))
+coord_observ_table <- left_join(number_obs_all,coord,by="Site_1_abrev")
+kable(select(coord_observ_table[,1:3 ],c(Site_1_abrev,Site,n)), caption = "Number of observations per site")
+```
+
+```{r Data structure per site, echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(T_all, aes(x=Sampling_year)) +
+  ylab("# of Samples") +
+  xlab("Sampling year") +
+  scale_x_discrete(limits=c(2010,2016,2021)) +
+  geom_bar() +
+  facet_wrap(vars(Site_1_abrev))
+```
+
+
+#Idee: alle Observationen auf einer Zeitachse und nach Standort unterteilt anzeigen
+
+```{r all observations, echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(T_all) +
+  geom_point(aes(x=Sampling_date, y= fct_rev(Site_1_abrev), color = factor("Nb loci"))) +
+  scale_colour_brewer(palette= "Greens") +
+  theme_publish(base_family = "Times") +
+  labs(title = "Overview of samples in truffle monitoring dataset",
+       x = "Sampling year", y = "Sampling site abbreviation",
+       colour = "Nb loci")
+```
+
+Show missing data
+
+```{r allele frequencies}
+setPop(myData) <- ~Pop
+(microsats_lt <- locus_table(myData))
+info_table(myData, type = "missing", plot = TRUE)
+#for more stuff (removal of individuals or loci etc.): grunwaldlab.github.io/population_genetics_in_r/locus_stats.html
+```
+
+```{r treemap, echo=FALSE}
+#treemap:
+monstrata <- strata(myData) %>%     
+  group_by(Pop,Month,SamplingYear, TruffleYear) %>%
+  summarize(Count = n())
+treemap(dtf = monstrata, index = nameStrata(myData), vSize = "Count",
+        type = "categorical", vColor = "Pop", title = "Truffles")
+#itreemap(dtf = monstrata, index = nameStrata(myData), vSize = "Count",
+ #       type = "categorical", vColor = "Pop", title = "Truffles")
+```
+
+```{r examine genetic data as genind, echo=FALSE}
+setPop(myData_genind) <- ~Pop
+barplot(table(pop(myData_genind)), col=funky(17), las=3,
+xlab="Population", ylab="Sample size")
+
+temp <- summary(myData_genind)
+temp
+barplot(myData_genind$loc.n.all,table(locNames(myData_genind)),col=funky(17),las=3,xlab="locNames",ylab="Number of alleles")
+temp$Hexp
+#plot(temp$Hexp, temp$Hobs, pch=20, cex=3, xlim=c(.4,1), ylim=c(.4,1))
+#abline(0,1,lty=2)
+```
+
+##Clone correction
+from https://grunwaldlab.github.io/Population_Genetics_in_R/Population_Strata.html
+When dealing with clonal populations, analyses are typically conducted with and without clone correction. Clone correction is a method of censoring a data set such that only one individual per MLG is represented per population (Milgroom, 1996; Grünwald et al., 2003; Grünwald & Hoheisel, 2006). This technique is commonly used with the index of association and genotypic diversity measures since clone corrected populations approximate behavior of sexual populations. Since we want to only observe unique genotypes per population, clone correction requires specification of the stratifications at which clones should be censored. This section will show how to clone correct at a specific stratification and also compare the results with uncorrected data.
+
+Question: Will allelic diversity increase or decrease with clone-censored data?
+
+```{r compare diversity between corrected and uncorrected, eval=FALSE, include=FALSE}
+#see grunwaldlab.github.io/population_genetics_in_R/Population_Strata_html
+cc <- locus_table(cc_myData, info=FALSE)
+mp <- locus_table(myData, info = FALSE)
+mp-cc
+locus_diff <- mp-cc
+barplot(locus_diff[,"1-D"], ylab="Change in Simpson's Index",xlab="Locus", main = "Comparison of clone-corrected vs. uncorrected data")
+```
+
+The graph shows a decrease of diversity for most markers when clone-correcting the data (increase of Simpson index means a decrease of genotypic diversity).
+
+
+#PCA
+
+```{r first pca, echo=TRUE}
+x.pops <- tab(myData_genind, freq=TRUE, NA.method="mean")
+pca.pops <- dudi.pca(df = x.pops, center = TRUE, scale = FALSE, scannf = FALSE, nf = 2)
+s.class(pca.pops$li, fac=pop(myData_genind), col=funky(15))
+
+#clonecorrected PCA
+x.pops_cc <- tab(cc_myData_genind, freq=TRUE, NA.method="mean")
+pca.pops_cc <- dudi.pca(df = x.pops_cc, center = TRUE, scale = FALSE, scannf = FALSE, nf = 2)
+s.class(pca.pops_cc$li, fac=pop(cc_myData_genind), col=funky(15))
+```
+
+## Genotype accumulation curve
+A genotype accumulation curve is a tool that allows you to assess how much power you have to discriminate between unique individuals given a random sample of n loci. This analysis is particularly important for clonal organisms to confirm that a plateau has been reached in the number of loci necessary to discriminate individuals.
+We specified sample = 1000 in our function call. This means that for each boxplot, n loci were randomly sampled 1000 times in order to create the distribution. Since this data has been curated, we can see that we have reached the plateau with 13 loci.
+ 
+```{r genotype accumulation curve}
+gac <- genotype_curve(myData, sample = 1000, quiet = TRUE)
+```
+
+
+##The index of association
+The index of association (IA) was originally proposed by Brown et al. (Brown, Feldman & Nevo, 1980) and implemented in the poppr R package (Kamvar, Tabima & Grünwald, 2014) using a permutation approach to assess if loci are linked as described previously by Agapow and Burt [@]. Agapow and Burt also described the index r¯d
+ that accounts for the number of loci sampled that is less biased and will be used here. The data we will use in this chapter are populations of Phytophthora infestans from North and South America (Goss et al., 2014). We will use the index of association to test the hypothesis that Mexico is the putative origin of P. infestans where populations are expected to be sexual while populations in South America are expected to be clonal.
+ Next, we will analyze the North American population with the index of association and use 999 permutations of the data in order to give us a p-value. Note that the p-value is calculated with the original observation included.
+ 
+```{r index of association and LD}
+setPop(myData) <-~Pop
+LD_BUR <- popsub(myData, "BUR")
+ia(LD_BUR, sample = 999)
+
+setPop(cc_myData) <- ~Pop
+LD_BUR_cc <- popsub(cc_myData,"BUR")
+ia(LD_BUR_cc,sample=999)
+```
+
+```{r set strata to Pop_Year}
+setPop(myData) <- ~Pop/SamplingYear
+popdata <- poppr(myData)
+popdata
+#N = Number of individuals, MLG = Number of multilocus genotypes, eMLG = number of expected MLG at the smallest sample size >= 10 based on rarefaction
+#SE = Standard error based on eMLG, H = Shannon-Wiener Index of MLG diversity
+#G = Stoddart & Taylor's Index of MLG diversity
+# lambda = Simpsons index, E.5 = Evenness, Hexp = Neis Expected Heterozygosity
+#Ia = Index of association, rbarD = stand. Index of association
+```
+We have anything between 5 and 24 alleles per locus. aest28_01 has the highest Simpson diversity (0.80) and aest10_1 as well as aest36_1 have the most evenly distributed alleles (0.88).
+
+
+## Genotypic evenness
+
+Evenness is a measure of the distribution of genotype abundances, wherein a population with equally abundant genotypes yields a value equal to 1 and a population dominated by a single genotype is closer to zero.
+
+```{r genotypic evenness}
+M.tab <- mlg.table(myData)
+#mll(myData)
+```
+
+```{r set strata to Pop}
+setPop(myData) <- ~Pop
+popdata_pop <- poppr(myData)
+popdata_pop
+#N = Number of individuals, MLG = Number of multilocus genotypes, eMLG = number of expected MLG at the smallest sample size >= 10 based on rarefaction
+#SE = Standard error based on eMLG, H = Shannon-Wiener Index of MLG diversity
+#G = Stoddart & Taylor's Index of MLG diversity
+# lambda = Simpsons index, E.5 = Evenness, Hexp = Neis Expected Heterozygosity
+#Ia = Index of association, rbarD = stand. Index of association
+```
+
+```{r genotypic evenness 2}
+M.tab <- mlg.table(myData)
+mlg.vector(myData)
+```
+
+## Visualize diversity
+
+Diversity measures incorporate both genotypic richness and abundance. There are three measures of genotypic diversity employed by poppr, the Shannon-Wiener index (H), Stoddart and Taylor’s index (G), and Simpson’s index (lambda). In our example, comparing the diversity of BB to FR shows that H is greater for FR (4.58 vs. 4.4), but G is lower (53.4 vs. 61.7). Thus, our expectation that diversity is lower for FR than BB is rejected in the case of H, which is likely due to the sensitivity of the Shannon-Wiener index to genotypic richness in the uneven sample sizes, and accepted in the case of G. To be fair, the sample size used to calculate these diversity measures is different and is therefore not an appropriate comparison.
+
+For an easier statistic to grasp, we have included the Simpson index, which is simply one minus the sum of squared genotype frequencies. This measure provides an estimation of the probability that two randomly selected genotypes are different and scales from 0 (no genotypes are different) to 1 (all genotypes are different). In the data above, we can see that lambda is just barely higher in BB than FR (0.984 vs. 0.981). Since this might be an artifact of sample size, we can explore a correction of Simpson’s index for sample size by multiplying lambda by \(N/(N - 1)\). Since R is vectorized, we can do this for all of our populations at once:
+
+```{r plot diversity Simpson}
+popdata_pop_year <- separate(popdata,Pop,c("Pop","SamplingYear"))
+ggplot(popdata_pop_year,aes(SamplingYear,lambda)) +
+  geom_point() +
+  facet_wrap(vars(Pop)) +
+  theme_light() +
+  labs(y="Simpson's index", title ="Simpson's index over the sampling years")
+
+#rarefied:
+N      <- popdata_pop_year$N      # number of samples
+lambda <- popdata_pop_year$lambda # Simpson's index
+Simpson_rarefied <- (N/(N - 1)) * lambda              # Corrected Simpson's index
+
+ggplot(popdata_pop_year,aes(SamplingYear,Simpson_rarefied)) +
+  geom_point() +
+  facet_wrap(vars(Pop)) +
+  theme_light() +
+  labs(y="Rarefied Simpson's index", title ="Rarefied Simpson's index over the sampling years")
+
+# TruffleYears
+setPop(myData) <- ~Pop/TruffleYear
+
+popdata_pop_year <- separate(popdata,Pop,c("Pop","SamplingYear"))
+ggplot(popdata_pop_year,aes(SamplingYear,lambda)) +
+  geom_point() +
+  facet_wrap(vars(Pop)) +
+  theme_light() +
+  labs(y="Simpson's index", title ="Simpson's index over the sampling years")
+
+#rarefied:
+N      <- popdata_pop_year$N      # number of samples
+lambda <- popdata_pop_year$lambda # Simpson's index
+Simpson_rarefied <- (N/(N - 1)) * lambda              # Corrected Simpson's index
+
+ggplot(popdata_pop_year,aes(SamplingYear,Simpson_rarefied)) +
+  geom_point() +
+  facet_wrap(vars(Pop)) +
+  theme_light() +
+  labs(y="Rarefied Simpson's index", title ="Rarefied Simpson's index over the sampling years")
+```
+
+Assess GST
+
+Assessing genetic diversity almost always starts with an analysis of a parameter such as GST
+. There are lengthy debates as to what measure of differentiation is better (Meirmans & Hedrick, 2011). Instead of going into that lengthy debate, it would be more worthwhile to point you into the direction of a package dedicated to Modern Methods of Differentiation called mmod. We will use the data set nancycats containing 17 colonies of cats collected from Nancy, France. As cats tend to stay within small groups, we expect to see some population differentiation. In terms of these diversity measures, an index of GST=0
+ indicates no differentiation, whereas GST=1
+ indicates that populations are segregating for differing alleles.
+ Now we will use Hendrick’s standardized GST
+ to assess population structure among these populations (Hedrick, 2005).
+
+```{r hedrick Gst}
+GST <- Gst_Hedrick(myData_genind)
+barplot(GST$per.locus)
+```
+Very high differentiation!
+
+
+```{r plot persistence, message=TRUE, warning=TRUE}
+setPop(myData) <- ~Pop/SamplingYear
+mlg.crosspop <- mlg.crosspop(myData,df=T)
+
+crosspop <- mlg.crosspop %>%
+  separate_wider_delim(Population,delim="_",names=c("Pop","SamplingYear"), too_few="align_end")
+
+ggplot(subset(crosspop, Pop %in% "BOB"),aes(SamplingYear,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in BOB (Bohlingen Buche) over the years")
+ggplot(subset(crosspop, Pop %in% "SCL"),aes(SamplingYear,MLG)) + geom_point()  + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in SCL (Schlieren Grillplatz) over the years")
+ggplot(subset(crosspop, Pop %in% "ALD"),aes(SamplingYear,MLG)) + geom_point()  + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in ALD (Aldingen) over the years")
+ggplot(subset(crosspop, Pop %in% "BOH"),aes(SamplingYear,MLG)) + geom_point()  + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in BOH (Bohlingen Hasel) over the years")
+ggplot(subset(crosspop, Pop %in% "WSL"),aes(SamplingYear,MLG)) + geom_point()  + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in WSL over the years")
+```

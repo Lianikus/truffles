@@ -1,0 +1,164 @@
+---
+title: "Persistence of MLGs with all markers (no NAs)"
+author: "Lia Baumann"
+date: "2024-05-29"
+output: github_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r Tabellen laden, message=FALSE, warning=FALSE, include=FALSE}
+library(readxl)
+library(knitr)
+library(tidyverse)
+library(ggplot2)
+theme_set(theme_bw())
+library(sf)
+library(ggspatial)
+library(rnaturalearth)
+library(envalysis)
+library(forcats)
+library(poppr)
+library(treemap)
+library(pegas)
+library(adegenet)
+library(devtools)
+library(hierfstat)
+library(mmod)
+library(scales)
+library(plotly)
+T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_Mai2024.xlsx")
+# wirf alle Individuals mit NA raus
+myData <- read.genalex("Daten_Genalex.csv",genclone=TRUE, ploidy=1)
+splitStrata(myData) <- ~Pop/Month/SamplingYear/TruffleYear
+setPop(myData) <- ~Pop
+Tuaest_allMarkersOnly <- myData %>%
+  missingno("geno", cutoff = 0)
+cc_FullTable_Tuaest_allMarkersOnly <- read.csv("C:/Users/liaba/OneDrive - Eidg. Forschungsanstalt WSL/R/truffles/cc_TUAEST_ALLMARKERSONLY_HWE.csv")
+cc_distinctMLGs_allMarkersOnly <- cc_FullTable_Tuaest_allMarkersOnly[!duplicated(cc_FullTable_Tuaest_allMarkersOnly$MLG), ]
+T_all <- separate_wider_delim(T_all,Code_Analyses2, delim="_", names = c("Code","Yr"))
+T_all_withMLGs_allMarkersOnly <- inner_join(T_all,cc_FullTable_Tuaest_allMarkersOnly,by=c("Code"="Sample")) %>%
+  select(Code, MLG, Site_1_abrev, truffle_year, Sampling_year,Sampling_date)
+```
+
+## Genetic information
+
+Erklärung der Datenherkunft:
+
+1.  myData = Daten_Genalex.csv
+
+Aus myData werden danach alle missing (NA) gefiltert:
+
+Tuaest_allMarkersOnly \<- myData %\>% missingno("geno", cutoff = 0)
+
+```{r poppr with Tuaest_allMarkersOnly}
+setPop(Tuaest_allMarkersOnly) <- ~Pop
+poppr_withoutNA <- poppr(Tuaest_allMarkersOnly)
+kable(select(poppr_withoutNA,Pop,N,MLG,eMLG,SE,H,G,lambda,E.5,Hexp,Ia,rbarD))
+```
+
+Info zur Tabelle: N = Number of individuals, MLG = Number of multilocus
+genotypes, eMLG = number of expected MLG at the smallest sample size \>=
+10 based on rarefaction SE = Standard error based on eMLG, H =
+Shannon-Wiener Index of MLG diversity G = Stoddart & Taylor's Index of
+MLG diversity lambda = Simpsons index, E.5 = Evenness, Hexp = Neis
+Expected Heterozygosity Ia = Index of association, rbarD = stand. Index
+of association
+
+-- Wegen der wenigen Samples habe ich SCHIF und BAR danach ausgelassen.
+–
+
+## Persistence over the years (MLG per population)
+
+1.  Import der klonkorrigierten Datei "cc_TUAEST_ALLMARKERSONLY", welche
+    mit MLGSim generiert wurde (enthält Sample, MLG, PSex sowie die
+    Marker):
+
+cc_FullTable_Tuaest_allMarkersOnly \<-
+read.csv("C:/Users/liaba/OneDrive - Eidg. Forschungsanstalt
+WSL/R/truffles/cc_TUAEST_ALLMARKERSONLY_HWE.csv")
+
+2.  MLG Duplikate werden entfernt
+
+cc_distinctMLGs_allMarkersOnly \<-
+cc_FullTable_Tuaest_allMarkersOnly[!duplicated(cc_FullTable_Tuaest_allMarkersOnly\$MLG),
+]
+
+3.  T_all kommt aus der Masterliste
+    Tuaest_Master_genMonit_haploid_MP_Mai2024.xlsx
+
+Hier wird zuerst die Spalte "Code_Analyses2" vom Jahr separiert, und
+danach verjoint, damit die MLGs zusammen mit den Sample-Informationen
+verfügbar sind:
+
+T_all \<- separate_wider_delim(T_all,Code_Analyses2, delim="\_", names =
+c("Code","Yr"))
+
+T_all_withMLGs_allMarkersOnly \<-
+inner_join(T_all,cc_FullTable_Tuaest_allMarkersOnly,by=c("Code"="Sample"))
+%\>% select(Code, MLG, Site_1_abrev, truffle_year,
+Sampling_year,Sampling_date)
+
+4.  Nun können wir damit die Grafiken generieren:
+
+## Looking at persistence over years
+
+Der erste Plot ist interaktiv (kann auch alle interaktiv machen, bei
+Bedarf).
+
+--\> bei LIM und BRU kommen die MLGs doppelt vor bzw. an beiden Orten...
+sollte man diese vielleicht zusammen nehmen?
+
+```{r MLGs per year per surface}
+ggplotly(ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "BOB"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+  labs(title ="Interactive distribution of MLGs in BOB (Bohlingen Buche) over the years") + scale_x_continuous(breaks=2010:2023))
+
+```
+
+```{r more MLGs without code display, echo=FALSE}
+ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "ALD"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in ALD over the years") + scale_x_continuous(breaks=2010:2023)
+ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "BRU"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in BRU over the years") + scale_x_continuous(breaks=2010:2024)
+ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "BUR"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in BUR over the years") + scale_x_continuous(breaks=2010:2023)
+ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "FRB"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in FRB over the years") + scale_x_continuous(breaks=2010:2023)
+ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "FRE"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in FRE over the years") + scale_x_continuous(breaks=2010:2023)
+ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "FRI"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in FRI over the years") + scale_x_continuous(breaks=2010:2023)
+ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "GEN"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in GEN over the years") + scale_x_continuous(breaks=2010:2023)
+ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "HAN"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in HAN over the years") + scale_x_continuous(breaks=2010:2023)
+ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "KON"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in KON over the years") + scale_x_continuous(breaks=2010:2024)
+ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "LIM"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in LIM over the years") + scale_x_continuous(breaks=2010:2024)
+ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "NEU"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in NEU over the years") + scale_x_continuous(breaks=2010:2023)
+ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "RIE"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in RIE over the years") + scale_x_continuous(breaks=2010:2023)
+ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "SCD"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in SCD over the years") + scale_x_continuous(breaks=2010:2023)
+ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "SCG"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in SCG over the years") + scale_x_continuous(breaks=2010:2023)
+ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "SCL"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in SCL over the years") + scale_x_continuous(breaks=2010:2023)
+ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "SCS"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in SCS over the years") + scale_x_continuous(breaks=2010:2023)
+ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "TRO"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in TRO over the years") + scale_x_continuous(breaks=2010:2023)
+ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "UEB"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in UEB over the years") + scale_x_continuous(breaks=2010:2023)
+ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "UST"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in UST over the years") + scale_x_continuous(breaks=2010:2023)
+ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "WSL"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in WSL over the years") + scale_x_continuous(breaks=2010:2023)
+```
