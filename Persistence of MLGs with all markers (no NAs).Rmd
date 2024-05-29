@@ -2,7 +2,9 @@
 title: "Persistence of MLGs with all markers (no NAs)"
 author: "Lia Baumann"
 date: "2024-05-29"
-output: html_document
+output: 
+  html_document:
+    keep_md: true
 editor_options: 
   markdown: 
     wrap: 72
