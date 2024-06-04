@@ -3,7 +3,10 @@ PCA
 Lia Baumann
 2024-06-04
 
-## R Markdown
+## PCA
+
+from
+<https://www.molecularecologist.com/2015/07/30/pca-of-multilocus-genotypes-in-r/>
 
 ``` r
 library(scatterplot3d)

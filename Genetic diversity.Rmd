@@ -1,0 +1,64 @@
+---
+title: "Genetic Diversity"
+author: "Lia Baumann"
+date: "2024-06-04"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Genetic diversity
+
+```{r Tabellen laden, message=FALSE, warning=FALSE, include=FALSE}
+library(readxl)
+library(knitr)
+library(tidyverse)
+library(ggplot2)
+theme_set(theme_bw())
+library(sf)
+library(ggspatial)
+library(rnaturalearth)
+library(envalysis)
+library(forcats)
+library(poppr)
+library(treemap)
+library(pegas)
+library(adegenet)
+library(devtools)
+library(hierfstat)
+library(mmod)
+library(diveRsity)
+T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_Mai2024.xlsx")
+myData <- read.genalex("Daten_Genalex.csv",genclone=TRUE, ploidy=1)
+myData_genind <- read.genalex("Daten_Genalex.csv",genclone=FALSE, ploidy=1)
+myData_genind_allMarkersOnly <- myData_genind %>%
+  missingno("geno", cutoff = 0)
+splitStrata(myData) <- ~Pop/Month/SamplingYear/TruffleYear
+splitStrata(myData_genind) <- ~Pop/Month/SamplingYear/TruffleYear
+splitStrata(myData_genind_allMarkersOnly) <- ~Pop/Month/SamplingYear/TruffleYear
+```
+
+Basic stats with hierfstat
+
+```{r basic stats with all data, message=FALSE, warning=FALSE}
+basic.stats(myData_genind)
+```
+```{r basic stats with reduced dataset (no NAs), message=FALSE, warning=FALSE}
+basic.stats(myData_genind_allMarkersOnly)
+```
+
+Basic stats with poppr
+
+```{r basic stats with poppr, message=FALSE, warning=FALSE}
+setPop(myData_genind) <- ~Pop
+locus_table(myData_genind)
+kable(poppr(myData_genind))
+```
+
+```{r basic stats with poppr, reduced dataset (no NAs), message=FALSE, warning=FALSE}
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+locus_table(myData_genind_allMarkersOnly)
+kable(poppr(myData_genind_allMarkersOnly))
+```
