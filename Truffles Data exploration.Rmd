@@ -80,11 +80,11 @@ The dataset was already corrected in the following way:
 # Number of samples per Site
 
 ```{r erste Datensichtung, echo=FALSE}
-# of observations per site
+# of observations per site and years of sampling
 number_obs_all <- as.data.frame(T_all %>%
                                   count(Site_1_abrev))
 coord_observ_table <- left_join(number_obs_all,coord,by="Site_1_abrev")
-kable(select(coord_observ_table[,1:3 ],c(Site_1_abrev,Site,n)), caption = "Number of observations per site")
+kable(select(coord_observ_table[,1:3 ],c(Site_1_abrev,Site,n), T_all(First(Sampling_date)), caption = "Number of observations per site")
 ```
 
 ```{r Data structure per site, echo=FALSE, message=FALSE, warning=FALSE}
@@ -100,16 +100,17 @@ ggplot(T_all, aes(x=Sampling_year)) +
 #Idee: alle Observationen auf einer Zeitachse und nach Standort unterteilt anzeigen
 
 ```{r all observations, echo=FALSE, message=FALSE, warning=FALSE}
-ggplot(T_all) +
-  geom_point(aes(x=Sampling_date, y= fct_rev(Site_1_abrev), color = factor("Nb loci"))) +
-  scale_colour_brewer(palette= "Greens") +
+T_all$Sampling_date <- as_date(T_all$Sampling_date)
+summary(T_all)
+ggplot(T_all, aes(x=Sampling_date, y= fct_rev(Site_1_abrev))) +
+  geom_point(aes(colour=factor('Nb_Loci'))) +
   theme_publish(base_family = "Times") +
-  labs(title = "Overview of samples in truffle monitoring dataset",
-       x = "Sampling year", y = "Sampling site abbreviation",
-       colour = "Nb loci")
+  scale_colour_brewer(palette= "Greens") +
+  scale_x_date(date_labels="%Y", date_breaks = "5 years") +
+  labs(title = "Overview of samples in truffle monitoring dataset", y = "Sampling site abbreviation", x ="Sampling date", colour="Number of loci")
 ```
 
-Show missing data
+Show missing data:
 
 ```{r allele frequencies}
 setPop(myData) <- ~Pop

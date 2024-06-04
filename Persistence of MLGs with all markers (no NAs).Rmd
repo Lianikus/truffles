@@ -74,6 +74,13 @@ of association
 -- Wegen der wenigen Samples habe ich SCHIF und BAR danach ausgelassen.
 –
 
+Hier nochmals die gleiche Tabelle, jedoch ohne Populationen mit kleiner Sample Size (n<20):
+```{r poppr with Tuaest_allMarkersOnly only sites with 20+ samples}
+setPop(Tuaest_allMarkersOnly) <- ~Pop
+poppr_withoutNA_min20samples <- poppr(popsub(Tuaest_allMarkersOnly, exclude=c("SCG","FRB","BAR","GEN","SCHIF")))
+kable(select(poppr_withoutNA_min20samples,Pop,N,MLG,eMLG,SE,H,G,lambda,E.5,Hexp,Ia,rbarD))
+```
+
 ## Persistence over the years (MLG per population)
 
 1.  Import der klonkorrigierten Datei "cc_TUAEST_ALLMARKERSONLY", welche
