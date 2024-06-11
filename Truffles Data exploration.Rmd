@@ -3,7 +3,7 @@ title: "Truffle Monitoring"
 author: "Lia Baumann"
 date: "2024-03-05"
 output: github_document
-bibliography: references.json
+bibliography: references_bib.json
 ---
 
 ```{r setup, include=FALSE}
@@ -66,7 +66,7 @@ ggplot(data=europe) + geom_sf() +
   #annotation_north_arrow(location = "bl",which_north = "true",
   #                       pad_x = unit(0.5,"in"),pad_y=unit(0.5,"in"),
   #                       style=north_arrow_fancy_orienteering) +
-  coord_sf(xlim = c(5.5,11), ylim = c(45.5,48.5), expand = FALSE) +
+  coord_sf(xlim = c(5.5,10.5), ylim = c(45.5,48.5), expand = FALSE) +
   geom_point(data=coord,
              aes(x=LON, y=LAT),shape=20,color="darkcyan", fill = "darkcyan",
              pch = 5, size = 3)
@@ -79,12 +79,12 @@ The dataset was already corrected in the following way:
 
 # Number of samples per Site
 
-```{r erste Datensichtung, echo=FALSE}
+```{r erste Datensichtung, eval=FALSE, include=FALSE}
 # of observations per site and years of sampling
 number_obs_all <- as.data.frame(T_all %>%
                                   count(Site_1_abrev))
 coord_observ_table <- left_join(number_obs_all,coord,by="Site_1_abrev")
-kable(select(coord_observ_table[,1:3 ],c(Site_1_abrev,Site,n), T_all(First(Sampling_date)), caption = "Number of observations per site")
+#kable(select(coord_observ_table[,1:3 ], c(Site_1_abrev,Site,n), First(Sampling_date), caption = "Number of observations per site"))
 ```
 
 ```{r Data structure per site, echo=FALSE, message=FALSE, warning=FALSE}
@@ -101,9 +101,11 @@ ggplot(T_all, aes(x=Sampling_year)) +
 
 ```{r all observations, echo=FALSE, message=FALSE, warning=FALSE}
 T_all$Sampling_date <- as_date(T_all$Sampling_date)
-summary(T_all)
+T_all$Nb_Loci <- as.factor(T_all$Nb_Loci)
+T_all$Nb_Loci <- factor(T_all$Nb_Loci, ordered=TRUE, levels = c("10","11","12","13","14"))
+
 ggplot(T_all, aes(x=Sampling_date, y= fct_rev(Site_1_abrev))) +
-  geom_point(aes(colour=factor('Nb_Loci'))) +
+  geom_point(aes(colour=factor(Nb_Loci))) +
   theme_publish(base_family = "Times") +
   scale_colour_brewer(palette= "Greens") +
   scale_x_date(date_labels="%Y", date_breaks = "5 years") +
@@ -112,11 +114,22 @@ ggplot(T_all, aes(x=Sampling_date, y= fct_rev(Site_1_abrev))) +
 
 Show missing data:
 
-```{r allele frequencies}
+```{r missing data, fig.height=10, fig.width=15}
 setPop(myData) <- ~Pop
 (microsats_lt <- locus_table(myData))
 info_table(myData, type = "missing", plot = TRUE)
 #for more stuff (removal of individuals or loci etc.): grunwaldlab.github.io/population_genetics_in_r/locus_stats.html
+missing <- info_table(myData,type="missing", df=TRUE)
+missing$Missing <- missing$Missing*100
+missing[missing=="Total"] <- "X-Total"
+
+ggplot(missing,aes(x=Locus, y= fct_rev(Population))) +
+  geom_tile(aes(fill=Missing)) +
+  geom_text(aes(label=round(Missing, 1))) +
+  theme_publish(base_family = "Times") +
+  labs(title = "Missing data", y = "Population", x ="Locus") +
+  theme(axis.text.x = element_text(angle=45, size=17), axis.text.y=element_text(size=17)) +
+  scale_fill_gradient(low="white",high="red")
 ```
 
 ```{r treemap, echo=FALSE}
@@ -223,7 +236,7 @@ M.tab <- mlg.table(myData)
 ```{r set strata to Pop}
 setPop(myData) <- ~Pop
 popdata_pop <- poppr(myData)
-popdata_pop
+kable(popdata_pop)
 #N = Number of individuals, MLG = Number of multilocus genotypes, eMLG = number of expected MLG at the smallest sample size >= 10 based on rarefaction
 #SE = Standard error based on eMLG, H = Shannon-Wiener Index of MLG diversity
 #G = Stoddart & Taylor's Index of MLG diversity
@@ -233,7 +246,7 @@ popdata_pop
 
 ```{r genotypic evenness 2}
 M.tab <- mlg.table(myData)
-mlg.vector(myData)
+kable(M.tab)
 ```
 
 ## Visualize diversity
@@ -285,12 +298,8 @@ ggplot(popdata_pop_year,aes(SamplingYear,Simpson_rarefied)) +
 
 Assess GST
 
-Assessing genetic diversity almost always starts with an analysis of a parameter such as GST
-. There are lengthy debates as to what measure of differentiation is better (Meirmans & Hedrick, 2011). Instead of going into that lengthy debate, it would be more worthwhile to point you into the direction of a package dedicated to Modern Methods of Differentiation called mmod. We will use the data set nancycats containing 17 colonies of cats collected from Nancy, France. As cats tend to stay within small groups, we expect to see some population differentiation. In terms of these diversity measures, an index of GST=0
- indicates no differentiation, whereas GST=1
- indicates that populations are segregating for differing alleles.
- Now we will use Hendrick’s standardized GST
- to assess population structure among these populations (Hedrick, 2005).
+Assessing genetic diversity almost always starts with an analysis of a parameter such as GST. There are lengthy debates as to what measure of differentiation is better (Meirmans & Hedrick, 2011). Instead of going into that lengthy debate, it would be more worthwhile to point you into the direction of a package dedicated to Modern Methods of Differentiation called mmod. We will use the data set nancycats containing 17 colonies of cats collected from Nancy, France. As cats tend to stay within small groups, we expect to see some population differentiation. In terms of these diversity measures, an index of GST=0 indicates no differentiation, whereas GST=1 indicates that populations are segregating for differing alleles.
+Now we will use Hendrick’s standardized GST to assess population structure among these populations (Hedrick, 2005).
 
 ```{r hedrick Gst}
 GST <- Gst_Hedrick(myData_genind)

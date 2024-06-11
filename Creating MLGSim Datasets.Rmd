@@ -28,9 +28,10 @@ library(poppr)
 setPop(myData) <- ~Pop
 Tuaest_allMarkersOnly <- myData %>%
   missingno("geno", cutoff = 0)
+ccR_Tuaest_allMarkersOnly <- clonecorrect(Tuaest_allMarkersOnly)
+#genind2genalex(ccR_Tuaest_allMarkersOnly, filename="C:/Users/liaba/OneDrive - Eidg. Forschungsanstalt WSL/R/truffles/ccR_Tuaest_allMarkersOnly.csv")
 setPop(Tuaest_allMarkersOnly) <- ~Pop
-
-genind2genalex(Tuaest_allMarkersOnly, filename="C:/Users/liaba/OneDrive - Eidg. Forschungsanstalt WSL/R/truffles/Tuaest_allMarkersOnly.csv", overwrite=TRUE)
+#genind2genalex(Tuaest_allMarkersOnly, filename="C:/Users/liaba/OneDrive - Eidg. Forschungsanstalt WSL/R/truffles/Tuaest_allMarkersOnly.csv", overwrite=TRUE)
 
 # wirf Marker 01,28 und 31 raus und danach Individuals mit NA
 
