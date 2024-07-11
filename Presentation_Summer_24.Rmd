@@ -28,6 +28,7 @@ library(hierfstat)
 library(mmod)
 library(diveRsity)
 library(vegan)
+library(writexl)
 T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_Mai2024.xlsx")
 myData <- read.genalex("Daten_Genalex.csv",genclone=TRUE, ploidy=1)
 myData_genind <- read.genalex("Daten_Genalex.csv",genclone=FALSE, ploidy=1)
@@ -38,13 +39,13 @@ splitStrata(myData_genind) <- ~Pop/Month/SamplingYear/TruffleYear
 splitStrata(myData_genind_allMarkersOnly) <- ~Pop/Month/SamplingYear/TruffleYear
 ```
 
-# myData_genind_allMarkersOnly locus table mean over all data
+### myData_genind_allMarkersOnly locus table mean over all data
 ```{r mean table over all, echo=TRUE, warning=FALSE, message=FALSE}
 setPop(myData_genind_allMarkersOnly) <- ~Pop/SamplingYear
 locus_table(myData_genind_allMarkersOnly, lev="genotype")
 ```
 
-# myData_genind_allMarkersOnly locus table per Population (Strata: Population / SamplingYear)
+### myData_genind_allMarkersOnly locus table per Population (Strata: Population / SamplingYear)
 ```{r Hexp table Pop SamplingYear, echo=TRUE, warning=FALSE, message=FALSE}
 setPop(myData_genind_allMarkersOnly) <- ~Pop/SamplingYear
 
@@ -75,7 +76,7 @@ ggplot(locus_table_SY_hexp,aes(x=SamplingYear, y=mean)) +
   facet_wrap(vars(Pop))
 ```
 
-# myData_genind_allMarkersOnly locus table per Population (Strata: Population / TruffleYear)
+### myData_genind_allMarkersOnly locus table per Population (Strata: Population / TruffleYear)
 ```{r Hexp table Pop TruffleYear, echo=TRUE, warning=FALSE, message=FALSE}
 setPop(myData_genind_allMarkersOnly) <- ~Pop/TruffleYear
 
@@ -104,4 +105,62 @@ kable(locus_table_TY_hexp)
 ggplot(locus_table_TY_hexp,aes(x=TruffleYear, y=mean)) +
   geom_point() +
   facet_wrap(vars(Pop))
+```
+
+```{r write excel files}
+write_xlsx(locus_table_SY_hexp, "C:\\Users\\liaba\\OneDrive - Eidg. Forschungsanstalt WSL\\R\\truffles\\Presentation-Summer-24_files\\locus_table_SY_hexp.xlsx")
+write_xlsx(locus_table_TY_hexp, "C:\\Users\\liaba\\OneDrive - Eidg. Forschungsanstalt WSL\\R\\truffles\\Presentation-Summer-24_files\\locus_table_TY_hexp.xlsx")
+```
+
+# Rarefaction of Neis' diversity index
+Rarefied: Hexp * (N/N-1). N= Anzahl samples (nicht Allele)
+
+```{r rarefy Nei SamplingYear}
+setPop(myData_genind_allMarkersOnly) <- ~Pop/SamplingYear
+popdata_pop_year_rareNei_SY <- poppr(myData_genind_allMarkersOnly) %>%
+  select(Pop, N)
+
+locus_table_SY_hexp_N <- 
+  select(locus_table_SY, X31:X45) %>%
+  rename(aest06_1=X31,aest07_1=X32, aest15_1=X33, aest26_1=X34,aest28_1=X35, aest35_1=X36, aest36_1=X37, aest01_1=X38, aest10_1=X39, aest18_1=X40, aest24_1=X41, aest25_1=X42, aest29_1=X43, aest31_1=X44, mean=X45) %>%
+    tibble::rownames_to_column("Pop") %>%
+  left_join(.,popdata_pop_year_rareNei_SY,by="Pop") %>%
+  separate(.,Pop,sep="_", into=c("Pop","SamplingYear"))
+
+N <- locus_table_SY_hexp_N$N #number of samples
+#calculate rarefaction over all the values (columns 3:17)
+rarHexpSY <- (N/(N-1))*select(locus_table_SY_hexp_N,3:17)
+#add the pop and year again
+rarHexpSY <- bind_cols(rarHexpSY,Pop = locus_table_SY_hexp_N$Pop, SamplingYear = locus_table_SY_hexp_N$SamplingYear)
+
+kable(rarHexpSY)
+
+```
+
+```{r rarefy Nei TruffleYear}
+setPop(myData_genind_allMarkersOnly) <- ~Pop/TruffleYear
+popdata_pop_year_rareNei_TY <- poppr(myData_genind_allMarkersOnly) %>%
+  select(Pop, N)
+
+locus_table_TY_hexp_N <- 
+  select(locus_table_TY, X31:X45) %>%
+  rename(aest06_1=X31,aest07_1=X32, aest15_1=X33, aest26_1=X34,aest28_1=X35, aest35_1=X36, aest36_1=X37, aest01_1=X38, aest10_1=X39, aest18_1=X40, aest24_1=X41, aest25_1=X42, aest29_1=X43, aest31_1=X44, mean=X45) %>%
+    tibble::rownames_to_column("Pop") %>%
+  left_join(.,popdata_pop_year_rareNei_TY,by="Pop") %>%
+  separate(.,Pop,sep="_", into=c("Pop","TruffleYear"))
+
+N <- locus_table_TY_hexp_N$N #number of samples
+#calculate rarefaction over all the values (columns 3:17)
+rarHexpTY <- (N/(N-1))*select(locus_table_TY_hexp_N,3:17)
+#add the pop and year again
+rarHexpTY <- bind_cols(rarHexpTY,Pop = locus_table_TY_hexp_N$Pop, TruffleYear = locus_table_TY_hexp_N$TruffleYear)
+
+kable(rarHexpTY)
+
+```
+
+
+```{r write excel files rarefied}
+write_xlsx(rarHexpSY, "C:\\Users\\liaba\\OneDrive - Eidg. Forschungsanstalt WSL\\R\\truffles\\Presentation-Summer-24_files\\rarHexpSY.xlsx")
+write_xlsx(rarHexpTY, "C:\\Users\\liaba\\OneDrive - Eidg. Forschungsanstalt WSL\\R\\truffles\\Presentation-Summer-24_files\\rarHexpTY.xlsx")
 ```
