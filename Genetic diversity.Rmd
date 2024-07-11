@@ -30,6 +30,7 @@ library(devtools)
 library(hierfstat)
 library(mmod)
 library(diveRsity)
+library(vegan)
 T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_Mai2024.xlsx")
 myData <- read.genalex("Daten_Genalex.csv",genclone=TRUE, ploidy=1)
 myData_genind <- read.genalex("Daten_Genalex.csv",genclone=FALSE, ploidy=1)
@@ -61,4 +62,11 @@ kable(poppr(myData_genind))
 setPop(myData_genind_allMarkersOnly) <- ~Pop
 locus_table(myData_genind_allMarkersOnly)
 kable(poppr(myData_genind_allMarkersOnly))
+```
+
+```{r rarefaction curve}
+setPop(myData_genind) <- ~Pop
+summary(myData_genind)
+H.Pop <- mlg.table(myData_genind, bar=FALSE)
+rarecurve(H.Pop, ylab="Number of expected MLGs", sample=min(rowSums(H.Pop)), border = NA, fill = NA, font = 2, cex = 1, col =1, lty=1)
 ```

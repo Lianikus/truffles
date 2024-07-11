@@ -1,0 +1,107 @@
+---
+title: "Presentation2024"
+author: "Lia Baumann"
+date: "2024-07-10"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Nei's Genetic diversity
+
+```{r Tabellen laden, message=FALSE, warning=FALSE, include=FALSE}
+library(readxl)
+library(knitr)
+library(tidyverse)
+library(ggplot2)
+theme_set(theme_bw())
+library(envalysis)
+library(forcats)
+library(poppr)
+library(treemap)
+library(pegas)
+library(adegenet)
+library(devtools)
+library(hierfstat)
+library(mmod)
+library(diveRsity)
+library(vegan)
+T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_Mai2024.xlsx")
+myData <- read.genalex("Daten_Genalex.csv",genclone=TRUE, ploidy=1)
+myData_genind <- read.genalex("Daten_Genalex.csv",genclone=FALSE, ploidy=1)
+myData_genind_allMarkersOnly <- myData_genind %>%
+  missingno("geno", cutoff = 0)
+splitStrata(myData) <- ~Pop/Month/SamplingYear/TruffleYear
+splitStrata(myData_genind) <- ~Pop/Month/SamplingYear/TruffleYear
+splitStrata(myData_genind_allMarkersOnly) <- ~Pop/Month/SamplingYear/TruffleYear
+```
+
+# myData_genind_allMarkersOnly locus table mean over all data
+```{r mean table over all, echo=TRUE, warning=FALSE, message=FALSE}
+setPop(myData_genind_allMarkersOnly) <- ~Pop/SamplingYear
+locus_table(myData_genind_allMarkersOnly, lev="genotype")
+```
+
+# myData_genind_allMarkersOnly locus table per Population (Strata: Population / SamplingYear)
+```{r Hexp table Pop SamplingYear, echo=TRUE, warning=FALSE, message=FALSE}
+setPop(myData_genind_allMarkersOnly) <- ~Pop/SamplingYear
+
+# create a data frame and transpose the result;
+# use sapply to iterate over all populations calculated by seppop.
+# then use the locus_table function on the level Genotype
+
+locus_table_SY <- data.frame(t(
+  sapply(seppop(myData_genind_allMarkersOnly),
+    function(ls) poppr::locus_table(ls,lev="genotype"))))
+
+# choose only the columns corresponding to Hexp values and rename them with their loci
+
+locus_table_SY_hexp <- 
+  select(locus_table_SY, X31:X45) %>%
+  rename(aest06_1=X31,aest07_1=X32, aest15_1=X33, aest26_1=X34,aest28_1=X35, aest35_1=X36, aest36_1=X37, aest01_1=X38, aest10_1=X39, aest18_1=X40, aest24_1=X41, aest25_1=X42, aest29_1=X43, aest31_1=X44, mean=X45) %>%
+  tibble::rownames_to_column("Pop") %>%
+  separate(.,Pop,sep="_", into=c("Pop","SamplingYear"))
+                                      
+#check with one population:
+#locus_table(myData_genind_AllMarkersOnly, lev="genotype",population="UEB_2015")
+#looks good
+
+kable(locus_table_SY_hexp)
+
+ggplot(locus_table_SY_hexp,aes(x=SamplingYear, y=mean)) +
+  geom_point() +
+  facet_wrap(vars(Pop))
+```
+
+# myData_genind_allMarkersOnly locus table per Population (Strata: Population / TruffleYear)
+```{r Hexp table Pop TruffleYear, echo=TRUE, warning=FALSE, message=FALSE}
+setPop(myData_genind_allMarkersOnly) <- ~Pop/TruffleYear
+
+# create a data frame and transpose the result;
+# use sapply to iterate over all populations calculated by seppop.
+# then use the locus_table function on the level Genotype
+
+locus_table_TY <- data.frame(t(
+  sapply(seppop(myData_genind_allMarkersOnly),
+    function(ls) poppr::locus_table(ls,lev="genotype"))))
+
+# choose only the columns corresponding to Hexp values and rename them with their loci
+
+locus_table_TY_hexp <- 
+  select(locus_table_TY, X31:X45) %>%
+  rename(aest06_1=X31,aest07_1=X32, aest15_1=X33, aest26_1=X34,aest28_1=X35, aest35_1=X36, aest36_1=X37, aest01_1=X38, aest10_1=X39, aest18_1=X40, aest24_1=X41, aest25_1=X42, aest29_1=X43, aest31_1=X44, mean=X45) %>%
+    tibble::rownames_to_column("Pop") %>%
+  separate(.,Pop,sep="_", into=c("Pop","TruffleYear"))
+                                      
+#check with one population:
+#locus_table(myData_genind_AllMarkersOnly, lev="genotype",population="UEB_2015")
+#looks good
+
+kable(locus_table_TY_hexp)
+
+ggplot(locus_table_TY_hexp,aes(x=TruffleYear, y=mean)) +
+  geom_point() +
+  facet_wrap(vars(Pop))
+```

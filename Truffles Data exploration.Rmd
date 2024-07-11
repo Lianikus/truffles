@@ -44,6 +44,7 @@ T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_Mai2024.xlsx")
 coord <- read_excel("Koordinaten_2024.xlsx")
 myData <- read.genalex("Daten_Genalex.csv",genclone=TRUE, ploidy=1)
 myData_genind <- read.genalex("Daten_Genalex.csv",genclone=FALSE, ploidy=1)
+
 splitStrata(myData) <- ~Pop/Month/SamplingYear/TruffleYear
 splitStrata(myData_genind) <- ~Pop/Month/SamplingYear/TruffleYear
 cc_myData <- clonecorrect(myData,strata=~Pop/SamplingYear)
