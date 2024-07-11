@@ -70,11 +70,25 @@ locus_table_SY_hexp <-
 #looks good
 
 kable(locus_table_SY_hexp)
+locus_table_SY_hexp_pivot <- pivot_longer(locus_table_SY_hexp,cols=3:16,names_to="locus",values_to="value")
 
-ggplot(locus_table_SY_hexp,aes(x=SamplingYear, y=mean)) +
+ggplot(locus_table_SY_hexp_pivot,aes(x=SamplingYear, y=value)) +
   geom_point() +
-  facet_wrap(vars(Pop))
+  facet_wrap(vars(Pop)) +
+  theme_classic()
 ```
+
+```{r GAM plots SY, eval=FALSE, include=FALSE}
+#calculating the GAM
+library(mgcv)
+mod_lm = gam(value ~ Pop, data = locus_table_SY_hexp_pivot)
+summary(mod_lm)
+mod_gam1 = gam(value ~ s(Pop), data = locus_table_SY_hexp_pivot)
+summary(mod_gam1)
+mod_gam2 = gam(value ~ s(Pop) + s(SamplingYear) + s(locus), data = locus_table_SY_hexp_pivot)
+summary(mod_gam2)
+```
+
 
 ### myData_genind_allMarkersOnly locus table per Population (Strata: Population / TruffleYear)
 ```{r Hexp table Pop TruffleYear, echo=TRUE, warning=FALSE, message=FALSE}
@@ -163,4 +177,26 @@ kable(rarHexpTY)
 ```{r write excel files rarefied}
 write_xlsx(rarHexpSY, "C:\\Users\\liaba\\OneDrive - Eidg. Forschungsanstalt WSL\\R\\truffles\\Presentation-Summer-24_files\\rarHexpSY.xlsx")
 write_xlsx(rarHexpTY, "C:\\Users\\liaba\\OneDrive - Eidg. Forschungsanstalt WSL\\R\\truffles\\Presentation-Summer-24_files\\rarHexpTY.xlsx")
+```
+
+# PCA
+
+```{r pca, echo=TRUE}
+#uncorrected PCA with allMarkersOnly dataset
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+x.pops_allMarkersOnly <- tab(myData_genind_allMarkersOnly, freq=TRUE, NA.method="mean")
+pca.pops.allMarkersOnly <- dudi.pca(df = x.pops_allMarkersOnly, center = TRUE, scale = FALSE, scannf = FALSE, nf = 2)
+s.class(pca.pops.allMarkersOnly$li, fac=pop(myData_genind_allMarkersOnly), col=funky(15))
+
+#clonecorrected PCA  with samplingYear
+cc_myData_genind_allMarkersOnly_SY <- clonecorrect(myData_genind_allMarkersOnly,strata=~Pop/SamplingYear)
+x.pops_cc.SY <- tab(cc_myData_genind_allMarkersOnly_SY, freq=TRUE, NA.method="mean")
+pca.pops_cc.SY <- dudi.pca(df = x.pops_cc.SY, center = TRUE, scale = FALSE, scannf = FALSE, nf = 2)
+s.class(pca.pops_cc.SY$li, fac=pop(cc_myData_genind_allMarkersOnly_SY), col=funky(15))
+
+#clonecorrected PCA  with TruffleYear
+cc_myData_genind_allMarkersOnly_TY <- clonecorrect(myData_genind_allMarkersOnly,strata=~Pop/TruffleYear)
+x.pops_cc.TY <- tab(cc_myData_genind_allMarkersOnly_TY, freq=TRUE, NA.method="mean")
+pca.pops_cc.TY <- dudi.pca(df = x.pops_cc.TY, center = TRUE, scale = FALSE, scannf = FALSE, nf = 2)
+s.class(pca.pops_cc.TY$li, fac=pop(cc_myData_genind_allMarkersOnly_TY), col=funky(15))
 ```

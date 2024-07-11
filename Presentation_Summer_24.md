@@ -183,9 +183,12 @@ kable(locus_table_SY_hexp)
 | SCHIF | 2016 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
 
 ``` r
-ggplot(locus_table_SY_hexp,aes(x=SamplingYear, y=mean)) +
+locus_table_SY_hexp_pivot <- pivot_longer(locus_table_SY_hexp,cols=3:16,names_to="locus",values_to="value")
+
+ggplot(locus_table_SY_hexp_pivot,aes(x=SamplingYear, y=value)) +
   geom_point() +
-  facet_wrap(vars(Pop))
+  facet_wrap(vars(Pop)) +
+  theme_classic()
 ```
 
 ![](Presentation_Summer_24_files/figure-gfm/Hexp%20table%20Pop%20SamplingYear-1.png)<!-- -->
@@ -655,3 +658,35 @@ kable(rarHexpTY)
 write_xlsx(rarHexpSY, "C:\\Users\\liaba\\OneDrive - Eidg. Forschungsanstalt WSL\\R\\truffles\\Presentation-Summer-24_files\\rarHexpSY.xlsx")
 write_xlsx(rarHexpTY, "C:\\Users\\liaba\\OneDrive - Eidg. Forschungsanstalt WSL\\R\\truffles\\Presentation-Summer-24_files\\rarHexpTY.xlsx")
 ```
+
+# PCA
+
+``` r
+#uncorrected PCA with allMarkersOnly dataset
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+x.pops_allMarkersOnly <- tab(myData_genind_allMarkersOnly, freq=TRUE, NA.method="mean")
+pca.pops.allMarkersOnly <- dudi.pca(df = x.pops_allMarkersOnly, center = TRUE, scale = FALSE, scannf = FALSE, nf = 2)
+s.class(pca.pops.allMarkersOnly$li, fac=pop(myData_genind_allMarkersOnly), col=funky(15))
+```
+
+![](Presentation_Summer_24_files/figure-gfm/pca-1.png)<!-- -->
+
+``` r
+#clonecorrected PCA  with samplingYear
+cc_myData_genind_allMarkersOnly_SY <- clonecorrect(myData_genind_allMarkersOnly,strata=~Pop/SamplingYear)
+x.pops_cc.SY <- tab(cc_myData_genind_allMarkersOnly_SY, freq=TRUE, NA.method="mean")
+pca.pops_cc.SY <- dudi.pca(df = x.pops_cc.SY, center = TRUE, scale = FALSE, scannf = FALSE, nf = 2)
+s.class(pca.pops_cc.SY$li, fac=pop(cc_myData_genind_allMarkersOnly_SY), col=funky(15))
+```
+
+![](Presentation_Summer_24_files/figure-gfm/pca-2.png)<!-- -->
+
+``` r
+#clonecorrected PCA  with TruffleYear
+cc_myData_genind_allMarkersOnly_TY <- clonecorrect(myData_genind_allMarkersOnly,strata=~Pop/TruffleYear)
+x.pops_cc.TY <- tab(cc_myData_genind_allMarkersOnly_TY, freq=TRUE, NA.method="mean")
+pca.pops_cc.TY <- dudi.pca(df = x.pops_cc.TY, center = TRUE, scale = FALSE, scannf = FALSE, nf = 2)
+s.class(pca.pops_cc.TY$li, fac=pop(cc_myData_genind_allMarkersOnly_TY), col=funky(15))
+```
+
+![](Presentation_Summer_24_files/figure-gfm/pca-3.png)<!-- -->
