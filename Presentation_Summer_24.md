@@ -692,7 +692,7 @@ pca.pops_cc.SY <- dudi.pca(df = x.pops_cc.SY,
 s.class(pca.pops_cc.SY$li,
         fac=pop(cc_myData_genind_allMarkersOnly_SY),
         col=funky(15),
-        sub="PCA mit poppr klonkorrigiertem Datenset ohne NA (allMarkersOnly)")
+        sub="PCA mit poppr klonkorrigiertem Datenset ohne NA (allMarkersOnly), basiert auf Sampling Year")
 ```
 
 ![](Presentation_Summer_24_files/figure-gfm/pca-2.png)<!-- -->
@@ -707,7 +707,8 @@ pca.pops_cc.TY <- dudi.pca(df = x.pops_cc.TY,
                            center = TRUE, scale = FALSE, scannf = FALSE, nf = 2)
 s.class(pca.pops_cc.TY$li,
         fac=pop(cc_myData_genind_allMarkersOnly_TY),
-        col=funky(15))
+        col=funky(15),
+        sub="PCA mit poppr klonkorrigiertem Datenset ohne NA (allMarkersOnly), basiert auf Truffle Year")
 ```
 
 ![](Presentation_Summer_24_files/figure-gfm/pca-3.png)<!-- -->
