@@ -37,6 +37,11 @@ myData_genind_allMarkersOnly <- myData_genind %>%
 splitStrata(myData) <- ~Pop/Month/SamplingYear/TruffleYear
 splitStrata(myData_genind) <- ~Pop/Month/SamplingYear/TruffleYear
 splitStrata(myData_genind_allMarkersOnly) <- ~Pop/Month/SamplingYear/TruffleYear
+cc_myData_genind_allMarkersOnly_SY <- clonecorrect(myData_genind_allMarkersOnly,
+                                                   strata=~Pop/SamplingYear)
+rm(cc_myData_genind_allMarkersOnly)
+cc_myData_genind_allMarkersOnly_TY <- clonecorrect(myData_genind_allMarkersOnly,
+                                                   strata=~Pop/TruffleYear)
 ```
 
 ### myData_genind_allMarkersOnly locus table mean over all data
@@ -73,12 +78,23 @@ kable(locus_table_SY_hexp)
 locus_table_SY_hexp_pivot <- pivot_longer(locus_table_SY_hexp,cols=3:16,names_to="locus",values_to="value")
 
 ggplot(locus_table_SY_hexp_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
-  geom_point(pch=20) +
-  geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen") +
+  geom_point(pch=20, alpha=0.3, size=0.8) +
+  geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
   facet_wrap(vars(Pop)) +
-  theme(aspect.ratio=0.35) +
   labs(y="Nei's genetic diversity Hexp", x="Sampling year") +
-  ggtitle("Nei's genetic diversity per locus, Sampling year and Population")
+  ggtitle("Nei's genetic diversity per locus, Sampling year and Population") +
+  theme(aspect.ratio=0.4,
+    strip.background = element_blank(),
+    strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
+    panel.grid = element_blank(),
+    panel.spacing=unit(0.1,"lines"))
+
+n_samples_allMarkersOnly_SY <- poppr(myData_genind_allMarkersOnly) %>%
+  separate(Pop, sep="_", into=c("Pop","SamplingYear"))
+
+n_samples_allMarkersOnly_SY %>%
+  select(Pop,SamplingYear,N) %>%
+  kable()
 ```
 
 ```{r GAM plots SY, eval=FALSE, include=FALSE}
@@ -128,10 +144,26 @@ locus_table_TY_hexp <-
 #looks good
 
 kable(locus_table_TY_hexp)
+locus_table_TY_hexp_pivot <- pivot_longer(locus_table_TY_hexp,cols=3:16,names_to="locus",values_to="value")
 
-ggplot(locus_table_TY_hexp,aes(x=TruffleYear, y=mean)) +
-  geom_point() +
-  facet_wrap(vars(Pop))
+ggplot(locus_table_TY_hexp_pivot,aes(x=as.numeric(TruffleYear), y=value)) +
+  geom_point(pch=20, alpha=0.3, size=0.8) +
+  geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
+  facet_wrap(vars(Pop)) +
+  labs(y="Nei's genetic diversity Hexp", x="Truffle year") +
+  ggtitle("Nei's genetic diversity per locus, Truffle year and Population") +
+  theme(aspect.ratio=0.4,
+    strip.background = element_blank(),
+    strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
+    panel.grid = element_blank(),
+    panel.spacing=unit(0.1,"lines"))
+
+n_samples_allMarkersOnly_TY <- poppr(myData_genind_allMarkersOnly) %>%
+  separate(Pop, sep="_", into=c("Pop","TruffleYear"))
+
+n_samples_allMarkersOnly_TY %>%
+  select(Pop,TruffleYear,N) %>%
+  kable()
 ```
 
 ```{r write excel files}
@@ -162,6 +194,20 @@ rarHexpSY <- bind_cols(rarHexpSY,Pop = locus_table_SY_hexp_N$Pop, SamplingYear =
 
 kable(rarHexpSY)
 
+locus_table_SY_hexp_pivot <- pivot_longer(locus_table_SY_hexp,cols=3:16,names_to="locus",values_to="value")
+
+ggplot(locus_table_SY_hexp_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
+  geom_point(pch=20, alpha=0.3, size=0.8) +
+  geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
+  facet_wrap(vars(Pop)) +
+  labs(y="Nei's genetic diversity rarefied Hexp", x="Sampling year") +
+  ggtitle("Nei's rarefied genetic diversity per locus, Sampling year and Population") +
+  theme(aspect.ratio=0.4,
+    strip.background = element_blank(),
+    strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
+    panel.grid = element_blank(),
+    panel.spacing=unit(0.1,"lines"))
+
 ```
 
 ```{r rarefy Nei TruffleYear}
@@ -184,6 +230,19 @@ rarHexpTY <- bind_cols(rarHexpTY,Pop = locus_table_TY_hexp_N$Pop, TruffleYear = 
 
 kable(rarHexpTY)
 
+locus_table_TY_hexp_pivot <- pivot_longer(locus_table_TY_hexp,cols=3:16,names_to="locus",values_to="value")
+
+ggplot(locus_table_TY_hexp_pivot,aes(x=as.numeric(TruffleYear), y=value)) +
+  geom_point(pch=20, alpha=0.3, size=0.8) +
+  geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
+  facet_wrap(vars(Pop)) +
+  labs(y="Nei's genetic diversity rarefied Hexp", x="Truffle year") +
+  ggtitle("Nei's rarefied genetic diversity per locus, Truffle year and Population") +
+  theme(aspect.ratio=0.4,
+    strip.background = element_blank(),
+    strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
+    panel.grid = element_blank(),
+    panel.spacing=unit(0.1,"lines"))
 ```
 
 
@@ -191,6 +250,106 @@ kable(rarHexpTY)
 write_xlsx(rarHexpSY, "C:\\Users\\liaba\\OneDrive - Eidg. Forschungsanstalt WSL\\R\\truffles\\Presentation-Summer-24_files\\rarHexpSY.xlsx")
 write_xlsx(rarHexpTY, "C:\\Users\\liaba\\OneDrive - Eidg. Forschungsanstalt WSL\\R\\truffles\\Presentation-Summer-24_files\\rarHexpTY.xlsx")
 ```
+
+
+### clone-corrected myData_genind_allMarkersOnly locus table per Population (Strata: Population / SamplingYear)
+```{r cc Hexp table Pop SamplingYear, echo=TRUE, warning=FALSE, message=FALSE}
+
+setPop(cc_myData_genind_allMarkersOnly_SY) <- ~Pop/SamplingYear
+
+# create a data frame and transpose the result;
+# use sapply to iterate over all populations calculated by seppop.
+# then use the locus_table function on the level Genotype
+
+cc_locus_table_SY <- data.frame(t(
+  sapply(seppop(cc_myData_genind_allMarkersOnly_SY),
+    function(ls) poppr::locus_table(ls,lev="genotype"))))
+
+# choose only the columns corresponding to Hexp values and rename them with their loci
+
+cc_locus_table_SY_hexp <- 
+  select(cc_locus_table_SY, X31:X45) %>%
+  rename(aest06_1=X31,aest07_1=X32, aest15_1=X33, aest26_1=X34,aest28_1=X35, aest35_1=X36, aest36_1=X37, aest01_1=X38, aest10_1=X39, aest18_1=X40, aest24_1=X41, aest25_1=X42, aest29_1=X43, aest31_1=X44, mean=X45) %>%
+  tibble::rownames_to_column("Pop") %>%
+  separate(.,Pop,sep="_", into=c("Pop","SamplingYear"))
+                                      
+#check with one population:
+#locus_table(myData_genind_AllMarkersOnly, lev="genotype",population="UEB_2015")
+#looks good
+
+kable(cc_locus_table_SY_hexp)
+cc_locus_table_SY_hexp_pivot <- pivot_longer(cc_locus_table_SY_hexp,cols=3:16,names_to="locus",values_to="value")
+
+ggplot(cc_locus_table_SY_hexp_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
+  geom_point(pch=20, alpha=0.3, size=0.8) +
+  geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
+  facet_wrap(vars(Pop)) +
+  labs(y="Nei's genetic diversity Hexp", x="Sampling year") +
+  ggtitle("Nei's genetic diversity per locus, Sampling year and Population (clone-corrected)") +
+  theme(aspect.ratio=0.4,
+    strip.background = element_blank(),
+    strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
+    panel.grid = element_blank(),
+    panel.spacing=unit(0.1,"lines"))
+
+cc_n_samples_allMarkersOnly_SY <- poppr(cc_myData_genind_allMarkersOnly_SY) %>%
+  separate(Pop, sep="_", into=c("Pop","SamplingYear"))
+
+
+cc_n_samples_allMarkersOnly_SY %>%
+  select(Pop,SamplingYear,N) %>%
+  kable()
+```
+
+### clone-corrected myData_genind_allMarkersOnly locus table per Population (Strata: Population / TruffleYear)
+```{r cc Hexp table Pop TruffleYear, echo=TRUE, warning=FALSE, message=FALSE}
+
+setPop(cc_myData_genind_allMarkersOnly_TY) <- ~Pop/TruffleYear
+
+# create a data frame and transpose the result;
+# use sapply to iterate over all populations calculated by seppop.
+# then use the locus_table function on the level Genotype
+
+cc_locus_table_TY <- data.frame(t(
+  sapply(seppop(cc_myData_genind_allMarkersOnly_TY),
+    function(ls) poppr::locus_table(ls,lev="genotype"))))
+
+# choose only the columns corresponding to Hexp values and rename them with their loci
+
+cc_locus_table_TY_hexp <- 
+  select(cc_locus_table_TY, X31:X45) %>%
+  rename(aest06_1=X31,aest07_1=X32, aest15_1=X33, aest26_1=X34,aest28_1=X35, aest35_1=X36, aest36_1=X37, aest01_1=X38, aest10_1=X39, aest18_1=X40, aest24_1=X41, aest25_1=X42, aest29_1=X43, aest31_1=X44, mean=X45) %>%
+  tibble::rownames_to_column("Pop") %>%
+  separate(.,Pop,sep="_", into=c("Pop","TruffleYear"))
+                                      
+#check with one population:
+#locus_table(myData_genind_AllMarkersOnly, lev="genotype",population="UEB_2015")
+#looks good
+
+kable(cc_locus_table_TY_hexp)
+cc_locus_table_TY_hexp_pivot <- pivot_longer(cc_locus_table_TY_hexp,cols=3:16,names_to="locus",values_to="value")
+
+ggplot(cc_locus_table_TY_hexp_pivot,aes(x=as.numeric(TruffleYear), y=value)) +
+  geom_point(pch=20, alpha=0.3, size=0.8) +
+  geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
+  facet_wrap(vars(Pop)) +
+  labs(y="Nei's genetic diversity Hexp", x="Truffle year") +
+  ggtitle("Nei's genetic diversity per locus, Truffle year and Population (clone-corrected)") +
+  theme(aspect.ratio=0.4,
+    strip.background = element_blank(),
+    strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
+    panel.grid = element_blank(),
+    panel.spacing=unit(0.1,"lines"))
+
+cc_n_samples_allMarkersOnly_TY <- poppr(cc_myData_genind_allMarkersOnly_TY) %>%
+  separate(Pop, sep="_", into=c("Pop","TruffleYear"))
+
+
+cc_n_samples_allMarkersOnly_TY %>%
+  select(Pop,TruffleYear,N) %>%
+  kable()
+```
+
 
 # PCA
 
@@ -209,8 +368,7 @@ s.class(pca.pops.allMarkersOnly$li, fac=pop(myData_genind_allMarkersOnly),
         sub="PCA mit Datenset ohne NA (allMarkersOnly)")
 
 #clonecorrected PCA  with samplingYear
-cc_myData_genind_allMarkersOnly_SY <- clonecorrect(myData_genind_allMarkersOnly,
-                                                   strata=~Pop/SamplingYear)
+setPop(cc_myData_genind_allMarkersOnly_SY) <- ~Pop
 x.pops_cc.SY <- tab(cc_myData_genind_allMarkersOnly_SY,
                     freq=TRUE, NA.method="mean")
 pca.pops_cc.SY <- dudi.pca(df = x.pops_cc.SY,
@@ -221,8 +379,7 @@ s.class(pca.pops_cc.SY$li,
         sub="PCA mit poppr klonkorrigiertem Datenset ohne NA (allMarkersOnly), basiert auf Sampling Year")
 
 #clonecorrected PCA  with TruffleYear
-cc_myData_genind_allMarkersOnly_TY <- clonecorrect(myData_genind_allMarkersOnly,
-                                                   strata=~Pop/TruffleYear)
+setPop(cc_myData_genind_allMarkersOnly_TY) <- ~Pop
 x.pops_cc.TY <- tab(cc_myData_genind_allMarkersOnly_TY,
                     freq=TRUE, NA.method="mean")
 pca.pops_cc.TY <- dudi.pca(df = x.pops_cc.TY,

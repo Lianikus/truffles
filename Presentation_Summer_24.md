@@ -186,15 +186,153 @@ kable(locus_table_SY_hexp)
 locus_table_SY_hexp_pivot <- pivot_longer(locus_table_SY_hexp,cols=3:16,names_to="locus",values_to="value")
 
 ggplot(locus_table_SY_hexp_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
-  geom_point(pch=20) +
-  geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen") +
+  geom_point(pch=20, alpha=0.3, size=0.8) +
+  geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
   facet_wrap(vars(Pop)) +
-  theme(aspect.ratio=0.35) +
   labs(y="Nei's genetic diversity Hexp", x="Sampling year") +
-  ggtitle("Nei's genetic diversity per locus, Sampling year and Population")
+  ggtitle("Nei's genetic diversity per locus, Sampling year and Population") +
+  theme(aspect.ratio=0.4,
+    strip.background = element_blank(),
+    strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
+    panel.grid = element_blank(),
+    panel.spacing=unit(0.1,"lines"))
 ```
 
 ![](Presentation_Summer_24_files/figure-gfm/Hexp%20table%20Pop%20SamplingYear-1.png)<!-- -->
+
+``` r
+n_samples_allMarkersOnly_SY <- poppr(myData_genind_allMarkersOnly) %>%
+  separate(Pop, sep="_", into=c("Pop","SamplingYear"))
+
+n_samples_allMarkersOnly_SY %>%
+  select(Pop,SamplingYear,N) %>%
+  kable()
+```
+
+| Pop   | SamplingYear |    N |
+|:------|:-------------|-----:|
+| FRE   | 2011         |   21 |
+| ALD   | 2011         |   24 |
+| RIE   | 2011         |   19 |
+| TRO   | 2011         |   16 |
+| SCG   | 2011         |    9 |
+| BOH   | 2011         |   11 |
+| BOB   | 2011         |    6 |
+| FRB   | 2011         |    4 |
+| UEB   | 2011         |   27 |
+| ALD   | 2012         |   12 |
+| TRO   | 2012         |   10 |
+| FRE   | 2012         |   20 |
+| RIE   | 2012         |   11 |
+| SCG   | 2012         |    3 |
+| BOB   | 2012         |   36 |
+| SCL   | 2012         |   53 |
+| SCD   | 2012         |   25 |
+| UEB   | 2012         |    6 |
+| BOH   | 2012         |   13 |
+| WSL   | 2012         |    1 |
+| FRB   | 2012         |    4 |
+| ALD   | 2013         |   16 |
+| RIE   | 2013         |   16 |
+| TRO   | 2013         |    8 |
+| BOB   | 2013         |   50 |
+| SCG   | 2013         |    1 |
+| SCL   | 2013         |    7 |
+| FRE   | 2013         |   10 |
+| UEB   | 2013         |   54 |
+| FRB   | 2013         |    4 |
+| BUR   | 2013         |   63 |
+| SCS   | 2013         |    7 |
+| SCD   | 2013         |    5 |
+| BOH   | 2013         |    6 |
+| NEU   | 2013         |    4 |
+| UST   | 2013         |   25 |
+| KON   | 2013         |    3 |
+| FRI   | 2013         |   51 |
+| BOB   | 2014         |   30 |
+| RIE   | 2014         |   12 |
+| UEB   | 2014         |   36 |
+| UST   | 2014         |   10 |
+| SCD   | 2014         |    8 |
+| FRE   | 2014         |    9 |
+| FRB   | 2014         |    1 |
+| ALD   | 2014         |    7 |
+| FRI   | 2014         |    4 |
+| SCL   | 2014         |   24 |
+| SCS   | 2014         |   15 |
+| BAR   | 2014         |    1 |
+| SCG   | 2014         |    2 |
+| BOH   | 2014         |   10 |
+| BUR   | 2014         |    8 |
+| KON   | 2014         |   12 |
+| NEU   | 2014         |    3 |
+| ALD   | 2015         |    3 |
+| BOB   | 2015         |   16 |
+| KON   | 2015         |    2 |
+| RIE   | 2015         |    4 |
+| UEB   | 2015         |   27 |
+| FRI   | 2015         |    1 |
+| FRE   | 2015         |    6 |
+| SCD   | 2015         |   16 |
+| SCL   | 2015         |    1 |
+| BUR   | 2015         |    6 |
+| NEU   | 2015         |    1 |
+| BOB   | 2016         |   53 |
+| SCS   | 2016         |   18 |
+| BRU   | 2016         |   90 |
+| LIM   | 2016         |   65 |
+| FRE   | 2016         |   51 |
+| SCD   | 2016         |   43 |
+| SCL   | 2016         |    9 |
+| WSL   | 2016         |   58 |
+| BUR   | 2016         |   21 |
+| KON   | 2016         |   25 |
+| NEU   | 2016         |   15 |
+| FRI   | 2016         |    9 |
+| HAN   | 2016         |    1 |
+| HAN   | 2017         |   39 |
+| LIM   | 2017         |   80 |
+| BRU   | 2017         |   14 |
+| KON   | 2017         |   17 |
+| NEU   | 2017         |    2 |
+| WSL   | 2017         |   61 |
+| BOB   | 2017         |  145 |
+| SCL   | 2017         |    5 |
+| FRE   | 2017         |   97 |
+| FRI   | 2017         |   52 |
+| SCS   | 2017         |    2 |
+| SCD   | 2017         |    3 |
+| FRI   | 2018         |    3 |
+| HAN   | 2018         |   22 |
+| WSL   | 2018         |   14 |
+| BOB   | 2018         |   65 |
+| KON   | 2018         |   41 |
+| LIM   | 2018         |   71 |
+| BRU   | 2018         |   74 |
+| BUR   | 2018         |   34 |
+| GEN   | 2018         |    1 |
+| HAN   | 2019         |    3 |
+| WSL   | 2019         |   72 |
+| KON   | 2019         |   26 |
+| BOB   | 2019         |   28 |
+| BUR   | 2019         |    3 |
+| UEB   | 2019         |    3 |
+| GEN   | 2020         |    3 |
+| KON   | 2020         |   25 |
+| WSL   | 2020         |   73 |
+| BUR   | 2020         |   59 |
+| NEU   | 2020         |    5 |
+| WSL   | 2021         |    4 |
+| BUR   | 2021         |   20 |
+| KON   | 2021         |   27 |
+| NEU   | 2021         |    2 |
+| GEN   | 2021         |    1 |
+| GEN   | 2022         |    5 |
+| BUR   | 2022         |    9 |
+| KON   | 2022         |   11 |
+| KON   | 2023         |   23 |
+| SCHIF | 2016         |    1 |
+| Total | NA           | 2639 |
 
 ### myData_genind_allMarkersOnly locus table per Population (Strata: Population / TruffleYear)
 
@@ -350,12 +488,157 @@ kable(locus_table_TY_hexp)
 | SCHIF | 2016 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
 
 ``` r
-ggplot(locus_table_TY_hexp,aes(x=TruffleYear, y=mean)) +
-  geom_point() +
-  facet_wrap(vars(Pop))
+locus_table_TY_hexp_pivot <- pivot_longer(locus_table_TY_hexp,cols=3:16,names_to="locus",values_to="value")
+
+ggplot(locus_table_TY_hexp_pivot,aes(x=as.numeric(TruffleYear), y=value)) +
+  geom_point(pch=20, alpha=0.3, size=0.8) +
+  geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
+  facet_wrap(vars(Pop)) +
+  labs(y="Nei's genetic diversity Hexp", x="Truffle year") +
+  ggtitle("Nei's genetic diversity per locus, Truffle year and Population") +
+  theme(aspect.ratio=0.4,
+    strip.background = element_blank(),
+    strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
+    panel.grid = element_blank(),
+    panel.spacing=unit(0.1,"lines"))
 ```
 
 ![](Presentation_Summer_24_files/figure-gfm/Hexp%20table%20Pop%20TruffleYear-1.png)<!-- -->
+
+``` r
+n_samples_allMarkersOnly_TY <- poppr(myData_genind_allMarkersOnly) %>%
+  separate(Pop, sep="_", into=c("Pop","TruffleYear"))
+
+n_samples_allMarkersOnly_TY %>%
+  select(Pop,TruffleYear,N) %>%
+  kable()
+```
+
+| Pop   | TruffleYear |    N |
+|:------|:------------|-----:|
+| FRE   | 2010        |    4 |
+| ALD   | 2010        |    5 |
+| RIE   | 2010        |    6 |
+| TRO   | 2010        |    5 |
+| SCG   | 2010        |    3 |
+| ALD   | 2011        |   25 |
+| BOH   | 2011        |   11 |
+| FRE   | 2011        |   20 |
+| RIE   | 2011        |   17 |
+| SCG   | 2011        |    7 |
+| BOB   | 2011        |   15 |
+| TRO   | 2011        |   16 |
+| FRB   | 2011        |    4 |
+| UEB   | 2011        |   27 |
+| SCL   | 2011        |    3 |
+| BOB   | 2012        |   28 |
+| FRE   | 2012        |   18 |
+| SCL   | 2012        |   51 |
+| SCD   | 2012        |   25 |
+| UEB   | 2012        |   11 |
+| BOH   | 2012        |   13 |
+| WSL   | 2012        |    1 |
+| ALD   | 2012        |   13 |
+| RIE   | 2012        |   14 |
+| FRB   | 2012        |    5 |
+| SCG   | 2012        |    3 |
+| TRO   | 2012        |   13 |
+| BOB   | 2013        |   54 |
+| UEB   | 2013        |   57 |
+| BUR   | 2013        |   63 |
+| FRE   | 2013        |   11 |
+| SCL   | 2013        |    8 |
+| SCS   | 2013        |    7 |
+| SCD   | 2013        |    7 |
+| BOH   | 2013        |    6 |
+| NEU   | 2013        |    4 |
+| UST   | 2013        |   28 |
+| KON   | 2013        |    3 |
+| ALD   | 2013        |   11 |
+| RIE   | 2013        |   13 |
+| FRI   | 2013        |   52 |
+| FRB   | 2013        |    4 |
+| UEB   | 2014        |   40 |
+| FRE   | 2014        |    8 |
+| SCS   | 2014        |   15 |
+| BAR   | 2014        |    1 |
+| SCL   | 2014        |   22 |
+| SCG   | 2014        |    2 |
+| BOB   | 2014        |   30 |
+| BOH   | 2014        |   10 |
+| SCD   | 2014        |    6 |
+| BUR   | 2014        |    8 |
+| UST   | 2014        |    7 |
+| ALD   | 2014        |    6 |
+| FRI   | 2014        |    4 |
+| RIE   | 2014        |   11 |
+| KON   | 2014        |   14 |
+| NEU   | 2014        |    3 |
+| UEB   | 2015        |   15 |
+| BOB   | 2015        |   12 |
+| SCD   | 2015        |   16 |
+| SCL   | 2015        |    1 |
+| FRE   | 2015        |    5 |
+| BUR   | 2015        |    6 |
+| NEU   | 2015        |    1 |
+| ALD   | 2015        |    2 |
+| RIE   | 2015        |    1 |
+| SCS   | 2015        |    1 |
+| BRU   | 2016        |   96 |
+| LIM   | 2016        |   74 |
+| BOB   | 2016        |   52 |
+| FRE   | 2016        |   51 |
+| SCD   | 2016        |   43 |
+| SCL   | 2016        |    9 |
+| WSL   | 2016        |   59 |
+| SCS   | 2016        |   17 |
+| BUR   | 2016        |   21 |
+| KON   | 2016        |   26 |
+| NEU   | 2016        |   17 |
+| FRI   | 2016        |    9 |
+| HAN   | 2016        |   13 |
+| LIM   | 2017        |   78 |
+| BOB   | 2017        |  163 |
+| HAN   | 2017        |   34 |
+| BRU   | 2017        |   22 |
+| WSL   | 2017        |   62 |
+| SCL   | 2017        |    5 |
+| FRE   | 2017        |   97 |
+| FRI   | 2017        |   55 |
+| KON   | 2017        |   18 |
+| SCS   | 2017        |    2 |
+| SCD   | 2017        |    3 |
+| BRU   | 2018        |   60 |
+| LIM   | 2018        |   64 |
+| WSL   | 2018        |   12 |
+| HAN   | 2018        |   15 |
+| BUR   | 2018        |   34 |
+| BOB   | 2018        |   47 |
+| KON   | 2018        |   39 |
+| GEN   | 2018        |    1 |
+| HAN   | 2019        |    3 |
+| WSL   | 2019        |   73 |
+| KON   | 2019        |   27 |
+| BOB   | 2019        |   28 |
+| BUR   | 2019        |    3 |
+| UEB   | 2019        |    3 |
+| GEN   | 2019        |    1 |
+| BUR   | 2020        |   59 |
+| WSL   | 2020        |   72 |
+| KON   | 2020        |   24 |
+| NEU   | 2020        |    5 |
+| GEN   | 2020        |    2 |
+| WSL   | 2021        |    4 |
+| BUR   | 2021        |   20 |
+| KON   | 2021        |   27 |
+| NEU   | 2021        |    2 |
+| GEN   | 2021        |    2 |
+| BUR   | 2022        |    9 |
+| GEN   | 2022        |    4 |
+| KON   | 2022        |   11 |
+| KON   | 2023        |   23 |
+| SCHIF | 2016        |    1 |
+| Total | NA          | 2639 |
 
 ``` r
 write_xlsx(locus_table_SY_hexp, "C:\\Users\\liaba\\OneDrive - Eidg. Forschungsanstalt WSL\\R\\truffles\\Presentation-Summer-24_files\\locus_table_SY_hexp.xlsx")
@@ -512,6 +795,82 @@ kable(rarHexpSY)
 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | SCHIF | 2016 |
 
 ``` r
+locus_table_SY_hexp_pivot <- pivot_longer(locus_table_SY_hexp,cols=3:16,names_to="locus",values_to="value")
+
+ggplot(locus_table_SY_hexp_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
+  geom_point(pch=20, alpha=0.3, size=0.8) +
+  geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
+  facet_wrap(vars(Pop)) +
+  labs(y="Nei's genetic diversity rarefied Hexp", x="Sampling year") +
+  ggtitle("Nei's rarefied genetic diversity per locus, Sampling year and Population") +
+  theme(aspect.ratio=0.4,
+    strip.background = element_blank(),
+    strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
+    panel.grid = element_blank(),
+    panel.spacing=unit(0.1,"lines"))
+```
+
+    ## Warning: Removed 154 rows containing non-finite outside the scale range
+    ## (`stat_smooth()`).
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning: Failed to fit group -1.
+    ## Caused by error in `smooth.construct.tp.smooth.spec()`:
+    ## ! A term has fewer unique covariate combinations than specified maximum degrees of freedom
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning: Failed to fit group -1.
+    ## Caused by error in `smooth.construct.tp.smooth.spec()`:
+    ## ! A term has fewer unique covariate combinations than specified maximum degrees of freedom
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning: Removed 154 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+![](Presentation_Summer_24_files/figure-gfm/rarefy%20Nei%20SamplingYear-1.png)<!-- -->
+
+``` r
 setPop(myData_genind_allMarkersOnly) <- ~Pop/TruffleYear
 popdata_pop_year_rareNei_TY <- poppr(myData_genind_allMarkersOnly) %>%
   select(Pop, N)
@@ -658,9 +1017,697 @@ kable(rarHexpTY)
 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | SCHIF | 2016 |
 
 ``` r
+locus_table_TY_hexp_pivot <- pivot_longer(locus_table_TY_hexp,cols=3:16,names_to="locus",values_to="value")
+
+ggplot(locus_table_TY_hexp_pivot,aes(x=as.numeric(TruffleYear), y=value)) +
+  geom_point(pch=20, alpha=0.3, size=0.8) +
+  geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
+  facet_wrap(vars(Pop)) +
+  labs(y="Nei's genetic diversity rarefied Hexp", x="Truffle year") +
+  ggtitle("Nei's rarefied genetic diversity per locus, Truffle year and Population") +
+  theme(aspect.ratio=0.4,
+    strip.background = element_blank(),
+    strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
+    panel.grid = element_blank(),
+    panel.spacing=unit(0.1,"lines"))
+```
+
+    ## Warning: Removed 126 rows containing non-finite outside the scale range
+    ## (`stat_smooth()`).
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning: Failed to fit group -1.
+    ## Caused by error in `gam.reparam()`:
+    ## ! NA/NaN/Inf in foreign function call (arg 3)
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning: Failed to fit group -1.
+    ## Caused by error in `smooth.construct.tp.smooth.spec()`:
+    ## ! A term has fewer unique covariate combinations than specified maximum degrees of freedom
+
+    ## Warning in smooth.construct.tp.smooth.spec(object, dk$data, dk$knots): basis dimension, k, increased to minimum possible
+
+    ## Warning: Removed 126 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+![](Presentation_Summer_24_files/figure-gfm/rarefy%20Nei%20TruffleYear-1.png)<!-- -->
+
+``` r
 write_xlsx(rarHexpSY, "C:\\Users\\liaba\\OneDrive - Eidg. Forschungsanstalt WSL\\R\\truffles\\Presentation-Summer-24_files\\rarHexpSY.xlsx")
 write_xlsx(rarHexpTY, "C:\\Users\\liaba\\OneDrive - Eidg. Forschungsanstalt WSL\\R\\truffles\\Presentation-Summer-24_files\\rarHexpTY.xlsx")
 ```
+
+### clone-corrected myData_genind_allMarkersOnly locus table per Population (Strata: Population / SamplingYear)
+
+``` r
+setPop(cc_myData_genind_allMarkersOnly_SY) <- ~Pop/SamplingYear
+
+# create a data frame and transpose the result;
+# use sapply to iterate over all populations calculated by seppop.
+# then use the locus_table function on the level Genotype
+
+cc_locus_table_SY <- data.frame(t(
+  sapply(seppop(cc_myData_genind_allMarkersOnly_SY),
+    function(ls) poppr::locus_table(ls,lev="genotype"))))
+
+# choose only the columns corresponding to Hexp values and rename them with their loci
+
+cc_locus_table_SY_hexp <- 
+  select(cc_locus_table_SY, X31:X45) %>%
+  rename(aest06_1=X31,aest07_1=X32, aest15_1=X33, aest26_1=X34,aest28_1=X35, aest35_1=X36, aest36_1=X37, aest01_1=X38, aest10_1=X39, aest18_1=X40, aest24_1=X41, aest25_1=X42, aest29_1=X43, aest31_1=X44, mean=X45) %>%
+  tibble::rownames_to_column("Pop") %>%
+  separate(.,Pop,sep="_", into=c("Pop","SamplingYear"))
+                                      
+#check with one population:
+#locus_table(myData_genind_AllMarkersOnly, lev="genotype",population="UEB_2015")
+#looks good
+
+kable(cc_locus_table_SY_hexp)
+```
+
+| Pop | SamplingYear | aest06_1 | aest07_1 | aest15_1 | aest26_1 | aest28_1 | aest35_1 | aest36_1 | aest01_1 | aest10_1 | aest18_1 | aest24_1 | aest25_1 | aest29_1 | aest31_1 | mean |
+|:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| FRE | 2011 | 1.0000000 | 1.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 0.7857143 |
+| ALD | 2011 | 0.8666667 | 0.5333333 | 0.0000000 | 0.5333333 | 0.7333333 | 0.0000000 | 0.3333333 | 0.6000000 | 0.7333333 | 0.6000000 | 0.0000000 | 0.0000000 | 0.3333333 | 0.3333333 | 0.4000000 |
+| RIE | 2011 | 0.6250000 | 0.1250000 | 0.0000000 | 0.6916667 | 0.7250000 | 0.0000000 | 0.0000000 | 0.5416667 | 0.7083333 | 0.7416667 | 0.6083333 | 0.5250000 | 0.3250000 | 0.5083333 | 0.4375000 |
+| TRO | 2011 | 0.6000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.6000000 | 0.6000000 | 0.4000000 | 0.0000000 | 0.6000000 | 0.6000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.2428571 |
+| SCG | 2011 | 0.0000000 | 0.0000000 | 0.0000000 | 0.9000000 | 0.6000000 | 0.0000000 | 0.4000000 | 0.6000000 | 0.0000000 | 0.8000000 | 0.0000000 | 0.4000000 | 0.4000000 | 0.6000000 | 0.3357143 |
+| BOH | 2011 | 0.2222222 | 0.5555556 | 0.0000000 | 0.6944444 | 0.5833333 | 0.2222222 | 0.0000000 | 0.5000000 | 0.5555556 | 0.5555556 | 0.0000000 | 0.0000000 | 0.0000000 | 0.6666667 | 0.3253968 |
+| BOB | 2011 | 0.0000000 | 0.4000000 | 0.0000000 | 0.6000000 | 0.8000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.7000000 | 0.4000000 | 0.6000000 | 0.6000000 | 0.6000000 | 0.3357143 |
+| FRB | 2011 | 1.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.3571429 |
+| UEB | 2011 | 0.0000000 | 0.5714286 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.5714286 | 0.0000000 | 0.6666667 | 0.0000000 | 0.0000000 | 0.0000000 | 0.2857143 | 0.0000000 | 0.1496599 |
+| ALD | 2012 | 0.6666667 | 0.0000000 | 0.0000000 | 0.6666667 | 0.6666667 | 0.8333333 | 0.0000000 | 0.0000000 | 0.6666667 | 0.6666667 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.2976190 |
+| TRO | 2012 | 0.6666667 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.6666667 | 0.6666667 | 0.0000000 | 0.0000000 | 0.6666667 | 0.6666667 | 0.0000000 | 0.0000000 | 0.0000000 | 0.2380952 |
+| FRE | 2012 | 0.6666667 | 0.6666667 | 0.6666667 | 0.0000000 | 1.0000000 | 0.0000000 | 0.6666667 | 0.0000000 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 | 0.5476190 |
+| RIE | 2012 | 0.2000000 | 0.2000000 | 0.0000000 | 0.7333333 | 0.7777778 | 0.0000000 | 0.2000000 | 0.6444444 | 0.5111111 | 0.8222222 | 0.3777778 | 0.5333333 | 0.2000000 | 0.3555556 | 0.3968254 |
+| SCG | 2012 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| BOB | 2012 | 0.2941176 | 0.3660131 | 0.0000000 | 0.6078431 | 0.8039216 | 0.0000000 | 0.0000000 | 0.2941176 | 0.2091503 | 0.4640523 | 0.1111111 | 0.4705882 | 0.5032680 | 0.6993464 | 0.3445378 |
+| SCL | 2012 | 0.0000000 | 0.4155844 | 0.0000000 | 0.2597403 | 0.7922078 | 0.3679654 | 0.0000000 | 0.6363636 | 0.1731602 | 0.3679654 | 0.0000000 | 0.4155844 | 0.0000000 | 0.6103896 | 0.2884972 |
+| SCD | 2012 | 0.0000000 | 0.5194805 | 0.0000000 | 0.6450216 | 0.6969697 | 0.4978355 | 0.5411255 | 0.5151515 | 0.5194805 | 0.5194805 | 0.0000000 | 0.0000000 | 0.1731602 | 0.5497835 | 0.3698207 |
+| UEB | 2012 | 0.3333333 | 0.7333333 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.6000000 | 0.3333333 | 0.7333333 | 0.0000000 | 0.0000000 | 0.0000000 | 0.5333333 | 0.0000000 | 0.2333333 |
+| BOH | 2012 | 0.4090909 | 0.3030303 | 0.0000000 | 0.4848485 | 0.5303030 | 0.1666667 | 0.4848485 | 0.5909091 | 0.4848485 | 0.3030303 | 0.0000000 | 0.0000000 | 0.4393939 | 0.6212121 | 0.3441558 |
+| WSL | 2012 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| FRB | 2012 | 1.0000000 | 0.6666667 | 0.6666667 | 0.6666667 | 1.0000000 | 0.0000000 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 |
+| ALD | 2013 | 0.0000000 | 0.0000000 | 0.0000000 | 0.6666667 | 0.0000000 | 0.6666667 | 0.0000000 | 0.0000000 | 0.0000000 | 0.5000000 | 0.0000000 | 0.0000000 | 0.5000000 | 0.5000000 | 0.2023810 |
+| RIE | 2013 | 0.5000000 | 0.2820513 | 0.0000000 | 0.7179487 | 0.7179487 | 0.1538462 | 0.1538462 | 0.6923077 | 0.4102564 | 0.7307692 | 0.4102564 | 0.5128205 | 0.1538462 | 0.3846154 | 0.4157509 |
+| TRO | 2013 | 1.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.4285714 |
+| BOB | 2013 | 0.3988604 | 0.5185185 | 0.0000000 | 0.5897436 | 0.6980057 | 0.0740741 | 0.3988604 | 0.3133903 | 0.2051282 | 0.5897436 | 0.3846154 | 0.5128205 | 0.4843305 | 0.6809117 | 0.4177859 |
+| SCG | 2013 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| SCL | 2013 | 0.0000000 | 0.0000000 | 0.0000000 | 0.7142857 | 0.7142857 | 0.4761905 | 0.2857143 | 0.8095238 | 0.0000000 | 0.2857143 | 0.0000000 | 0.2857143 | 0.0000000 | 0.7142857 | 0.3061224 |
+| FRE | 2013 | 0.6666667 | 0.6666667 | 0.6666667 | 0.0000000 | 0.6666667 | 0.6666667 | 0.6666667 | 0.0000000 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 | 1.0000000 | 0.5952381 |
+| UEB | 2013 | 0.1538462 | 0.5128205 | 0.0000000 | 0.1538462 | 0.0000000 | 0.0000000 | 0.5128205 | 0.0000000 | 0.7051282 | 0.1538462 | 0.0000000 | 0.0000000 | 0.4615385 | 0.1538462 | 0.2005495 |
+| FRB | 2013 | 0.5000000 | 0.5000000 | 0.5000000 | 0.5000000 | 0.8333333 | 0.5000000 | 0.5000000 | 0.5000000 | 0.6666667 | 0.5000000 | 0.0000000 | 0.5000000 | 0.8333333 | 0.5000000 | 0.5238095 |
+| BUR | 2013 | 0.0000000 | 0.6181818 | 0.4363636 | 0.1818182 | 0.6909091 | 0.4363636 | 0.6909091 | 0.5818182 | 0.4363636 | 0.3272727 | 0.3272727 | 0.7454545 | 0.4727273 | 0.4727273 | 0.4584416 |
+| SCS | 2013 | 0.5000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.5000000 | 0.5000000 | 0.0000000 | 0.5000000 | 0.0000000 | 0.5000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.8333333 | 0.2380952 |
+| SCD | 2013 | 0.0000000 | 0.6000000 | 0.0000000 | 0.8000000 | 0.7000000 | 0.0000000 | 0.6000000 | 0.7000000 | 0.4000000 | 0.4000000 | 0.0000000 | 0.0000000 | 0.4000000 | 0.6000000 | 0.3714286 |
+| BOH | 2013 | 0.0000000 | 0.5333333 | 0.0000000 | 0.6000000 | 0.3333333 | 0.3333333 | 0.5333333 | 0.0000000 | 0.5333333 | 0.3333333 | 0.0000000 | 0.0000000 | 0.0000000 | 0.3333333 | 0.2523810 |
+| NEU | 2013 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0714286 |
+| UST | 2013 | 0.4761905 | 0.3428571 | 0.0000000 | 0.2571429 | 0.7238095 | 0.1333333 | 0.3428571 | 0.1333333 | 0.6000000 | 0.4666667 | 0.2476190 | 0.5142857 | 0.4190476 | 0.6285714 | 0.3775510 |
+| KON | 2013 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.6666667 | 0.6666667 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0952381 |
+| FRI | 2013 | 0.5714286 | 0.4761905 | 0.0000000 | 0.6666667 | 0.5714286 | 0.0000000 | 0.4761905 | 0.0000000 | 0.2857143 | 0.0000000 | 0.0000000 | 0.0000000 | 0.4761905 | 0.7142857 | 0.3027211 |
+| BOB | 2014 | 0.2282609 | 0.4311594 | 0.0000000 | 0.7536232 | 0.7427536 | 0.2355072 | 0.2898551 | 0.5978261 | 0.3007246 | 0.5615942 | 0.2355072 | 0.4891304 | 0.5072464 | 0.6485507 | 0.4301242 |
+| RIE | 2014 | 0.5636364 | 0.1818182 | 0.0000000 | 0.7636364 | 0.8545455 | 0.0000000 | 0.0000000 | 0.6545455 | 0.7272727 | 0.7090909 | 0.6545455 | 0.5090909 | 0.3272727 | 0.6000000 | 0.4675325 |
+| UEB | 2014 | 0.2571429 | 0.4190476 | 0.0000000 | 0.4571429 | 0.0000000 | 0.0000000 | 0.4761905 | 0.4761905 | 0.5904762 | 0.1333333 | 0.1333333 | 0.0000000 | 0.3619048 | 0.3428571 | 0.2605442 |
+| UST | 2014 | 0.4285714 | 0.4285714 | 0.0000000 | 0.4285714 | 0.7500000 | 0.5714286 | 0.4285714 | 0.0000000 | 0.6785714 | 0.4285714 | 0.0000000 | 0.4285714 | 0.4285714 | 0.7142857 | 0.4081633 |
+| SCD | 2014 | 0.0000000 | 0.5000000 | 0.0000000 | 0.5000000 | 0.0000000 | 0.0000000 | 0.5000000 | 0.8333333 | 0.5000000 | 0.5000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.5000000 | 0.2738095 |
+| FRE | 2014 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0714286 |
+| FRB | 2014 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| ALD | 2014 | 0.7000000 | 0.4000000 | 0.0000000 | 0.4000000 | 0.4000000 | 0.0000000 | 0.0000000 | 0.4000000 | 0.4000000 | 0.4000000 | 0.4000000 | 0.0000000 | 0.4000000 | 0.0000000 | 0.2785714 |
+| FRI | 2014 | 0.0000000 | 0.6666667 | 0.0000000 | 0.6666667 | 0.6666667 | 0.0000000 | 0.0000000 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 | 0.0000000 | 0.6666667 | 0.6666667 | 0.4285714 |
+| SCL | 2014 | 0.0000000 | 0.0000000 | 0.0000000 | 0.4666667 | 0.8444444 | 0.2000000 | 0.0000000 | 0.3777778 | 0.2000000 | 0.3555556 | 0.0000000 | 0.2000000 | 0.2000000 | 0.2000000 | 0.2174603 |
+| SCS | 2014 | 0.0000000 | 0.6666667 | 0.0000000 | 0.6666667 | 0.6666667 | 0.6666667 | 0.0000000 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 | 0.0000000 | 0.0000000 | 0.0000000 | 0.3809524 |
+| BAR | 2014 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| SCG | 2014 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 0.5714286 |
+| BOH | 2014 | 0.0000000 | 0.5333333 | 0.0000000 | 0.3333333 | 0.3333333 | 0.5333333 | 0.0000000 | 0.3333333 | 0.5333333 | 0.3333333 | 0.0000000 | 0.0000000 | 0.3333333 | 0.7333333 | 0.2857143 |
+| BUR | 2014 | 0.3333333 | 0.3333333 | 0.3333333 | 0.3333333 | 0.8666667 | 0.3333333 | 0.7333333 | 0.3333333 | 0.3333333 | 0.3333333 | 0.3333333 | 0.6000000 | 0.3333333 | 0.6000000 | 0.4380952 |
+| KON | 2014 | 0.5714286 | 0.0000000 | 0.0000000 | 0.2857143 | 0.0000000 | 0.4761905 | 0.2857143 | 0.5714286 | 0.0000000 | 0.2857143 | 0.5714286 | 0.0000000 | 0.0000000 | 0.0000000 | 0.2176871 |
+| NEU | 2014 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0714286 |
+| ALD | 2015 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0714286 |
+| BOB | 2015 | 0.4190476 | 0.5333333 | 0.0000000 | 0.6190476 | 0.7428571 | 0.0000000 | 0.3428571 | 0.4761905 | 0.4190476 | 0.4571429 | 0.3619048 | 0.3428571 | 0.5142857 | 0.6285714 | 0.4183673 |
+| KON | 2015 | 1.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.1428571 |
+| RIE | 2015 | 0.5000000 | 0.6666667 | 0.0000000 | 0.8333333 | 1.0000000 | 0.0000000 | 0.0000000 | 0.8333333 | 0.6666667 | 0.5000000 | 0.8333333 | 0.6666667 | 0.0000000 | 0.5000000 | 0.5000000 |
+| UEB | 2015 | 0.2222222 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.2222222 | 0.3888889 | 0.3888889 | 0.5555556 | 0.0000000 | 0.0000000 | 0.0000000 | 0.3888889 | 0.4166667 | 0.1845238 |
+| FRI | 2015 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| FRE | 2015 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| SCD | 2015 | 0.0000000 | 0.5454545 | 0.0000000 | 0.6545455 | 0.3454545 | 0.1818182 | 0.5454545 | 0.6727273 | 0.5090909 | 0.5090909 | 0.0000000 | 0.0000000 | 0.0000000 | 0.4363636 | 0.3142857 |
+| SCL | 2015 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| BUR | 2015 | 0.0000000 | 0.6666667 | 0.0000000 | 0.0000000 | 0.6666667 | 0.0000000 | 0.6666667 | 0.6666667 | 0.0000000 | 0.0000000 | 0.0000000 | 0.6666667 | 0.0000000 | 0.8333333 | 0.2976190 |
+| NEU | 2015 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| BOB | 2016 | 0.5533597 | 0.5217391 | 0.0000000 | 0.6284585 | 0.7114625 | 0.0000000 | 0.2371542 | 0.5533597 | 0.3557312 | 0.5533597 | 0.3715415 | 0.5217391 | 0.5138340 | 0.6877470 | 0.4435347 |
+| SCS | 2016 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| BRU | 2016 | 0.8000000 | 0.9000000 | 0.8000000 | 0.7000000 | 0.9000000 | 0.7000000 | 0.9000000 | 0.9000000 | 0.8000000 | 0.4000000 | 0.7000000 | 0.8000000 | 0.7000000 | 0.9000000 | 0.7785714 |
+| LIM | 2016 | 0.4393939 | 0.6969697 | 0.3181818 | 0.8181818 | 0.8333333 | 0.6212121 | 0.5606061 | 0.7272727 | 0.7878788 | 0.7272727 | 0.4545455 | 0.6363636 | 0.6212121 | 0.6666667 | 0.6363636 |
+| FRE | 2016 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| SCD | 2016 | 0.5000000 | 0.5000000 | 0.0000000 | 0.5000000 | 0.5000000 | 0.5000000 | 0.5000000 | 0.5000000 | 0.6666667 | 0.5000000 | 0.0000000 | 0.5000000 | 0.5000000 | 0.6666667 | 0.4523810 |
+| SCL | 2016 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0714286 |
+| WSL | 2016 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.1428571 |
+| BUR | 2016 | 0.6666667 | 0.6666667 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.6666667 | 0.6666667 | 0.6666667 | 1.0000000 | 0.4523810 |
+| KON | 2016 | 0.0000000 | 0.0000000 | 0.0000000 | 0.5238095 | 0.0000000 | 0.2857143 | 0.2857143 | 0.5238095 | 0.2857143 | 0.0000000 | 0.5714286 | 0.0000000 | 0.2857143 | 0.0000000 | 0.1972789 |
+| NEU | 2016 | 0.0000000 | 0.6666667 | 0.0000000 | 0.6666667 | 0.6666667 | 0.0000000 | 0.0000000 | 1.0000000 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 | 0.0000000 | 0.0000000 | 0.4047619 |
+| FRI | 2016 | 1.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 1.0000000 | 0.5000000 |
+| HAN | 2016 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| HAN | 2017 | 0.5333333 | 0.3333333 | 0.0000000 | 0.6000000 | 0.5333333 | 0.0000000 | 0.5333333 | 0.5333333 | 0.7333333 | 0.0000000 | 0.3333333 | 0.3333333 | 0.6000000 | 0.6000000 | 0.4047619 |
+| LIM | 2017 | 0.3333333 | 0.6000000 | 0.0000000 | 0.8666667 | 0.9333333 | 0.6000000 | 0.6000000 | 0.5333333 | 0.5333333 | 0.7333333 | 0.5333333 | 0.3333333 | 0.5333333 | 0.7333333 | 0.5619048 |
+| BRU | 2017 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 | 1.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 0.6666667 | 0.6666667 | 1.0000000 | 1.0000000 | 0.8571429 |
+| KON | 2017 | 0.3333333 | 0.3333333 | 0.0000000 | 0.6000000 | 0.3333333 | 0.0000000 | 0.3333333 | 0.6000000 | 0.3333333 | 0.3333333 | 0.7333333 | 0.0000000 | 0.0000000 | 0.3333333 | 0.3047619 |
+| NEU | 2017 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| WSL | 2017 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.1428571 |
+| BOB | 2017 | 0.5060976 | 0.4975610 | 0.0000000 | 0.6548780 | 0.7512195 | 0.0000000 | 0.1804878 | 0.5195122 | 0.1804878 | 0.6500000 | 0.3085366 | 0.5097561 | 0.5524390 | 0.6512195 | 0.4258711 |
+| SCL | 2017 | 0.0000000 | 0.6000000 | 0.0000000 | 0.6000000 | 0.4000000 | 0.0000000 | 0.0000000 | 0.4000000 | 0.0000000 | 0.6000000 | 0.0000000 | 0.6000000 | 0.0000000 | 0.8000000 | 0.2857143 |
+| FRE | 2017 | 1.0000000 | 1.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 0.0000000 | 0.7857143 |
+| FRI | 2017 | 0.6000000 | 0.7000000 | 0.4000000 | 0.7000000 | 0.8000000 | 0.4000000 | 0.7000000 | 0.4000000 | 0.7000000 | 0.4000000 | 0.4000000 | 0.4000000 | 0.8000000 | 0.6000000 | 0.5714286 |
+| SCS | 2017 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| SCD | 2017 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.5000000 |
+| FRI | 2018 | 1.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 1.0000000 | 0.5000000 |
+| HAN | 2018 | 0.6000000 | 0.0000000 | 0.0000000 | 0.4000000 | 0.6000000 | 0.0000000 | 0.6000000 | 0.7000000 | 0.4000000 | 0.0000000 | 0.4000000 | 0.4000000 | 0.8000000 | 0.4000000 | 0.3785714 |
+| WSL | 2018 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| BOB | 2018 | 0.5020161 | 0.5161290 | 0.0000000 | 0.5342742 | 0.7399194 | 0.0000000 | 0.1209677 | 0.4455645 | 0.1754032 | 0.6431452 | 0.3326613 | 0.5080645 | 0.5141129 | 0.6794355 | 0.4079781 |
+| KON | 2018 | 0.0000000 | 0.0000000 | 0.0000000 | 0.5555556 | 0.0000000 | 0.0000000 | 0.3888889 | 0.5833333 | 0.5000000 | 0.3888889 | 0.5000000 | 0.2222222 | 0.2222222 | 0.2222222 | 0.2559524 |
+| LIM | 2018 | 0.6000000 | 0.7333333 | 0.3333333 | 0.8666667 | 0.8000000 | 0.7333333 | 0.7333333 | 0.6000000 | 0.7333333 | 0.7333333 | 0.6000000 | 0.6000000 | 0.6000000 | 0.5333333 | 0.6571429 |
+| BRU | 2018 | 0.3777778 | 0.7111111 | 0.3777778 | 0.8222222 | 0.8000000 | 0.5111111 | 0.6444444 | 0.8000000 | 0.8222222 | 0.6444444 | 0.2000000 | 0.5333333 | 0.7111111 | 0.8444444 | 0.6285714 |
+| BUR | 2018 | 1.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.4285714 |
+| GEN | 2018 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| HAN | 2019 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| WSL | 2019 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.1428571 |
+| KON | 2019 | 0.0000000 | 0.0000000 | 0.0000000 | 0.4642857 | 0.2500000 | 0.4285714 | 0.5357143 | 0.7142857 | 0.2500000 | 0.2500000 | 0.5357143 | 0.2500000 | 0.0000000 | 0.0000000 | 0.2627551 |
+| BOB | 2019 | 0.3250000 | 0.5250000 | 0.0000000 | 0.6916667 | 0.6666667 | 0.0000000 | 0.2333333 | 0.6750000 | 0.4000000 | 0.5916667 | 0.2416667 | 0.5000000 | 0.5250000 | 0.6250000 | 0.4285714 |
+| BUR | 2019 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| UEB | 2019 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.6666667 | 0.0000000 | 0.6666667 | 0.0000000 | 0.0000000 | 0.0000000 | 0.6666667 | 0.0000000 | 0.1428571 |
+| GEN | 2020 | 1.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 0.4285714 |
+| KON | 2020 | 0.2857143 | 0.2857143 | 0.0000000 | 0.2857143 | 0.2857143 | 0.2857143 | 0.2857143 | 0.6666667 | 0.4761905 | 0.0000000 | 0.7142857 | 0.0000000 | 0.0000000 | 0.2857143 | 0.2755102 |
+| WSL | 2020 | 0.6666667 | 0.6666667 | 0.0000000 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 | 0.0000000 | 0.6666667 | 0.0000000 | 0.0000000 | 0.6666667 | 0.4761905 |
+| BUR | 2020 | 1.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.4285714 |
+| NEU | 2020 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.6666667 | 0.6666667 | 0.6666667 | 0.0000000 | 0.6666667 | 0.6666667 | 0.0000000 | 0.2380952 |
+| WSL | 2021 | 1.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.5714286 |
+| BUR | 2021 | 1.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.4285714 |
+| KON | 2021 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.4285714 |
+| NEU | 2021 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.2142857 |
+| GEN | 2021 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| GEN | 2022 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| BUR | 2022 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| KON | 2022 | 0.0000000 | 0.5000000 | 0.0000000 | 0.5000000 | 0.5000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.5000000 | 0.0000000 | 0.5000000 | 0.0000000 | 0.5000000 | 0.5000000 | 0.2500000 |
+| KON | 2023 | 0.0000000 | 0.4000000 | 0.0000000 | 0.7000000 | 0.4000000 | 0.4000000 | 0.4000000 | 0.6000000 | 0.6000000 | 0.4000000 | 0.7000000 | 0.0000000 | 0.0000000 | 0.4000000 | 0.3571429 |
+| SCHIF | 2016 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+
+``` r
+cc_locus_table_SY_hexp_pivot <- pivot_longer(cc_locus_table_SY_hexp,cols=3:16,names_to="locus",values_to="value")
+
+ggplot(cc_locus_table_SY_hexp_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
+  geom_point(pch=20, alpha=0.3, size=0.8) +
+  geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
+  facet_wrap(vars(Pop)) +
+  labs(y="Nei's genetic diversity Hexp", x="Sampling year") +
+  ggtitle("Nei's genetic diversity per locus, Sampling year and Population (clone-corrected)") +
+  theme(aspect.ratio=0.4,
+    strip.background = element_blank(),
+    strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
+    panel.grid = element_blank(),
+    panel.spacing=unit(0.1,"lines"))
+```
+
+![](Presentation_Summer_24_files/figure-gfm/cc%20Hexp%20table%20Pop%20SamplingYear-1.png)<!-- -->
+
+``` r
+cc_n_samples_allMarkersOnly_SY <- poppr(cc_myData_genind_allMarkersOnly_SY) %>%
+  separate(Pop, sep="_", into=c("Pop","SamplingYear"))
+
+
+cc_n_samples_allMarkersOnly_SY %>%
+  select(Pop,SamplingYear,N) %>%
+  kable()
+```
+
+| Pop   | SamplingYear |   N |
+|:------|:-------------|----:|
+| FRE   | 2011         |   2 |
+| ALD   | 2011         |   6 |
+| RIE   | 2011         |  16 |
+| TRO   | 2011         |   5 |
+| SCG   | 2011         |   5 |
+| BOH   | 2011         |   9 |
+| BOB   | 2011         |   5 |
+| FRB   | 2011         |   2 |
+| UEB   | 2011         |   7 |
+| ALD   | 2012         |   4 |
+| TRO   | 2012         |   3 |
+| FRE   | 2012         |   3 |
+| RIE   | 2012         |  10 |
+| SCG   | 2012         |   1 |
+| BOB   | 2012         |  18 |
+| SCL   | 2012         |  22 |
+| SCD   | 2012         |  22 |
+| UEB   | 2012         |   6 |
+| BOH   | 2012         |  12 |
+| WSL   | 2012         |   1 |
+| FRB   | 2012         |   3 |
+| ALD   | 2013         |   4 |
+| RIE   | 2013         |  13 |
+| TRO   | 2013         |   2 |
+| BOB   | 2013         |  27 |
+| SCG   | 2013         |   1 |
+| SCL   | 2013         |   7 |
+| FRE   | 2013         |   3 |
+| UEB   | 2013         |  13 |
+| FRB   | 2013         |   4 |
+| BUR   | 2013         |  11 |
+| SCS   | 2013         |   4 |
+| SCD   | 2013         |   5 |
+| BOH   | 2013         |   6 |
+| NEU   | 2013         |   2 |
+| UST   | 2013         |  15 |
+| KON   | 2013         |   3 |
+| FRI   | 2013         |   7 |
+| BOB   | 2014         |  24 |
+| RIE   | 2014         |  11 |
+| UEB   | 2014         |  15 |
+| UST   | 2014         |   8 |
+| SCD   | 2014         |   4 |
+| FRE   | 2014         |   2 |
+| FRB   | 2014         |   1 |
+| ALD   | 2014         |   5 |
+| FRI   | 2014         |   3 |
+| SCL   | 2014         |  10 |
+| SCS   | 2014         |   3 |
+| BAR   | 2014         |   1 |
+| SCG   | 2014         |   2 |
+| BOH   | 2014         |   6 |
+| BUR   | 2014         |   6 |
+| KON   | 2014         |   7 |
+| NEU   | 2014         |   2 |
+| ALD   | 2015         |   2 |
+| BOB   | 2015         |  15 |
+| KON   | 2015         |   2 |
+| RIE   | 2015         |   4 |
+| UEB   | 2015         |   9 |
+| FRI   | 2015         |   1 |
+| FRE   | 2015         |   1 |
+| SCD   | 2015         |  11 |
+| SCL   | 2015         |   1 |
+| BUR   | 2015         |   4 |
+| NEU   | 2015         |   1 |
+| BOB   | 2016         |  23 |
+| SCS   | 2016         |   1 |
+| BRU   | 2016         |   5 |
+| LIM   | 2016         |  12 |
+| FRE   | 2016         |   1 |
+| SCD   | 2016         |   4 |
+| SCL   | 2016         |   3 |
+| WSL   | 2016         |   2 |
+| BUR   | 2016         |   3 |
+| KON   | 2016         |   7 |
+| NEU   | 2016         |   3 |
+| FRI   | 2016         |   2 |
+| HAN   | 2016         |   1 |
+| HAN   | 2017         |   6 |
+| LIM   | 2017         |   6 |
+| BRU   | 2017         |   3 |
+| KON   | 2017         |   6 |
+| NEU   | 2017         |   1 |
+| WSL   | 2017         |   2 |
+| BOB   | 2017         |  41 |
+| SCL   | 2017         |   5 |
+| FRE   | 2017         |   2 |
+| FRI   | 2017         |   5 |
+| SCS   | 2017         |   1 |
+| SCD   | 2017         |   2 |
+| FRI   | 2018         |   2 |
+| HAN   | 2018         |   5 |
+| WSL   | 2018         |   1 |
+| BOB   | 2018         |  32 |
+| KON   | 2018         |   9 |
+| LIM   | 2018         |   6 |
+| BRU   | 2018         |  10 |
+| BUR   | 2018         |   2 |
+| GEN   | 2018         |   1 |
+| HAN   | 2019         |   1 |
+| WSL   | 2019         |   2 |
+| KON   | 2019         |   8 |
+| BOB   | 2019         |  16 |
+| BUR   | 2019         |   1 |
+| UEB   | 2019         |   3 |
+| GEN   | 2020         |   2 |
+| KON   | 2020         |   7 |
+| WSL   | 2020         |   3 |
+| BUR   | 2020         |   2 |
+| NEU   | 2020         |   3 |
+| WSL   | 2021         |   2 |
+| BUR   | 2021         |   2 |
+| KON   | 2021         |   2 |
+| NEU   | 2021         |   2 |
+| GEN   | 2021         |   1 |
+| GEN   | 2022         |   1 |
+| BUR   | 2022         |   1 |
+| KON   | 2022         |   4 |
+| KON   | 2023         |   5 |
+| SCHIF | 2016         |   1 |
+| Total | NA           | 734 |
+
+### clone-corrected myData_genind_allMarkersOnly locus table per Population (Strata: Population / TruffleYear)
+
+``` r
+setPop(cc_myData_genind_allMarkersOnly_TY) <- ~Pop/TruffleYear
+
+# create a data frame and transpose the result;
+# use sapply to iterate over all populations calculated by seppop.
+# then use the locus_table function on the level Genotype
+
+cc_locus_table_TY <- data.frame(t(
+  sapply(seppop(cc_myData_genind_allMarkersOnly_TY),
+    function(ls) poppr::locus_table(ls,lev="genotype"))))
+
+# choose only the columns corresponding to Hexp values and rename them with their loci
+
+cc_locus_table_TY_hexp <- 
+  select(cc_locus_table_TY, X31:X45) %>%
+  rename(aest06_1=X31,aest07_1=X32, aest15_1=X33, aest26_1=X34,aest28_1=X35, aest35_1=X36, aest36_1=X37, aest01_1=X38, aest10_1=X39, aest18_1=X40, aest24_1=X41, aest25_1=X42, aest29_1=X43, aest31_1=X44, mean=X45) %>%
+  tibble::rownames_to_column("Pop") %>%
+  separate(.,Pop,sep="_", into=c("Pop","TruffleYear"))
+                                      
+#check with one population:
+#locus_table(myData_genind_AllMarkersOnly, lev="genotype",population="UEB_2015")
+#looks good
+
+kable(cc_locus_table_TY_hexp)
+```
+
+| Pop | TruffleYear | aest06_1 | aest07_1 | aest15_1 | aest26_1 | aest28_1 | aest35_1 | aest36_1 | aest01_1 | aest10_1 | aest18_1 | aest24_1 | aest25_1 | aest29_1 | aest31_1 | mean |
+|:---|:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| FRE | 2010 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| ALD | 2010 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| RIE | 2010 | 0.3333333 | 0.0000000 | 0.0000000 | 0.7333333 | 0.6000000 | 0.0000000 | 0.0000000 | 0.3333333 | 0.7333333 | 0.3333333 | 0.3333333 | 0.6000000 | 0.6000000 | 0.5333333 | 0.3666667 |
+| TRO | 2010 | 0.6666667 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.6666667 | 0.6666667 | 0.0000000 | 0.0000000 | 0.6666667 | 0.6666667 | 0.0000000 | 0.0000000 | 0.0000000 | 0.2380952 |
+| SCG | 2010 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.2857143 |
+| ALD | 2011 | 0.8571429 | 0.4761905 | 0.0000000 | 0.4761905 | 0.7142857 | 0.2857143 | 0.2857143 | 0.5238095 | 0.7619048 | 0.5714286 | 0.0000000 | 0.0000000 | 0.2857143 | 0.2857143 | 0.3945578 |
+| BOH | 2011 | 0.2222222 | 0.5555556 | 0.0000000 | 0.6944444 | 0.5833333 | 0.2222222 | 0.0000000 | 0.5000000 | 0.5555556 | 0.5555556 | 0.0000000 | 0.0000000 | 0.0000000 | 0.6666667 | 0.3253968 |
+| FRE | 2011 | 0.6666667 | 0.6666667 | 0.6666667 | 0.0000000 | 1.0000000 | 0.0000000 | 0.6666667 | 0.0000000 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 | 0.5476190 |
+| RIE | 2011 | 0.6666667 | 0.1666667 | 0.0000000 | 0.6969697 | 0.7727273 | 0.0000000 | 0.0000000 | 0.5909091 | 0.7121212 | 0.7424242 | 0.6666667 | 0.5303030 | 0.0000000 | 0.4090909 | 0.4253247 |
+| SCG | 2011 | 0.0000000 | 0.0000000 | 0.0000000 | 0.6666667 | 0.6666667 | 0.0000000 | 0.6666667 | 0.6666667 | 0.0000000 | 0.6666667 | 0.0000000 | 0.6666667 | 0.0000000 | 0.6666667 | 0.3333333 |
+| BOB | 2011 | 0.2222222 | 0.3888889 | 0.0000000 | 0.6388889 | 0.8055556 | 0.0000000 | 0.0000000 | 0.2222222 | 0.0000000 | 0.5555556 | 0.2222222 | 0.5555556 | 0.5555556 | 0.6388889 | 0.3432540 |
+| TRO | 2011 | 0.6666667 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.5000000 | 0.6666667 | 0.5000000 | 0.0000000 | 0.6666667 | 0.6666667 | 0.0000000 | 0.0000000 | 0.0000000 | 0.2619048 |
+| FRB | 2011 | 1.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.3571429 |
+| UEB | 2011 | 0.0000000 | 0.5714286 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.5714286 | 0.0000000 | 0.6666667 | 0.0000000 | 0.0000000 | 0.0000000 | 0.2857143 | 0.0000000 | 0.1496599 |
+| SCL | 2011 | 0.0000000 | 0.6666667 | 0.0000000 | 0.0000000 | 0.6666667 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.6666667 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.2142857 |
+| BOB | 2012 | 0.2820513 | 0.3846154 | 0.0000000 | 0.6025641 | 0.8205128 | 0.0000000 | 0.0000000 | 0.2820513 | 0.2820513 | 0.5128205 | 0.1538462 | 0.4615385 | 0.5128205 | 0.7179487 | 0.3580586 |
+| FRE | 2012 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| SCL | 2012 | 0.0000000 | 0.3947368 | 0.0000000 | 0.2842105 | 0.7842105 | 0.3947368 | 0.0000000 | 0.7000000 | 0.1894737 | 0.3368421 | 0.0000000 | 0.4421053 | 0.0000000 | 0.5263158 | 0.2894737 |
+| SCD | 2012 | 0.0000000 | 0.5194805 | 0.0000000 | 0.6450216 | 0.6969697 | 0.4978355 | 0.5411255 | 0.5151515 | 0.5194805 | 0.5194805 | 0.0000000 | 0.0000000 | 0.1731602 | 0.5497835 | 0.3698207 |
+| UEB | 2012 | 0.2000000 | 0.5111111 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.5111111 | 0.2000000 | 0.6888889 | 0.2000000 | 0.0000000 | 0.0000000 | 0.3555556 | 0.0000000 | 0.1904762 |
+| BOH | 2012 | 0.4090909 | 0.3030303 | 0.0000000 | 0.4848485 | 0.5303030 | 0.1666667 | 0.4848485 | 0.5909091 | 0.4848485 | 0.3030303 | 0.0000000 | 0.0000000 | 0.4393939 | 0.6212121 | 0.3441558 |
+| WSL | 2012 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| ALD | 2012 | 0.0000000 | 0.0000000 | 0.0000000 | 0.6666667 | 0.0000000 | 0.6666667 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0952381 |
+| RIE | 2012 | 0.3030303 | 0.0000000 | 0.0000000 | 0.7878788 | 0.7424242 | 0.0000000 | 0.1666667 | 0.6818182 | 0.5454545 | 0.7727273 | 0.3181818 | 0.5454545 | 0.1666667 | 0.4090909 | 0.3885281 |
+| FRB | 2012 | 0.8333333 | 0.6666667 | 0.6666667 | 0.6666667 | 0.8333333 | 0.0000000 | 0.8333333 | 0.5000000 | 0.6666667 | 0.6666667 | 0.5000000 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6309524 |
+| SCG | 2012 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0714286 |
+| TRO | 2012 | 0.6666667 | 0.0000000 | 0.0000000 | 0.6666667 | 0.0000000 | 0.0000000 | 0.6666667 | 0.0000000 | 0.6666667 | 0.6666667 | 0.6666667 | 0.0000000 | 0.0000000 | 0.6666667 | 0.3333333 |
+| BOB | 2013 | 0.3956989 | 0.5118280 | 0.0000000 | 0.6559140 | 0.7096774 | 0.1268817 | 0.4258065 | 0.4645161 | 0.2387097 | 0.6322581 | 0.3419355 | 0.5032258 | 0.5032258 | 0.6795699 | 0.4420891 |
+| UEB | 2013 | 0.2820513 | 0.5384615 | 0.0000000 | 0.3846154 | 0.0000000 | 0.0000000 | 0.5384615 | 0.1538462 | 0.6666667 | 0.1538462 | 0.1538462 | 0.0000000 | 0.5641026 | 0.2820513 | 0.2655678 |
+| BUR | 2013 | 0.0000000 | 0.6181818 | 0.4363636 | 0.1818182 | 0.6909091 | 0.4363636 | 0.6909091 | 0.5818182 | 0.4363636 | 0.3272727 | 0.3272727 | 0.7454545 | 0.4727273 | 0.4727273 | 0.4584416 |
+| FRE | 2013 | 0.6666667 | 0.6666667 | 0.6666667 | 0.0000000 | 0.6666667 | 0.6666667 | 0.6666667 | 0.0000000 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 | 1.0000000 | 0.5952381 |
+| SCL | 2013 | 0.0000000 | 0.0000000 | 0.0000000 | 0.6428571 | 0.6785714 | 0.4285714 | 0.2500000 | 0.7857143 | 0.0000000 | 0.2500000 | 0.0000000 | 0.2500000 | 0.0000000 | 0.6785714 | 0.2831633 |
+| SCS | 2013 | 0.5000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.5000000 | 0.5000000 | 0.0000000 | 0.5000000 | 0.0000000 | 0.5000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.8333333 | 0.2380952 |
+| SCD | 2013 | 0.0000000 | 0.4761905 | 0.0000000 | 0.7619048 | 0.7142857 | 0.0000000 | 0.5714286 | 0.6666667 | 0.5714286 | 0.5714286 | 0.0000000 | 0.0000000 | 0.2857143 | 0.4761905 | 0.3639456 |
+| BOH | 2013 | 0.0000000 | 0.5333333 | 0.0000000 | 0.6000000 | 0.3333333 | 0.3333333 | 0.5333333 | 0.0000000 | 0.5333333 | 0.3333333 | 0.0000000 | 0.0000000 | 0.0000000 | 0.3333333 | 0.2523810 |
+| NEU | 2013 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0714286 |
+| UST | 2013 | 0.5000000 | 0.4000000 | 0.0000000 | 0.2416667 | 0.7250000 | 0.1250000 | 0.3250000 | 0.1250000 | 0.5750000 | 0.4416667 | 0.2333333 | 0.5250000 | 0.4583333 | 0.6083333 | 0.3773810 |
+| KON | 2013 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.6666667 | 0.6666667 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0952381 |
+| ALD | 2013 | 0.0000000 | 0.0000000 | 0.0000000 | 0.4000000 | 0.0000000 | 0.6000000 | 0.0000000 | 0.6000000 | 0.0000000 | 0.4000000 | 0.4000000 | 0.0000000 | 0.4000000 | 0.4000000 | 0.2285714 |
+| RIE | 2013 | 0.4727273 | 0.3272727 | 0.0000000 | 0.7454545 | 0.8181818 | 0.1818182 | 0.1818182 | 0.7090909 | 0.4727273 | 0.7636364 | 0.5090909 | 0.5454545 | 0.1818182 | 0.6000000 | 0.4649351 |
+| FRI | 2013 | 0.5714286 | 0.4761905 | 0.0000000 | 0.6666667 | 0.5714286 | 0.0000000 | 0.4761905 | 0.0000000 | 0.2857143 | 0.0000000 | 0.0000000 | 0.0000000 | 0.4761905 | 0.7142857 | 0.3027211 |
+| FRB | 2013 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.6666667 | 0.6666667 | 0.0000000 | 0.6666667 | 0.6666667 | 0.0000000 | 0.0000000 | 0.0000000 | 0.6666667 | 0.0000000 | 0.2380952 |
+| UEB | 2014 | 0.2571429 | 0.3428571 | 0.0000000 | 0.2476190 | 0.0000000 | 0.1333333 | 0.4190476 | 0.4761905 | 0.5904762 | 0.0000000 | 0.0000000 | 0.0000000 | 0.2476190 | 0.2476190 | 0.2115646 |
+| FRE | 2014 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0714286 |
+| SCS | 2014 | 0.0000000 | 0.6666667 | 0.0000000 | 0.6666667 | 0.6666667 | 0.6666667 | 0.0000000 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 | 0.0000000 | 0.0000000 | 0.0000000 | 0.3809524 |
+| BAR | 2014 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| SCL | 2014 | 0.0000000 | 0.0000000 | 0.0000000 | 0.5000000 | 0.8333333 | 0.2222222 | 0.0000000 | 0.2222222 | 0.2222222 | 0.3888889 | 0.0000000 | 0.2222222 | 0.2222222 | 0.2222222 | 0.2182540 |
+| SCG | 2014 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 0.5714286 |
+| BOB | 2014 | 0.3116883 | 0.4155844 | 0.0000000 | 0.7316017 | 0.7445887 | 0.1731602 | 0.3116883 | 0.5367965 | 0.3679654 | 0.5497835 | 0.2554113 | 0.4545455 | 0.5064935 | 0.6580087 | 0.4298083 |
+| BOH | 2014 | 0.0000000 | 0.5333333 | 0.0000000 | 0.3333333 | 0.3333333 | 0.5333333 | 0.0000000 | 0.3333333 | 0.5333333 | 0.3333333 | 0.0000000 | 0.0000000 | 0.3333333 | 0.7333333 | 0.2857143 |
+| SCD | 2014 | 0.0000000 | 0.6666667 | 0.0000000 | 0.6666667 | 0.0000000 | 0.0000000 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 | 0.0000000 | 0.0000000 | 0.0000000 | 0.6666667 | 0.3333333 |
+| BUR | 2014 | 0.3333333 | 0.3333333 | 0.3333333 | 0.3333333 | 0.8666667 | 0.3333333 | 0.7333333 | 0.3333333 | 0.3333333 | 0.3333333 | 0.3333333 | 0.6000000 | 0.3333333 | 0.6000000 | 0.4380952 |
+| UST | 2014 | 0.3333333 | 0.3333333 | 0.0000000 | 0.5333333 | 0.7333333 | 0.5333333 | 0.5333333 | 0.0000000 | 0.6000000 | 0.5333333 | 0.0000000 | 0.3333333 | 0.0000000 | 0.8000000 | 0.3761905 |
+| ALD | 2014 | 0.7000000 | 0.4000000 | 0.0000000 | 0.6000000 | 0.4000000 | 0.0000000 | 0.0000000 | 0.6000000 | 0.4000000 | 0.4000000 | 0.0000000 | 0.0000000 | 0.4000000 | 0.0000000 | 0.2785714 |
+| FRI | 2014 | 0.6666667 | 1.0000000 | 0.6666667 | 0.6666667 | 1.0000000 | 0.6666667 | 0.6666667 | 1.0000000 | 1.0000000 | 1.0000000 | 0.6666667 | 0.6666667 | 1.0000000 | 0.6666667 | 0.8095238 |
+| RIE | 2014 | 0.5333333 | 0.4666667 | 0.0000000 | 0.6222222 | 0.9111111 | 0.0000000 | 0.0000000 | 0.6222222 | 0.7333333 | 0.7333333 | 0.6888889 | 0.5555556 | 0.3555556 | 0.5111111 | 0.4809524 |
+| KON | 2014 | 0.5714286 | 0.0000000 | 0.0000000 | 0.2500000 | 0.0000000 | 0.4285714 | 0.2500000 | 0.5357143 | 0.2500000 | 0.2500000 | 0.5714286 | 0.0000000 | 0.0000000 | 0.0000000 | 0.2219388 |
+| NEU | 2014 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0714286 |
+| UEB | 2015 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.3333333 | 0.0000000 | 0.3333333 | 0.0000000 | 0.0000000 | 0.0000000 | 0.5333333 | 0.6000000 | 0.1285714 |
+| BOB | 2015 | 0.1818182 | 0.5090909 | 0.0000000 | 0.4727273 | 0.7090909 | 0.0000000 | 0.1818182 | 0.5090909 | 0.3272727 | 0.1818182 | 0.4727273 | 0.4363636 | 0.4363636 | 0.6545455 | 0.3623377 |
+| SCD | 2015 | 0.0000000 | 0.5454545 | 0.0000000 | 0.6545455 | 0.3454545 | 0.1818182 | 0.5454545 | 0.6727273 | 0.5090909 | 0.5090909 | 0.0000000 | 0.0000000 | 0.0000000 | 0.4363636 | 0.3142857 |
+| SCL | 2015 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| FRE | 2015 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| BUR | 2015 | 0.0000000 | 0.6666667 | 0.0000000 | 0.0000000 | 0.6666667 | 0.0000000 | 0.6666667 | 0.6666667 | 0.0000000 | 0.0000000 | 0.0000000 | 0.6666667 | 0.0000000 | 0.8333333 | 0.2976190 |
+| NEU | 2015 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| ALD | 2015 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| RIE | 2015 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| SCS | 2015 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| BRU | 2016 | 0.8000000 | 0.9000000 | 0.8000000 | 0.7000000 | 0.9000000 | 0.7000000 | 0.9000000 | 0.9000000 | 0.8000000 | 0.4000000 | 0.7000000 | 0.8000000 | 0.7000000 | 0.9000000 | 0.7785714 |
+| LIM | 2016 | 0.4102564 | 0.6794872 | 0.2948718 | 0.8461538 | 0.8461538 | 0.6410256 | 0.5256410 | 0.6923077 | 0.7820513 | 0.7307692 | 0.4230769 | 0.6025641 | 0.5897436 | 0.7051282 | 0.6263736 |
+| BOB | 2016 | 0.5533597 | 0.5217391 | 0.0000000 | 0.6284585 | 0.7114625 | 0.0000000 | 0.2371542 | 0.5533597 | 0.3557312 | 0.5533597 | 0.3715415 | 0.5217391 | 0.5138340 | 0.6877470 | 0.4435347 |
+| FRE | 2016 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| SCD | 2016 | 0.5000000 | 0.5000000 | 0.0000000 | 0.5000000 | 0.5000000 | 0.5000000 | 0.5000000 | 0.5000000 | 0.6666667 | 0.5000000 | 0.0000000 | 0.5000000 | 0.5000000 | 0.6666667 | 0.4523810 |
+| SCL | 2016 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0714286 |
+| WSL | 2016 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.1428571 |
+| SCS | 2016 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| BUR | 2016 | 0.6666667 | 0.6666667 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.6666667 | 0.6666667 | 0.6666667 | 1.0000000 | 0.4523810 |
+| KON | 2016 | 0.0000000 | 0.0000000 | 0.0000000 | 0.5238095 | 0.0000000 | 0.2857143 | 0.2857143 | 0.5238095 | 0.2857143 | 0.0000000 | 0.5714286 | 0.0000000 | 0.2857143 | 0.0000000 | 0.1972789 |
+| NEU | 2016 | 0.0000000 | 0.6666667 | 0.0000000 | 0.6666667 | 0.6666667 | 0.0000000 | 0.0000000 | 1.0000000 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 | 0.0000000 | 0.0000000 | 0.4047619 |
+| FRI | 2016 | 1.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 1.0000000 | 0.5000000 |
+| HAN | 2016 | 0.6666667 | 0.0000000 | 0.0000000 | 0.0000000 | 0.6666667 | 0.0000000 | 0.6666667 | 0.6666667 | 0.0000000 | 0.0000000 | 0.6666667 | 0.6666667 | 1.0000000 | 0.0000000 | 0.3571429 |
+| LIM | 2017 | 0.3333333 | 0.6000000 | 0.0000000 | 0.8666667 | 1.0000000 | 0.5333333 | 0.6000000 | 0.5333333 | 0.5333333 | 0.7333333 | 0.5333333 | 0.3333333 | 0.5333333 | 0.6000000 | 0.5523810 |
+| BOB | 2017 | 0.5130435 | 0.5101449 | 0.0000000 | 0.6570048 | 0.7594203 | 0.0000000 | 0.1980676 | 0.5439614 | 0.1980676 | 0.6599034 | 0.2782609 | 0.5072464 | 0.5449275 | 0.6599034 | 0.4307108 |
+| HAN | 2017 | 0.5333333 | 0.3333333 | 0.0000000 | 0.6000000 | 0.5333333 | 0.0000000 | 0.5333333 | 0.5333333 | 0.7333333 | 0.0000000 | 0.3333333 | 0.3333333 | 0.6000000 | 0.6000000 | 0.4047619 |
+| BRU | 2017 | 0.6000000 | 0.8000000 | 0.6000000 | 0.7333333 | 0.8666667 | 0.7333333 | 0.8000000 | 0.9333333 | 0.8666667 | 0.7333333 | 0.3333333 | 0.6000000 | 0.8000000 | 0.9333333 | 0.7380952 |
+| WSL | 2017 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.1428571 |
+| SCL | 2017 | 0.0000000 | 0.6000000 | 0.0000000 | 0.6000000 | 0.4000000 | 0.0000000 | 0.0000000 | 0.4000000 | 0.0000000 | 0.6000000 | 0.0000000 | 0.6000000 | 0.0000000 | 0.8000000 | 0.2857143 |
+| FRE | 2017 | 1.0000000 | 1.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 0.0000000 | 0.7857143 |
+| FRI | 2017 | 0.6000000 | 0.7000000 | 0.4000000 | 0.7000000 | 0.8000000 | 0.4000000 | 0.7000000 | 0.4000000 | 0.7000000 | 0.4000000 | 0.4000000 | 0.4000000 | 0.8000000 | 0.6000000 | 0.5714286 |
+| KON | 2017 | 0.3333333 | 0.3333333 | 0.0000000 | 0.6000000 | 0.3333333 | 0.0000000 | 0.3333333 | 0.6000000 | 0.3333333 | 0.3333333 | 0.7333333 | 0.0000000 | 0.0000000 | 0.3333333 | 0.3047619 |
+| SCS | 2017 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| SCD | 2017 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.5000000 |
+| BRU | 2018 | 0.2500000 | 0.6785714 | 0.2500000 | 0.8571429 | 0.8571429 | 0.4642857 | 0.6071429 | 0.7857143 | 0.8214286 | 0.6428571 | 0.2500000 | 0.4642857 | 0.6785714 | 0.8928571 | 0.6071429 |
+| LIM | 2018 | 0.7000000 | 0.7000000 | 0.4000000 | 0.9000000 | 0.7000000 | 0.8000000 | 0.8000000 | 0.7000000 | 0.8000000 | 0.8000000 | 0.7000000 | 0.7000000 | 0.7000000 | 0.6000000 | 0.7142857 |
+| WSL | 2018 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| HAN | 2018 | 0.5000000 | 0.0000000 | 0.0000000 | 0.5000000 | 0.5000000 | 0.0000000 | 0.5000000 | 0.5000000 | 0.5000000 | 0.0000000 | 0.5000000 | 0.5000000 | 0.6666667 | 0.5000000 | 0.3690476 |
+| BUR | 2018 | 1.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.4285714 |
+| BOB | 2018 | 0.5072464 | 0.5072464 | 0.0000000 | 0.5543478 | 0.7536232 | 0.0000000 | 0.1594203 | 0.3586957 | 0.2282609 | 0.6485507 | 0.3659420 | 0.4891304 | 0.5072464 | 0.6811594 | 0.4114907 |
+| KON | 2018 | 0.0000000 | 0.0000000 | 0.0000000 | 0.5555556 | 0.0000000 | 0.0000000 | 0.3888889 | 0.5833333 | 0.5000000 | 0.3888889 | 0.5000000 | 0.2222222 | 0.2222222 | 0.2222222 | 0.2559524 |
+| GEN | 2018 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| HAN | 2019 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| WSL | 2019 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.1428571 |
+| KON | 2019 | 0.0000000 | 0.0000000 | 0.0000000 | 0.4642857 | 0.2500000 | 0.4285714 | 0.5357143 | 0.7142857 | 0.2500000 | 0.2500000 | 0.5357143 | 0.2500000 | 0.0000000 | 0.0000000 | 0.2627551 |
+| BOB | 2019 | 0.3250000 | 0.5250000 | 0.0000000 | 0.6916667 | 0.6666667 | 0.0000000 | 0.2333333 | 0.6750000 | 0.4000000 | 0.5916667 | 0.2416667 | 0.5000000 | 0.5250000 | 0.6250000 | 0.4285714 |
+| BUR | 2019 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| UEB | 2019 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.6666667 | 0.0000000 | 0.6666667 | 0.0000000 | 0.0000000 | 0.0000000 | 0.6666667 | 0.0000000 | 0.1428571 |
+| GEN | 2019 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| BUR | 2020 | 1.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.4285714 |
+| WSL | 2020 | 0.6666667 | 0.6666667 | 0.0000000 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 | 0.6666667 | 0.0000000 | 0.6666667 | 0.0000000 | 0.0000000 | 0.6666667 | 0.4761905 |
+| KON | 2020 | 0.2857143 | 0.2857143 | 0.0000000 | 0.2857143 | 0.2857143 | 0.2857143 | 0.2857143 | 0.6666667 | 0.4761905 | 0.0000000 | 0.7142857 | 0.0000000 | 0.0000000 | 0.2857143 | 0.2755102 |
+| NEU | 2020 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.6666667 | 0.6666667 | 0.6666667 | 0.0000000 | 0.6666667 | 0.6666667 | 0.0000000 | 0.2380952 |
+| GEN | 2020 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| WSL | 2021 | 1.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.5714286 |
+| BUR | 2021 | 1.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.4285714 |
+| KON | 2021 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.4285714 |
+| NEU | 2021 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 1.0000000 | 0.0000000 | 0.0000000 | 0.2142857 |
+| GEN | 2021 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| BUR | 2022 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| GEN | 2022 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+| KON | 2022 | 0.0000000 | 0.5000000 | 0.0000000 | 0.5000000 | 0.5000000 | 0.0000000 | 0.0000000 | 0.0000000 | 0.5000000 | 0.0000000 | 0.5000000 | 0.0000000 | 0.5000000 | 0.5000000 | 0.2500000 |
+| KON | 2023 | 0.0000000 | 0.4000000 | 0.0000000 | 0.7000000 | 0.4000000 | 0.4000000 | 0.4000000 | 0.6000000 | 0.6000000 | 0.4000000 | 0.7000000 | 0.0000000 | 0.0000000 | 0.4000000 | 0.3571429 |
+| SCHIF | 2016 | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN | NaN |
+
+``` r
+cc_locus_table_TY_hexp_pivot <- pivot_longer(cc_locus_table_TY_hexp,cols=3:16,names_to="locus",values_to="value")
+
+ggplot(cc_locus_table_TY_hexp_pivot,aes(x=as.numeric(TruffleYear), y=value)) +
+  geom_point(pch=20, alpha=0.3, size=0.8) +
+  geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
+  facet_wrap(vars(Pop)) +
+  labs(y="Nei's genetic diversity Hexp", x="Truffle year") +
+  ggtitle("Nei's genetic diversity per locus, Truffle year and Population (clone-corrected)") +
+  theme(aspect.ratio=0.4,
+    strip.background = element_blank(),
+    strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
+    panel.grid = element_blank(),
+    panel.spacing=unit(0.1,"lines"))
+```
+
+![](Presentation_Summer_24_files/figure-gfm/cc%20Hexp%20table%20Pop%20TruffleYear-1.png)<!-- -->
+
+``` r
+cc_n_samples_allMarkersOnly_TY <- poppr(cc_myData_genind_allMarkersOnly_TY) %>%
+  separate(Pop, sep="_", into=c("Pop","TruffleYear"))
+
+
+cc_n_samples_allMarkersOnly_TY %>%
+  select(Pop,TruffleYear,N) %>%
+  kable()
+```
+
+| Pop   | TruffleYear |   N |
+|:------|:------------|----:|
+| FRE   | 2010        |   1 |
+| ALD   | 2010        |   1 |
+| RIE   | 2010        |   6 |
+| TRO   | 2010        |   4 |
+| SCG   | 2010        |   2 |
+| ALD   | 2011        |   7 |
+| BOH   | 2011        |   9 |
+| FRE   | 2011        |   3 |
+| RIE   | 2011        |  12 |
+| SCG   | 2011        |   3 |
+| BOB   | 2011        |   9 |
+| TRO   | 2011        |   4 |
+| FRB   | 2011        |   2 |
+| UEB   | 2011        |   7 |
+| SCL   | 2011        |   3 |
+| BOB   | 2012        |  13 |
+| FRE   | 2012        |   1 |
+| SCL   | 2012        |  20 |
+| SCD   | 2012        |  22 |
+| UEB   | 2012        |  10 |
+| BOH   | 2012        |  12 |
+| WSL   | 2012        |   1 |
+| ALD   | 2012        |   3 |
+| RIE   | 2012        |  12 |
+| FRB   | 2012        |   4 |
+| SCG   | 2012        |   2 |
+| TRO   | 2012        |   3 |
+| BOB   | 2013        |  31 |
+| UEB   | 2013        |  13 |
+| BUR   | 2013        |  11 |
+| FRE   | 2013        |   3 |
+| SCL   | 2013        |   8 |
+| SCS   | 2013        |   4 |
+| SCD   | 2013        |   7 |
+| BOH   | 2013        |   6 |
+| NEU   | 2013        |   2 |
+| UST   | 2013        |  16 |
+| KON   | 2013        |   3 |
+| ALD   | 2013        |   5 |
+| RIE   | 2013        |  11 |
+| FRI   | 2013        |   7 |
+| FRB   | 2013        |   3 |
+| UEB   | 2014        |  15 |
+| FRE   | 2014        |   2 |
+| SCS   | 2014        |   3 |
+| BAR   | 2014        |   1 |
+| SCL   | 2014        |   9 |
+| SCG   | 2014        |   2 |
+| BOB   | 2014        |  22 |
+| BOH   | 2014        |   6 |
+| SCD   | 2014        |   3 |
+| BUR   | 2014        |   6 |
+| UST   | 2014        |   6 |
+| ALD   | 2014        |   5 |
+| FRI   | 2014        |   3 |
+| RIE   | 2014        |  10 |
+| KON   | 2014        |   8 |
+| NEU   | 2014        |   2 |
+| UEB   | 2015        |   6 |
+| BOB   | 2015        |  11 |
+| SCD   | 2015        |  11 |
+| SCL   | 2015        |   1 |
+| FRE   | 2015        |   1 |
+| BUR   | 2015        |   4 |
+| NEU   | 2015        |   1 |
+| ALD   | 2015        |   1 |
+| RIE   | 2015        |   1 |
+| SCS   | 2015        |   1 |
+| BRU   | 2016        |   5 |
+| LIM   | 2016        |  13 |
+| BOB   | 2016        |  23 |
+| FRE   | 2016        |   1 |
+| SCD   | 2016        |   4 |
+| SCL   | 2016        |   3 |
+| WSL   | 2016        |   2 |
+| SCS   | 2016        |   1 |
+| BUR   | 2016        |   3 |
+| KON   | 2016        |   7 |
+| NEU   | 2016        |   3 |
+| FRI   | 2016        |   2 |
+| HAN   | 2016        |   3 |
+| LIM   | 2017        |   6 |
+| BOB   | 2017        |  46 |
+| HAN   | 2017        |   6 |
+| BRU   | 2017        |   6 |
+| WSL   | 2017        |   2 |
+| SCL   | 2017        |   5 |
+| FRE   | 2017        |   2 |
+| FRI   | 2017        |   5 |
+| KON   | 2017        |   6 |
+| SCS   | 2017        |   1 |
+| SCD   | 2017        |   2 |
+| BRU   | 2018        |   8 |
+| LIM   | 2018        |   5 |
+| WSL   | 2018        |   1 |
+| HAN   | 2018        |   4 |
+| BUR   | 2018        |   2 |
+| BOB   | 2018        |  24 |
+| KON   | 2018        |   9 |
+| GEN   | 2018        |   1 |
+| HAN   | 2019        |   1 |
+| WSL   | 2019        |   2 |
+| KON   | 2019        |   8 |
+| BOB   | 2019        |  16 |
+| BUR   | 2019        |   1 |
+| UEB   | 2019        |   3 |
+| GEN   | 2019        |   1 |
+| BUR   | 2020        |   2 |
+| WSL   | 2020        |   3 |
+| KON   | 2020        |   7 |
+| NEU   | 2020        |   3 |
+| GEN   | 2020        |   1 |
+| WSL   | 2021        |   2 |
+| BUR   | 2021        |   2 |
+| KON   | 2021        |   2 |
+| NEU   | 2021        |   2 |
+| GEN   | 2021        |   1 |
+| BUR   | 2022        |   1 |
+| GEN   | 2022        |   1 |
+| KON   | 2022        |   4 |
+| KON   | 2023        |   5 |
+| SCHIF | 2016        |   1 |
+| Total | NA          | 727 |
 
 # PCA
 
@@ -683,8 +1730,7 @@ s.class(pca.pops.allMarkersOnly$li, fac=pop(myData_genind_allMarkersOnly),
 
 ``` r
 #clonecorrected PCA  with samplingYear
-cc_myData_genind_allMarkersOnly_SY <- clonecorrect(myData_genind_allMarkersOnly,
-                                                   strata=~Pop/SamplingYear)
+setPop(cc_myData_genind_allMarkersOnly_SY) <- ~Pop
 x.pops_cc.SY <- tab(cc_myData_genind_allMarkersOnly_SY,
                     freq=TRUE, NA.method="mean")
 pca.pops_cc.SY <- dudi.pca(df = x.pops_cc.SY,
@@ -699,8 +1745,7 @@ s.class(pca.pops_cc.SY$li,
 
 ``` r
 #clonecorrected PCA  with TruffleYear
-cc_myData_genind_allMarkersOnly_TY <- clonecorrect(myData_genind_allMarkersOnly,
-                                                   strata=~Pop/TruffleYear)
+setPop(cc_myData_genind_allMarkersOnly_TY) <- ~Pop
 x.pops_cc.TY <- tab(cc_myData_genind_allMarkersOnly_TY,
                     freq=TRUE, NA.method="mean")
 pca.pops_cc.TY <- dudi.pca(df = x.pops_cc.TY,
