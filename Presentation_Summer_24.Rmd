@@ -308,6 +308,24 @@ n_samples_allMarkersOnly_allButBAR_SCHIF_SY %>%
     panel.grid = element_blank(),
     panel.spacing=unit(0.1,"lines"))
 dev.off()
+
+emf(file="n_samples_allMarkersOnly_allButBAR_SCHIF_SY_y_limited.emf")
+n_samples_allMarkersOnly_allButBAR_SCHIF_SY %>%
+  filter(Pop != "Total") %>%
+  ggplot(aes(x=as.numeric(SamplingYear), y=Count, fill=Number)) +
+  geom_col(stat="identity", position="dodge") +
+  facet_wrap(vars(Pop)) +
+  labs(y="", x="Sampling year", subtitle="Dataset: only samples with all markers") +
+  ggtitle("Number of samples vs. number of MLGs") +
+  theme(aspect.ratio=0.4,
+    strip.background = element_blank(),
+    strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
+    panel.grid = element_blank(),
+    panel.spacing=unit(0.1,"lines")) +
+  coord_cartesian(ylim=c(0, 50))
+dev.off()
+
+write.csv(n_samples_allMarkersOnly_allButBAR_SCHIF_SY, file="n_samples_allMarkersOnly_allButBAR_SCHIF_SY.csv")
 ```
 
 
@@ -380,6 +398,26 @@ n_samples_allMarkersOnly_allButBAR_SCHIF_TY %>%
     strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
     panel.grid = element_blank(),
     panel.spacing=unit(0.1,"lines"))
+
+n_samples_allMarkersOnly_allButBAR_SCHIF_TY_y_limited <- n_samples_allMarkersOnly_allButBAR_SCHIF_TY %>%
+  filter(Pop != "Total") %>%
+  ggplot(aes(x=as.numeric(TruffleYear), y=Count, fill=Number)) +
+  geom_col(stat="identity", position="dodge") +
+  facet_wrap(vars(Pop)) +
+  labs(y="", x="Truffle year", subtitle="Dataset: only samples with all markers") +
+  ggtitle("Number of samples vs. number of MLGs") +
+  theme(aspect.ratio=0.4,
+    strip.background = element_blank(),
+    strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
+    panel.grid = element_blank(),
+    panel.spacing=unit(0.1,"lines")) +
+  coord_cartesian(ylim=c(0, 50))
+
+emf(file="n_samples_allMarkersOnly_allButBAR_SCHIF_TY_y_limited.emf")
+n_samples_allMarkersOnly_allButBAR_SCHIF_TY_y_limited
+dev.off()
+
+write.csv(n_samples_allMarkersOnly_allButBAR_SCHIF_TY,file="n_samples_allMarkersOnly_allButBAR_SCHIF_TY.csv")
 
 emf(file="n_samples_allMarkersOnly_allButBAR_SCHIF_TY.emf")
 n_samples_allMarkersOnly_allButBAR_SCHIF_TY %>%

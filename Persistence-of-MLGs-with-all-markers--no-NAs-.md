@@ -127,10 +127,55 @@ Sampling_year,Sampling_date)
 sollte man diese vielleicht zusammen nehmen?
 
 ``` r
-ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "BOB"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+persistence_bob <- ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "BOB"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
   labs(title ="distribution of MLGs in BOB (Bohlingen Buche) over the years") + scale_x_continuous(breaks=2010:2023)
+persistence_bob
 ```
 
 ![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/MLGs%20per%20year%20per%20surface-1.png)<!-- -->
 
-![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-1.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-2.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-3.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-4.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-5.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-6.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-7.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-8.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-9.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-10.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-11.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-12.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-13.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-14.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-15.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-16.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-17.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-18.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-19.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-20.png)<!-- -->
+``` r
+emf(file="persistence_bob.emf")
+persistence_bob
+dev.off()
+```
+
+    ## png 
+    ##   2
+
+![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-1.png)<!-- -->
+
+    ## png 
+    ##   2
+
+![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-2.png)<!-- -->
+
+    ## png 
+    ##   2
+
+![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-3.png)<!-- -->
+
+    ## png 
+    ##   2
+
+![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-4.png)<!-- -->
+
+    ## png 
+    ##   2
+
+![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-5.png)<!-- -->
+
+    ## png 
+    ##   2
+
+![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-6.png)<!-- -->
+
+    ## png 
+    ##   2
+
+![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-7.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-8.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-9.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-10.png)<!-- -->
+
+    ## png 
+    ##   2
+
+![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-11.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-12.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-13.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-14.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-15.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-16.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-17.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-18.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-19.png)<!-- -->![](Persistence-of-MLGs-with-all-markers--no-NAs-_files/figure-gfm/more%20MLGs%20without%20code%20display-20.png)<!-- -->

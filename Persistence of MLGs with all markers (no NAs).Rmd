@@ -33,6 +33,7 @@ library(hierfstat)
 library(mmod)
 library(scales)
 library(plotly)
+library(devEMF)
 T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_Mai2024.xlsx")
 # wirf alle Individuals mit NA raus
 myData <- read.genalex("Daten_Genalex.csv",genclone=TRUE, ploidy=1)
@@ -120,32 +121,73 @@ Sampling_year,Sampling_date)
 sollte man diese vielleicht zusammen nehmen?
 
 ```{r MLGs per year per surface}
-ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "BOB"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+persistence_bob <- ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "BOB"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
   labs(title ="distribution of MLGs in BOB (Bohlingen Buche) over the years") + scale_x_continuous(breaks=2010:2023)
+persistence_bob
+
+emf(file="persistence_bob.emf")
+persistence_bob
+dev.off()
 
 ```
 
 ```{r more MLGs without code display, echo=FALSE}
-ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "ALD"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+persistence_ald <- ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "ALD"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
   labs(title ="Distribution of MLGs in ALD over the years") + scale_x_continuous(breaks=2010:2023)
-ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "BRU"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+persistence_ald
+emf(file="persistence_ald.emf")
+persistence_ald
+dev.off()
+
+persistence_bru <- ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "BRU"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
   labs(title ="Distribution of MLGs in BRU over the years") + scale_x_continuous(breaks=2010:2024)
-ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "BUR"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+persistence_bru
+emf(file="persistence_bru.emf")
+persistence_bru
+dev.off()
+
+persistence_bur <- ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "BUR"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
   labs(title ="Distribution of MLGs in BUR over the years") + scale_x_continuous(breaks=2010:2023)
-ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "FRB"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+persistence_bur
+emf(file="persistence_bur.emf")
+persistence_bur
+dev.off()
+
+persistence_frb <- ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "FRB"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
   labs(title ="Distribution of MLGs in FRB over the years") + scale_x_continuous(breaks=2010:2023)
-ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "FRE"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+persistence_frb
+emf(file="persistence_frb.emf")
+persistence_frb
+dev.off()
+
+persistence_fre <- ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "FRE"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
   labs(title ="Distribution of MLGs in FRE over the years") + scale_x_continuous(breaks=2010:2023)
-ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "FRI"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+persistence_fre
+emf(file="persistence_fre.emf")
+persistence_fre
+dev.off()
+
+persistence_fri <- ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "FRI"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
   labs(title ="Distribution of MLGs in FRI over the years") + scale_x_continuous(breaks=2010:2023)
+persistence_fri
+emf(file="persistence_fri.emf")
+persistence_fri
+dev.off()
+
 ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "GEN"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
   labs(title ="Distribution of MLGs in GEN over the years") + scale_x_continuous(breaks=2010:2023)
 ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "HAN"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
   labs(title ="Distribution of MLGs in HAN over the years") + scale_x_continuous(breaks=2010:2023)
 ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "KON"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
   labs(title ="Distribution of MLGs in KON over the years") + scale_x_continuous(breaks=2010:2024)
-ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "LIM"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+
+persistence_lim <- ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "LIM"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
   labs(title ="Distribution of MLGs in LIM over the years") + scale_x_continuous(breaks=2010:2024)
+persistence_lim
+emf(file="persistence_lim.emf")
+persistence_lim
+dev.off()
+
 ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "NEU"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
   labs(title ="Distribution of MLGs in NEU over the years") + scale_x_continuous(breaks=2010:2023)
 ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "RIE"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
