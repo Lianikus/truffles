@@ -1,0 +1,335 @@
+---
+title: "Richness, Evenness, AMOVA, Isolation by distance"
+author: "Lia Baumann"
+date: "2024-09-03"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+```
+
+```{r Tabellen laden, message=FALSE, warning=FALSE, include=FALSE}
+library(readxl)
+library(knitr)
+library(tidyverse)
+library(ggplot2)
+theme_set(theme_bw())
+library(envalysis)
+library(forcats)
+library(poppr)
+library(treemap)
+library(pegas)
+library(adegenet)
+library(devtools)
+library(hierfstat)
+library(mmod)
+library(diveRsity)
+library(vegan)
+library(writexl)
+library(devEMF)
+library(ape)
+library(magrittr)
+library(reshape)
+library(reshape2)
+library(graph4lg)
+T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_Mai2024.xlsx")
+coord <- read_excel("Koordinaten_2024.xlsx")
+myData <- read.genalex("Daten_Genalex.csv",genclone=TRUE, ploidy=1)
+myData_genind <- read.genalex("Daten_Genalex.csv",genclone=FALSE, ploidy=1)
+myData_genind_allMarkersOnly <- myData_genind %>%
+  missingno("geno", cutoff = 0)
+splitStrata(myData) <- ~Pop/Month/SamplingYear/TruffleYear
+splitStrata(myData_genind) <- ~Pop/Month/SamplingYear/TruffleYear
+splitStrata(myData_genind_allMarkersOnly) <- ~Pop/Month/SamplingYear/TruffleYear
+cc_myData_genind_allMarkersOnly_SY <- clonecorrect(myData_genind_allMarkersOnly,
+                                                   strata=~Pop/SamplingYear)
+cc_myData_genind_allMarkersOnly_TY <- clonecorrect(myData_genind_allMarkersOnly,
+                                                   strata=~Pop/TruffleYear)
+```
+
+# Hardy-Weinberg equilibrium
+Cannot be determined for haploids.
+
+# Genotypic richness
+The number of observed MLGs is equivalent to genotypic richness. We expect that the BB population would have a higher genotypic richness than the FR population. However, looking at the raw number of MLGs for each symptom type, it shows us the opposite: there are 94 MLGs for BB and 191 MLGs for FR. This discrepancy has to do with the sample size differences, namely N=113 for BB and N=581 for FR. A more appropriate comparison is the eMLG value, which is an approximation of the number of genotypes that would be expected at the largest, shared sample size (N=113) based on rarefaction. For BB (N=113) the eMLG=94 and for FR (where N is set to 113) the eMLG = 66.6. Thus, genotypic richness is indeed higher in the BB populations than the FR population when considering equal sample sizes.
+
+```{r richness}
+setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
+
+#Minimal sample size Sum is 1 so this can not give any relevant output. I will plot the same for higher sample sizes only
+#only calculate Richness for populations > 100 samples (N)
+myData_genind_allMarkersOnly_above100N <- selPopSize(myData_genind_allMarkersOnly,pop=NULL,nMin=100)
+summary(myData_genind_allMarkersOnly_above100N)
+H.year <- mlg.table(myData_genind_allMarkersOnly, plot = FALSE)
+rarecurve(H.year, ylab="Number of expected MLGs", sample=min(rowSums(H.year)),
+          border = NA, fill = NA, font = 2, cex = 1, col = "blue")
+title("Rarecurve of Sampling Years")
+
+setPop(myData_genind_allMarkersOnly) <- ~TruffleYear
+myData_genind_allMarkersOnly_above100N <- selPopSize(myData_genind_allMarkersOnly,pop=NULL,nMin=100)
+summary(myData_genind_allMarkersOnly_above100N)
+H.year <- mlg.table(myData_genind_allMarkersOnly, plot = FALSE)
+rarecurve(H.year, ylab="Number of expected MLGs", sample=min(rowSums(H.year)),
+          border = NA, fill = NA, font = 2, cex = 1, col = "blue")
+title("Rarecurve of Truffle Years")
+
+setPop(myData_genind_allMarkersOnly) <- ~Month
+myData_genind_allMarkersOnly_above100N <- selPopSize(myData_genind_allMarkersOnly,pop=NULL,nMin=40)
+summary(myData_genind_allMarkersOnly_above100N)
+poppr(myData_genind_allMarkersOnly_above100N)
+H.year <- mlg.table(myData_genind_allMarkersOnly, plot = FALSE)
+rarecurve(H.year, ylab="Number of expected MLGs", sample=min(rowSums(H.year)),
+          border = NA, fill = NA, font = 2, cex = 1, col = "blue")
+title("Rarecurve of Month")
+
+#Genotypic richness rises, the later the ascocarps were collected --> more different individuals produced fruiting bodies
+```
+
+#Genotypic diversity
+Diversity measures incorporate both genotypic richness and abundance. There are three measures of genotypic diversity employed by poppr, the Shannon-Wiener index (H), Stoddart and Taylor’s index (G), and Simpson’s index (lambda). In our example, comparing the diversity of BB to FR shows that H is greater for FR (4.58 vs. 4.4), but G is lower (53.4 vs. 61.7). Thus, our expectation that diversity is lower for FR than BB is rejected in the case of H, which is likely due to the sensitivity of the Shannon-Wiener index to genotypic richness in the uneven sample sizes, and accepted in the case of G. To be fair, the sample size used to calculate these diversity measures is different and is therefore not an appropriate comparison.
+
+For an easier statistic to grasp, we have included the Simpson index, which is simply one minus the sum of squared genotype frequencies. This measure provides an estimation of the probability that two randomly selected genotypes are different and scales from 0 (no genotypes are different) to 1 (all genotypes are different). In the data above, we can see that lambda is just barely higher in BB than FR (0.984 vs. 0.981). Since this might be an artifact of sample size, we can explore a correction of Simpson’s index for sample size by multiplying lambda by N/(N−1). Since R is vectorized, we can do this for all of our populations at once:
+
+```{r diversity}
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+allMarkersOnly_diversity <- poppr(myData_genind_allMarkersOnly)
+N      <- allMarkersOnly_diversity$N      # number of samples
+lambda <- allMarkersOnly_diversity$lambda # Simpson's index
+lambda_corr <- (N/(N - 1)) * lambda              # Corrected Simpson's index
+allMarkersOnly_diversity$lambda_corr <- lambda_corr
+allMarkersOnly_diversity
+```
+
+#Genotypic evenness
+Evenness is a measure of the distribution of genotype abundances, wherein a population with equally abundant genotypes yields a value equal to 1 and a population dominated by a single genotype is closer to zero --> Value E.5
+```{r evenness}
+allMarkersTable <- mlg.table(myData_genind_allMarkersOnly)
+```
+
+# Genetic distance
+One common way to visualize a genetic distance is with a dendrogram. For this example, we will use the microbov data set (Laloe et al., 2007). This contains information on 704 cattle from both Africa and France over several different breeds. We can create a dendrogram over all 704 samples, but that would be difficult to visualize. For our purposes, let’s take ten random samples and calculate Provesti’s distance, which will return the fraction of the number of differences between samples:
+
+```{r genetic distance}
+setPop(myData_genind_allMarkersOnly) <- ~Pop/SamplingYear
+data(myData_genind_allMarkersOnly)
+set.seed(10)
+ten_samples <- sample(nInd(myData_genind_allMarkersOnly), 10)
+mic10       <- myData_genind_allMarkersOnly[ten_samples]
+(micdist    <- provesti.dist(mic10))
+#The above represents the pairwise distances between these 10 samples. We will use this distance matrix to create a neighbor-joining tree.
+theTree <- micdist %>%
+  nj() %>%    # calculate neighbor-joining tree
+  ladderize() # organize branches by clade
+plot(theTree)
+add.scale.bar(length = 0.05) # add a scale bar showing 5% difference.
+
+set.seed(999)
+aboot(mic10, dist = provesti.dist, sample = 200, tree = "nj", cutoff = 50, quiet = TRUE)
+
+#The bootstrap value of 100 on the node separating the French and African samples gives support that the country of origin is a factor in how these breeds are structured. If we wanted to analyze all of the breeds against one another, it would be better to create a bootstrapped dendrogram based on a genetic distance. To do this, we will add 3 stratifications to the microbov data set: Country, Breed, and Species. We will then set the population to Country by Breed, convert the data to a genpop object and then create a tree using aboot with Nei’s genetic distance.
+
+set.seed(999)
+myData_genind_allMarkersOnly %>%
+  genind2genpop(pop = ~Pop) %>%
+  aboot(cutoff = 50, quiet = TRUE, sample = 1000, distance = nei.dist)
+#entspricht auch den Ergebnissen von Structure und PCA
+```
+# K-means hierarchical clustering
+A recent study reported that the origin of the potato late blight pathogen Phytophthora infestans lies in Mexico as opposed to South America (Goss et al., 2014). We saw in the previous chapter that South American populations showed signatures of clonal reproduction while Mexican populations showed no evidence rejecting the null hypothesis of random mating. In this section, we will use K-means clustering in combination with bootstrapped dendrograms to see how well this pattern holds up. Clonal populations should have short terminal branch lengths and should cluster according to those branches. Panmictic populations will show no clear pattern. Let’s look at the data:
+
+```{r cluster analysis, eval=FALSE, include=FALSE}
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+MX <- popsub(myData_genind_allMarkersOnly, "BUR")
+MXclust <- find.clusters(MX)
+```
+
+```{r MSN}
+# KON_msn <- myData_genind_allMarkersOnly %>% setPop(~Pop) %>% popsub("KON")
+#args(plot_poppr_msn)
+#ls()
+# imsn() #accesses html tool to calculate distance networks
+#command from the tool:
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+myData_genind_allMarkersOnly_sub <- popsub(myData_genind_allMarkersOnly, sublist = c("FRE", "FRB", "BUR", "BRU"))
+min_span_net <- bruvo.msn(myData_genind_allMarkersOnly_sub, replen = c(1, 2, 3), add = TRUE, loss = TRUE, showplot = FALSE, include.ties = TRUE)
+set.seed(69)
+plot_poppr_msn(myData_genind_allMarkersOnly,
+               min_span_net,
+               inds = "ALL",
+               mlg = FALSE,
+               gadj = 3,
+               nodescale = 10,
+               palette = cm.colors,
+               cutoff = NULL,
+               quantiles = FALSE,
+               beforecut = TRUE,
+               pop.leg = TRUE,
+               size.leg = TRUE,
+               scale.leg = TRUE,
+               layfun = igraph::layout_nicely)
+
+#with MLGs instead of samples
+plot_poppr_msn(myData_genind_allMarkersOnly,
+               min_span_net,
+               inds = "ALL",
+               mlg = TRUE,
+               gadj = 3,
+               nodescale = 10,
+               palette = cm.colors,
+               cutoff = NULL,
+               quantiles = FALSE,
+               beforecut = TRUE,
+               pop.leg = TRUE,
+               size.leg = TRUE,
+               scale.leg = TRUE,
+               layfun = igraph::layout_nicely)
+```
+
+# AMOVA
+In this chapter, we will utilize AMOVA to analyze our populations. AMOVA stands for Analysis of MOlecular VAriance and is a method to detect population differentiation utilizing molecular markers (Excoffier, Smouse & Quattro, 1992). This procedure was initially implemented for DNA haplotypes, but applies to any marker system. The implementation of AMOVA in poppr requires two very basic components: (1) A distance matrix derived from the data and (2) a separate table used to partition the data into different stratifications.
+The distance matrix can be calculated using any distance as long as it is euclidean. The distance that is used in the program Arlequin is the opposite of the Kronecker Delta function that counts the number of differences summed over L loci
+
+```{r amova}
+myData_genclone_allMarkersOnly <- as.genclone(myData_genind_allMarkersOnly)
+myData_genclone_allMarkersOnly
+myData_genclone_allMarkersOnlyCC <- as.genclone(cc_myData_genind_allMarkersOnly_SY)
+table(strata(myData_genclone_allMarkersOnly, ~Pop/Month, combine = FALSE))  # Subpopulations
+
+#In panmictic populations, we would expect to see most of the variance arise from within samples. If we see that the most of the variance occurs among samples within populations or among populations, then there is evidence that we have some sort of population structure. In the case of clonal organisms, this would help support a hypothesis of clonal reproduction.
+allMarkers_amova <- poppr.amova(myData_genclone_allMarkersOnly, ~Pop)
+allMarkers_amovacc <- poppr.amova(myData_genclone_allMarkersOnly, ~Pop, clonecorrect = TRUE)
+allMarkers_amovaCC <- poppr.amova(cc_myData_genind_allMarkersOnly_TY, ~Pop)
+allMarkers_amova
+allMarkers_amovacc
+allMarkers_amovaCC
+
+#Keines davon ergibt das gleiche Resultat wie im Genalex --> Check datasets!
+
+#significance testing
+set.seed(1999)
+allMarkers_signif   <- randtest(allMarkers_amova, nrepet = 999)
+plot(allMarkers_signif)
+allMarkers_ccsignif <- randtest(allMarkers_amovacc, nrepet = 999)
+plot(allMarkers_ccsignif)
+
+```
+
+# DAPC
+DAPC was pioneered by Jombart and colleagues (Jombart et al., 2010) and can be used to infer the number of clusters of genetically related individuals. In this multivariate statistical approach variance in the sample is partitioned into a between-group and within- group component, in an effort to maximize discrimination between groups. In DAPC, data is first transformed using a principal components analysis (PCA) and subsequently clusters are identified using discriminant analysis (DA). This tutorial is based on the vignette written by Thibaut Jombart. We encourage the user to explore this vignette further. The vignette can also be opened within R by executing adegenetTutorial("dapc")
+
+```{r dapc}
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+dapc.allMarkers <- dapc(myData_genind_allMarkersOnly, var.contrib = TRUE, scale = FALSE, n.pca = 30, n.da = nPop(myData_genind_allMarkersOnly) - 1)
+scatter(dapc.allMarkers, cell = 0, pch = 18:23, cstar = 0, mstree = TRUE, lwd = 2, lty = 2)
+
+#BUR, FRB and FRE are separated from the cluster by their second axis (y) --> genetically distinct
+
+setPop(myData_genind_allMarkersOnly) <- ~Month
+dapc.allMarkers <- dapc(myData_genind_allMarkersOnly, var.contrib = TRUE, scale = FALSE, n.pca = 30, n.da = nPop(myData_genind_allMarkersOnly) - 1)
+scatter(dapc.allMarkers, cell = 0, pch = 18:23, cstar = 0, mstree = TRUE, lwd = 2, lty = 2)
+
+#assess if there is alleles in BUR, FRB and FRE that distinguishes them
+set.seed(4)
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+contrib <- loadingplot(dapc.allMarkers$var.contr, axis = 2, thres = 0.07, lab.jitter = 1, threshold=0.05)
+
+temp    <- seploc(myData_genind_allMarkersOnly)       # seploc {adegenet} creates a list of individual loci.
+aest07_1  <- tab(temp[["aest07_1"]]) # tab {adegenet} returns a matrix of genotypes
+aest01_1  <- tab(temp[["aest01_1"]])
+aest29_1  <- tab(temp[["aest29_1"]])
+
+# The following two commands find the average allele frequencies per population
+(freq07 <- apply(aest07_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
+#This allele 266 only appears in the three populations that are further discriminated on the second axis in the dapc
+
+(freq01 <- apply(aest01_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
+# The allele 254 appears in many of the populations, also in Zurich regions, FRE, BOB, FRI, KON and BRU
+
+(freq01 <- apply(aest29_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
+# the allele 204 appears only in FRE, FRB, NEU and FRI
+
+#When did the alleles appear?
+setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
+dapc.allMarkers <- dapc(myData_genind_allMarkersOnly, var.contrib = TRUE, scale = FALSE, n.pca = 30, n.da = nPop(myData_genind_allMarkersOnly) - 1)
+scatter(dapc.allMarkers, cell = 0, pch = 18:23, cstar = 0, mstree = TRUE, lwd = 2, lty = 2)
+
+set.seed(4)
+setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
+contrib <- loadingplot(dapc.allMarkers$var.contr, axis = 2, thres = 0.07, lab.jitter = 1, threshold=0.05)
+
+aest06_1  <- tab(temp[["aest06_1"]]) #allele 217
+aest24_1  <- tab(temp[["aest24_1"]]) #allele 295 & 301
+aest10_1  <- tab(temp[["aest10_1"]]) #allele 280
+
+# The following two commands find the average allele frequencies per population
+(freq06 <- apply(aest06_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
+#This allele 217 started appearing in the year 2016, but wasn't found in 2023
+
+df_06 <- melt(freq06)
+names(df_06)[1] <- "SamplingYear"
+names(df_06)[2] <- "Allele"
+names(df_06)[3] <- "Allele frequencies"
+
+ggplot(df_06,aes(x=SamplingYear,y=`Allele frequencies`)) +
+  geom_line(aes(color=Allele)) +
+  labs(x="SamplingYear", y="Allele frequency", title="Allele frequencies of aest06 over the years") +
+  theme_classic()
+
+(freq24 <- apply(aest24_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
+# The allele 295 was always present since 2011 but increased during the last years, as can be seen also here graphically:
+
+df_24 <- melt(freq24)
+names(df_24)[1] <- "SamplingYear"
+names(df_24)[2] <- "Allele"
+names(df_24)[3] <- "Allele frequencies"
+
+ggplot(df_24,aes(x=SamplingYear,y=`Allele frequencies`)) +
+  geom_line(aes(color=Allele)) +
+  labs(x="SamplingYear", y="Allele frequency", title="Allele frequencies of aest24 over the years") +
+  theme_classic()
+
+
+(freq10 <- apply(aest10_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
+# the allele 280 was always present, peaking in 2017.
+
+#The same with TruffleYear
+setPop(myData_genind_allMarkersOnly) <- ~TruffleYear
+dapc.allMarkers <- dapc(myData_genind_allMarkersOnly, var.contrib = TRUE, scale = FALSE, n.pca = 30, n.da = nPop(myData_genind_allMarkersOnly) - 1)
+scatter(dapc.allMarkers, cell = 0, pch = 18:23, cstar = 0, mstree = TRUE, lwd = 2, lty = 2)
+
+set.seed(4)
+setPop(myData_genind_allMarkersOnly) <- ~TruffleYear
+contrib <- loadingplot(dapc.allMarkers$var.contr, axis = 2, thres = 0.07, lab.jitter = 1, threshold=0.05)
+#not really a difference
+```
+
+#Isolation by distance (Mantel test)
+```{r isolation by distance}
+#https://cran.r-project.org/web/packages/graph4lg/vignettes/input_data_processing_1.html
+dist_allMarkersOnly <- mat_gen_dist(myData_genind_allMarkersOnly,dist="basic")
+coord_dist <- data.frame(coord$Site_1_abrev,coord$LAT,coord$LON)
+names(coord_dist)[1] <- "ID"
+names(coord_dist)[2] <- "Y" #latitude
+names(coord_dist)[3] <- "X" #longitude
+mat_geo <- mat_geo_dist(coord_dist, ID="ID",x="X",y="Y", crds_type="polar")
+
+# https://adegenet.r-forge.r-project.org/files/tutorial-basics.pdf
+
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+myData_genind_allMarkersOnly@other$xy <- coord_dist[,2:3]
+myData_genpop_allMarkersOnly2 <- genind2genpop(myData_genind_allMarkersOnly)
+Dgen <- dist.genpop(myData_genpop_allMarkersOnly2,method=2)
+Dgeo <- dist(myData_genpop_allMarkersOnly2@other$xy)
+ibd <- mantel.randtest(Dgen,Dgeo)
+ibd
+plot(ibd)
+plot(Dgeo, Dgen)
+#abline(lm(Dgen~log(Dgeo)), col="red",lty=2)
+
+#Hmm... das sieht nicht so befriedigend aus wie im Genalex...
+```
