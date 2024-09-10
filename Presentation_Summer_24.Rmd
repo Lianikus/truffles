@@ -61,12 +61,13 @@ cc_myData_genind_allMarkersOnly_SY <- clonecorrect(myData_genind_allMarkersOnly,
                                                    strata=~Pop/SamplingYear)
 cc_myData_genind_allMarkersOnly_TY <- clonecorrect(myData_genind_allMarkersOnly,
                                                    strata=~Pop/TruffleYear)
+order_sites_WtoE <- factor(c("BUR","GEN","NEU","SCS","KON","FRB","FRE","FRI","SCD","SCG","SCL","WSL","LIM","BRU","RIE","TRO","ALD","UST","BAR","UEB","BOB","BOH","HAN"))
 ```
 
 #### myData_genind_allMarkersOnly locus table mean over all data
 ```{r mean table over all, echo=TRUE, warning=FALSE, message=FALSE}
 setPop(myData_genind_allMarkersOnly) <- ~Pop/SamplingYear
-locus_table(myData_genind_allMarkersOnly, lev="genotype")
+kable(locus_table(myData_genind_allMarkersOnly, lev="genotype"))
 ```
 
 ```{r Hexp table Pop SamplingYear, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
@@ -96,7 +97,7 @@ kable(locus_table_SY_hexp)
 locus_table_SY_hexp_pivot <- pivot_longer(locus_table_SY_hexp,cols=3:16,names_to="locus",values_to="value")
 
 library(devEMF)
-emf(file= "allMarkersOnly_Pop_SY_hexp.emf") # Opens a device
+#emf(file= "allMarkersOnly_Pop_SY_hexp.emf") # Opens a device
 ggplot(locus_table_SY_hexp_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
   geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
@@ -108,13 +109,16 @@ ggplot(locus_table_SY_hexp_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
     strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
     panel.grid = element_blank(),
     panel.spacing=unit(0.1,"lines"))
-dev.off()  # Close the device
+#dev.off()  # Close the device
 
 n_samples_allMarkersOnly_SY <- poppr(myData_genind_allMarkersOnly) %>%
   separate(Pop, sep="_", into=c("Pop","SamplingYear"))
 
 n_samples_allMarkersOnly_SY %>%
   select(Pop,SamplingYear,N) %>%
+  pivot_wider(names_from=SamplingYear, values_from=N) %>%
+  select(.,-"NA") %>%
+  replace(is.na(.),0) %>%
   kable()
 ```
 
@@ -155,8 +159,36 @@ ggplot(locus_table_SY_hexp_allButBAR_SCHIF_pivot,aes(x=as.numeric(SamplingYear),
     panel.grid = element_blank(),
     panel.spacing=unit(0.1,"lines"))
 
+#Adaptiere Facetten nach Geographie
+
+locus_table_SY_hexp_allButBAR_SCHIF_pivot$Pop <-factor(locus_table_SY_hexp_allButBAR_SCHIF_pivot$Pop, ordered=TRUE, levels=order_sites_WtoE)
+
+ggplot(locus_table_SY_hexp_allButBAR_SCHIF_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
+  geom_point(pch=20, alpha=0.3, size=0.8) +
+  geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
+  facet_wrap(vars(Pop)) +
+  labs(y="Nei's genetic diversity Hexp", x="Sampling year") +
+  ggtitle("Nei's genetic diversity per locus, sampling year and population") +
+  theme(aspect.ratio=0.4,
+    strip.background = element_blank(),
+    strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
+    panel.grid = element_blank(),
+    panel.spacing=unit(0.1,"lines"))
+
+
+n_samples_allMarkersOnly_SY_allButBAR_SCHIF <- poppr(myData_genind_allMarkersOnly_allButBAR_SCHIF) %>%
+  separate(Pop, sep="_", into=c("Pop","SamplingYear"))
+
+n_samples_allMarkersOnly_SY_allButBAR_SCHIF %>%
+  select(Pop,SamplingYear,N) %>%
+  pivot_wider(names_from=SamplingYear, values_from=N) %>%
+  select(.,-"NA") %>%
+  replace(is.na(.),0) %>%
+  arrange(Pop) %>%
+  kable()
+```
+```{r high resolution locus_table_SY_hexp_allButBAR_SCHIF, eval=FALSE, include=FALSE}
 #create high resolution graph
-library(devEMF)
 emf(file= "locus_table_SY_hexp_allButBAR_SCHIF_pivot.emf") # Opens a device
 ggplot(locus_table_SY_hexp_allButBAR_SCHIF_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
@@ -170,7 +202,9 @@ ggplot(locus_table_SY_hexp_allButBAR_SCHIF_pivot,aes(x=as.numeric(SamplingYear),
     panel.grid = element_blank(),
     panel.spacing=unit(0.1,"lines"))
 dev.off()  # Close the device
+```
 
+```{r zoom-ins to hexp, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 #create zoom-in to BOB
 locus_table_SY_hexp_all_BOB <- locus_table_SY_hexp_allButBAR_SCHIF_pivot %>%
   filter(Pop=="BOB") %>%
@@ -330,7 +364,7 @@ write.csv(n_samples_allMarkersOnly_allButBAR_SCHIF_SY, file="n_samples_allMarker
 
 
 #### myData_genind_allMarkersOnly locus table per Population, BAR and SCHIF removed (Strata: Population / TruffleYear)
-```{r Hexp table Pop TruffleYear without empty facets, echo=TRUE, message=FALSE, warning=FALSE}
+```{r Hexp table Pop TruffleYear without empty facets, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 setPop(myData_genind_allMarkersOnly_allButBAR_SCHIF) <- ~Pop/TruffleYear
 
 # create a data frame and transpose the result;
@@ -363,9 +397,9 @@ ggplot(locus_table_TY_hexp_allButBAR_SCHIF_pivot,aes(x=as.numeric(TruffleYear), 
     strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
     panel.grid = element_blank(),
     panel.spacing=unit(0.1,"lines"))
-
+```
+```{r high resolution locus_table_TY_hexp_allButBAR_SCHIF, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 #create high resolution graph
-library(devEMF)
 emf(file= "locus_table_TY_hexp_allButBAR_SCHIF_pivot.emf") # Opens a device
 ggplot(locus_table_TY_hexp_allButBAR_SCHIF_pivot,aes(x=as.numeric(TruffleYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
@@ -628,6 +662,25 @@ ggplot(rarHexpSY_minus_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
     panel.grid = element_blank(),
     panel.spacing=unit(0.1,"lines"))
 
+
+#Adaptiere Facetten nach Geographie
+
+rarHexpSY_minus_pivot$Pop <-factor(rarHexpSY_minus_pivot$Pop, ordered=TRUE, levels=order_sites_WtoE)
+
+ggplot(rarHexpSY_minus_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
+  geom_point(pch=20, alpha=0.3, size=0.8) +
+  geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
+  facet_wrap(vars(Pop)) +
+  labs(y="Nei's rarefied genetic diversity Hexp", x="Sampling year") +
+  ggtitle("Nei's rarefied genetic diversity per locus, sampling year and population") +
+  theme(aspect.ratio=0.4,
+    strip.background = element_blank(),
+    strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
+    panel.grid = element_blank(),
+    panel.spacing=unit(0.1,"lines"))
+```
+
+```{r high res rar_locus_table_SY_hexp_allButBAR_SCHIF, eval=FALSE, include=FALSE}
 #create high resolution graph
 library(devEMF)
 emf(file= "rar_locus_table_SY_hexp_allButBAR_SCHIF.emf") # Opens a device
@@ -643,7 +696,9 @@ ggplot(rarHexpSY_minus_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
     panel.grid = element_blank(),
     panel.spacing=unit(0.1,"lines"))
 dev.off()  # Close the device
+```
 
+```{r zoom in rarefied graphs, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 #create zoom-in to BOB
 rarlocus_table_SY_hexp_all_BOB <- rarHexpSY_minus_pivot %>%
   filter(Pop=="BOB") %>%
@@ -784,7 +839,7 @@ ggplot(locus_table_TY_hexp_pivot,aes(x=as.numeric(TruffleYear), y=value)) +
     panel.spacing=unit(0.1,"lines"))
 ```
 
-```{r rarefy Nei TruffleYear without BAR and SCHIF, echo=TRUE, warning=FALSE}
+```{r rarefy Nei TruffleYear without BAR and SCHIF, eval=FALSE, warning=FALSE, include=FALSE}
 setPop(myData_genind_allMarkersOnly_allButBAR_SCHIF) <- ~Pop/TruffleYear
 popdata_pop_year_rareNei_TY <- poppr(myData_genind_allMarkersOnly_allButBAR_SCHIF) %>%
   select(Pop, N)
@@ -981,6 +1036,35 @@ ggplot(cc_locus_table_SY_hexp_allButBAR_SCHIF_pivot,aes(x=as.numeric(SamplingYea
     panel.grid = element_blank(),
     panel.spacing=unit(0.1,"lines"))
 
+#Adaptiere mit Geographie
+
+cc_locus_table_SY_hexp_allButBAR_SCHIF_pivot$Pop <-factor(cc_locus_table_SY_hexp_allButBAR_SCHIF_pivot$Pop, ordered=TRUE, levels=order_sites_WtoE)
+
+ggplot(cc_locus_table_SY_hexp_allButBAR_SCHIF_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
+  geom_point(pch=20, alpha=0.3, size=0.8) +
+  geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
+  facet_wrap(vars(Pop)) +
+  labs(y="Nei's genetic diversity Hexp", x="Sampling year") +
+  ggtitle("Nei's genetic diversity per locus, sampling year and population (clone-corrected)") +
+  theme(aspect.ratio=0.4,
+    strip.background = element_blank(),
+    strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
+    panel.grid = element_blank(),
+    panel.spacing=unit(0.1,"lines"))
+
+n_samples_cc_allMarkersOnly_SY <- poppr(cc_myData_genind_allMarkersOnly_allButBAR_SCHIF_SY) %>%
+  separate(Pop, sep="_", into=c("Pop","SamplingYear"))
+
+n_samples_cc_allMarkersOnly_SY %>%
+  select(Pop,SamplingYear,N) %>%
+  pivot_wider(names_from=SamplingYear, values_from=N) %>%
+  select(.,-"NA") %>%
+  replace(is.na(.),0) %>%
+  arrange(Pop) %>%
+  kable()
+```
+
+```{r high res cc_locus_table_SY_hexp_allButBAR_SCHIF_pivot, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 emf(file= "cc_locus_table_SY_hexp_allButBAR_SCHIF_pivot.emf") # Opens a device
 ggplot(cc_locus_table_SY_hexp_allButBAR_SCHIF_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
@@ -995,6 +1079,9 @@ ggplot(cc_locus_table_SY_hexp_allButBAR_SCHIF_pivot,aes(x=as.numeric(SamplingYea
     panel.spacing=unit(0.1,"lines"))
 dev.off()
 
+```
+
+```{r zoom in clone corrected, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 #create zoom-in to BOB
 cc_locus_table_SY_hexp_all_BOB <- cc_locus_table_SY_hexp_allButBAR_SCHIF_pivot %>%
   filter(Pop=="BOB") %>%
@@ -1151,7 +1238,7 @@ cc_n_samples_allMarkersOnly_TY %>%
 ```
 
 #### clone-corrected myData_genind_allMarkersOnly locus table per Population (Strata: Population / TruffleYear), removed BAR, SCHIF and GEN
-```{r cc Hexp table Pop TruffleYear removed BAR SCHIF GEN, echo=TRUE, warning=FALSE, message=FALSE}
+```{r cc Hexp table Pop TruffleYear removed BAR SCHIF GEN, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 setPop(cc_myData_genind_allMarkersOnly_SY) <- ~Pop
 cc_myData_genind_allMarkersOnly_allButBAR_SCHIF_GEN_TY <- popsub(cc_myData_genind_allMarkersOnly_TY, exclude=c("BAR","SCHIF","GEN"))
 setPop(cc_myData_genind_allMarkersOnly_allButBAR_SCHIF_GEN_TY) <- ~Pop/TruffleYear
@@ -1307,7 +1394,7 @@ dev.off()
 ```
 ## 2. Simpson's diversity
 
-```{r plot diversity Simpson}
+```{r plot diversity Simpson, echo=TRUE, message=FALSE, warning=FALSE}
 setPop(myData_genind_allMarkersOnly) <- ~Pop/SamplingYear
 popdata_all_pop_year <- poppr(myData_genind_allMarkersOnly) %>%
   separate(Pop,c("Pop","SamplingYear"))
@@ -1325,9 +1412,9 @@ ggplot(aes(as.numeric(SamplingYear),lambda)) +
     panel.spacing=unit(0.1,"lines"))
 popdata_all_pop_year_graph
 
-emf(file="simpson_all_SY.emf")
-popdata_all_pop_year_graph
-dev.off()
+#emf(file="simpson_all_SY.emf")
+#popdata_all_pop_year_graph
+#dev.off()
 
 #rarefied:
 N_all      <- popdata_all_pop_year$N      # number of samples
@@ -1361,9 +1448,9 @@ ggplot(aes(as.numeric(SamplingYear),rarLambda_all)) +
     panel.spacing=unit(0.1,"lines"))
 rar_popdata_all_pop_year_graph1
 
-emf(file="rarSimpson_all_SY_minusBARSCHIF.emf")
-rar_popdata_all_pop_year_graph1
-dev.off()
+#emf(file="rarSimpson_all_SY_minusBARSCHIF.emf")
+#rar_popdata_all_pop_year_graph1
+#dev.off()
 
 
 # TruffleYears
@@ -1385,9 +1472,9 @@ ggplot(aes(as.numeric(TruffleYear),lambda)) +
     panel.spacing=unit(0.1,"lines"))
 popdata_all_pop_year_graph_TY
 
-emf(file="simpson_all_TY.emf")
-popdata_all_pop_year_graph_TY
-dev.off()
+#emf(file="simpson_all_TY.emf")
+#popdata_all_pop_year_graph_TY
+#dev.off()
 
 #rarefied:
 N_all      <- popdata_all_pop_year$N      # number of samples
@@ -1407,9 +1494,9 @@ ggplot(aes(as.numeric(TruffleYear),rarLambda_all)) +
     panel.spacing=unit(0.1,"lines"))
 rar_popdata_all_pop_year_graph_TY
 
-emf(file="rarSimpson_all_TY.emf")
-rar_popdata_all_pop_year_graph_TY
-dev.off()
+#emf(file="rarSimpson_all_TY.emf")
+#rar_popdata_all_pop_year_graph_TY
+#dev.off()
 
 #remove BAR and SCHIF
 rar_popdata_all_pop_year_TY_graph1 <- filter(popdata_all_pop_year,! Pop %in% c("Total", "BAR","SCHIF")) %>%
@@ -1425,9 +1512,9 @@ ggplot(aes(as.numeric(TruffleYear),rarLambda_all)) +
     panel.spacing=unit(0.1,"lines"))
 rar_popdata_all_pop_year_TY_graph1
 
-emf(file="rarSimpson_all_TY_minusBARSCHIF.emf")
-rar_popdata_all_pop_year_TY_graph1
-dev.off()
+#emf(file="rarSimpson_all_TY_minusBARSCHIF.emf")
+#rar_popdata_all_pop_year_TY_graph1
+#dev.off()
 
 #clone corrected, Sampling Year:
 
@@ -1448,9 +1535,9 @@ ggplot(aes(as.numeric(SamplingYear),lambda)) +
     panel.spacing=unit(0.1,"lines"))
 cc_popdata_all_pop_year_graph
 
-emf(file="cc_simpson_all_SY.emf")
-cc_popdata_all_pop_year_graph
-dev.off()
+#emf(file="cc_simpson_all_SY.emf")
+#cc_popdata_all_pop_year_graph
+#dev.off()
 
 #rarefied doesn't make sense
 
@@ -1473,9 +1560,9 @@ ggplot(aes(as.numeric(TruffleYear),lambda)) +
     panel.spacing=unit(0.1,"lines"))
 cc_popdata_all_pop_year_TY_graph
 
-emf(file="cc_simpson_all_TY.emf")
-cc_popdata_all_pop_year_TY_graph
-dev.off()
+#emf(file="cc_simpson_all_TY.emf")
+#cc_popdata_all_pop_year_TY_graph
+#dev.off()
 
 ```
 
@@ -1494,10 +1581,10 @@ pca.pops.allMarkersOnly <- dudi.pca(df = x.pops_allMarkersOnly,
 s.class(pca.pops.allMarkersOnly$li, fac=pop(myData_genind_allMarkersOnly),
         col=funky(15))
 
-emf(file="pca.allMarkersOnly.emf")
-s.class(pca.pops.allMarkersOnly$li, fac=pop(myData_genind_allMarkersOnly),
-        col=funky(15))
-dev.off()
+#emf(file="pca.allMarkersOnly.emf")
+#s.class(pca.pops.allMarkersOnly$li, fac=pop(myData_genind_allMarkersOnly),
+ #       col=funky(15))
+#dev.off()
 
 #clonecorrected PCA  with samplingYear
 setPop(cc_myData_genind_allMarkersOnly_SY) <- ~Pop
@@ -1509,11 +1596,11 @@ s.class(pca.pops_cc.SY$li,
         fac=pop(cc_myData_genind_allMarkersOnly_SY),
         col=funky(15))
 
-emf(file="pca.cc.allMarkersOnly_SY.emf")
-s.class(pca.pops_cc.SY$li,
-        fac=pop(cc_myData_genind_allMarkersOnly_SY),
-        col=funky(15))
-dev.off()
+#emf(file="pca.cc.allMarkersOnly_SY.emf")
+#s.class(pca.pops_cc.SY$li,
+#        fac=pop(cc_myData_genind_allMarkersOnly_SY),
+#        col=funky(15))
+#dev.off()
 
 #clonecorrected PCA  with TruffleYear
 setPop(cc_myData_genind_allMarkersOnly_TY) <- ~Pop
@@ -1530,11 +1617,11 @@ s.class(pca.pops_cc.TY_3$li,
         fac=pop(cc_myData_genind_allMarkersOnly_TY),
         col=funky(15))
 
-emf(file="pca.cc.allMarkersOnly_TY.emf")
-s.class(pca.pops_cc.TY_2$li,
-        fac=pop(cc_myData_genind_allMarkersOnly_TY),
-        col=funky(15))
-dev.off()
+#emf(file="pca.cc.allMarkersOnly_TY.emf")
+#s.class(pca.pops_cc.TY_2$li,
+#        fac=pop(cc_myData_genind_allMarkersOnly_TY),
+#        col=funky(15))
+#dev.off()
 
 #plot(pca.pops_cc.TY$li, col=
 ```

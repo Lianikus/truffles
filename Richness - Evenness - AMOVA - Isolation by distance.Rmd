@@ -37,6 +37,7 @@ library(magrittr)
 library(reshape)
 library(reshape2)
 library(graph4lg)
+library(iNEXT)
 T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_Mai2024.xlsx")
 coord <- read_excel("Koordinaten_2024.xlsx")
 myData <- read.genalex("Daten_Genalex.csv",genclone=TRUE, ploidy=1)
@@ -65,7 +66,7 @@ setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
 #only calculate Richness for populations > 100 samples (N)
 myData_genind_allMarkersOnly_above100N <- selPopSize(myData_genind_allMarkersOnly,pop=NULL,nMin=100)
 summary(myData_genind_allMarkersOnly_above100N)
-H.year <- mlg.table(myData_genind_allMarkersOnly, plot = FALSE)
+H.year <- mlg.table(myData_genind_allMarkersOnly_above100N, plot = FALSE)
 rarecurve(H.year, ylab="Number of expected MLGs", sample=min(rowSums(H.year)),
           border = NA, fill = NA, font = 2, cex = 1, col = "blue")
 title("Rarecurve of Sampling Years")
@@ -73,19 +74,28 @@ title("Rarecurve of Sampling Years")
 setPop(myData_genind_allMarkersOnly) <- ~TruffleYear
 myData_genind_allMarkersOnly_above100N <- selPopSize(myData_genind_allMarkersOnly,pop=NULL,nMin=100)
 summary(myData_genind_allMarkersOnly_above100N)
-H.year <- mlg.table(myData_genind_allMarkersOnly, plot = FALSE)
+H.year <- mlg.table(myData_genind_allMarkersOnly_above100N, plot = FALSE)
 rarecurve(H.year, ylab="Number of expected MLGs", sample=min(rowSums(H.year)),
           border = NA, fill = NA, font = 2, cex = 1, col = "blue")
 title("Rarecurve of Truffle Years")
 
 setPop(myData_genind_allMarkersOnly) <- ~Month
-myData_genind_allMarkersOnly_above100N <- selPopSize(myData_genind_allMarkersOnly,pop=NULL,nMin=40)
-summary(myData_genind_allMarkersOnly_above100N)
-poppr(myData_genind_allMarkersOnly_above100N)
-H.year <- mlg.table(myData_genind_allMarkersOnly, plot = FALSE)
+myData_genind_allMarkersOnly_above40N <- selPopSize(myData_genind_allMarkersOnly,pop=NULL,nMin=40)
+summary(myData_genind_allMarkersOnly_above40N)
+poppr(myData_genind_allMarkersOnly_above40N)
+H.year <- mlg.table(myData_genind_allMarkersOnly_above40N, plot = FALSE)
 rarecurve(H.year, ylab="Number of expected MLGs", sample=min(rowSums(H.year)),
           border = NA, fill = NA, font = 2, cex = 1, col = "blue")
 title("Rarecurve of Month")
+
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+myData_genind_allMarkersOnly_above5N <- selPopSize(myData_genind_allMarkersOnly,pop=NULL,nMin=5)
+#summary(myData_genind_allMarkersOnly_above40N)
+poppr(myData_genind_allMarkersOnly_above5N)
+H.year <- mlg.table(myData_genind_allMarkersOnly_above5N, plot = FALSE)
+rarecurve(H.year, ylab="Number of expected MLGs", sample=min(rowSums(H.year)),
+          border = NA, fill = NA, font = 2, cex = 1, col = "blue")
+title("Rarecurve of Pop")
 
 #Genotypic richness rises, the later the ascocarps were collected --> more different individuals produced fruiting bodies
 ```

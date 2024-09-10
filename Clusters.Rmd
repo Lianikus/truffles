@@ -1,0 +1,70 @@
+---
+title: "Clusters from STRUCTURE"
+author: "Lia Baumann"
+date: "2024-09-10"
+output: github_document
+---
+
+# Cluster analysis
+
+```{r Tabellen laden, message=FALSE, warning=FALSE, include=FALSE}
+library(readxl)
+library(knitr)
+library(tidyverse)
+library(ggplot2)
+theme_set(theme_bw())
+library(envalysis)
+library(forcats)
+library(poppr)
+library(treemap)
+library(pegas)
+library(adegenet)
+library(devtools)
+library(hierfstat)
+library(mmod)
+library(diveRsity)
+library(vegan)
+library(writexl)
+library(devEMF)
+library(ape)
+library(magrittr)
+library(reshape)
+library(reshape2)
+library(graph4lg)
+library(iNEXT)
+T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_Mai2024.xlsx")
+myData_genind <- read.genalex("Daten_Genalex.csv",genclone=FALSE, ploidy=1)
+myData_genind_allMarkersOnly <- myData_genind %>%
+  missingno("geno", cutoff = 0)
+splitStrata(myData_genind) <- ~Pop/Month/SamplingYear/TruffleYear
+splitStrata(myData_genind_allMarkersOnly) <- ~Pop/Month/SamplingYear/TruffleYear
+cc_myData_genind_allMarkersOnly_SY <- clonecorrect(myData_genind_allMarkersOnly,
+                                                   strata=~Pop/SamplingYear)
+clusters <- read_excel("STRUCTURE Results MLGs.xlsx")
+clusters$`clusterssign(q>0.5)` <- factor(clusters$`clusterssign(q>0.5)`)
+cc_FullTable_Tuaest_allMarkersOnly <- read.csv("C:/Users/liaba/OneDrive - Eidg. Forschungsanstalt WSL/R/truffles/cc_TUAEST_ALLMARKERSONLY_HWE.csv")
+cc_distinctMLGs_allMarkersOnly <- cc_FullTable_Tuaest_allMarkersOnly[!duplicated(cc_FullTable_Tuaest_allMarkersOnly$MLG), ]
+T_all <- separate_wider_delim(T_all,Code_Analyses2, delim="_", names = c("Code","Yr"))
+T_all_withMLGs_allMarkersOnly <- inner_join(T_all,cc_FullTable_Tuaest_allMarkersOnly,by=c("Code"="Sample")) %>%
+  select(Code, MLG, Site_1_abrev, truffle_year, Sampling_year,Sampling_date)
+T_all_withMLGs_withClusters_allMarkersOnly <- left_join(T_all_withMLGs_allMarkersOnly,clusters,by=c("MLG"="MLG_ID"))
+```
+
+```{r how many clusters}
+n_per_cluster <- T_all_withMLGs_withClusters_allMarkersOnly %>%
+  group_by(`clusterssign(q>0.5)`) %>%
+  summarise(n=n()) %>%
+  arrange() %>%
+  kable()
+n_per_cluster
+
+T_all_withMLGs_withClusters_allMarkersOnly$Sampling_date <- as_date(T_all_withMLGs_withClusters_allMarkersOnly$Sampling_date)
+T_all_withMLGs_withClusters_allMarkersOnly$`clusterssign(q>0.5)` <- factor(T_all_withMLGs_withClusters_allMarkersOnly$`clusterssign(q>0.5)`, ordered=TRUE, levels = c("cluster1","cluster2","cluster3","cluster4","cluster5","cluster6","mixed"))
+
+ggplot(T_all_withMLGs_withClusters_allMarkersOnly, aes(x=Sampling_date, y= fct_rev(Site_1_abrev))) +
+  geom_point(aes(colour=factor('clusterssign(q<0.5)'))) +
+  theme_publish(base_family = "Times") +
+  scale_colour_brewer(palette= "Greens") +
+  scale_x_date(date_labels="%Y", date_breaks = "5 years") +
+  labs(title = "Overview of samples in truffle monitoring dataset", y = "Sampling site abbreviation", x ="Sampling date", colour="Genetic cluster")
+```
