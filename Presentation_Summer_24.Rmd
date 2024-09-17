@@ -122,32 +122,32 @@ n_samples_allMarkersOnly_SY %>%
   kable()
 ```
 
-#### myData_genind_allMarkersOnly locus table per Population, BAR and SCHIF removed (Strata: Population / SamplingYear)
+#### myData_genind_allMarkersOnly locus table per Population, BAR removed (Strata: Population / SamplingYear)
 ```{r Hexp table Pop SamplingYear without empty facets, echo=TRUE, message=FALSE, warning=FALSE}
 setPop(myData_genind_allMarkersOnly) <- ~Pop
-myData_genind_allMarkersOnly_allButBAR_SCHIF <- popsub(myData_genind_allMarkersOnly, exclude=c("BAR","SCHIF"))
-setPop(myData_genind_allMarkersOnly_allButBAR_SCHIF) <- ~Pop/SamplingYear
+myData_genind_allMarkersOnly_allButBAR <- popsub(myData_genind_allMarkersOnly, exclude=c("BAR"))
+setPop(myData_genind_allMarkersOnly_allButBAR) <- ~Pop/SamplingYear
 
 # create a data frame and transpose the result;
 # use sapply to iterate over all populations calculated by seppop.
 # then use the locus_table function on the level Genotype
 
-locus_table_SY_allButBAR_SCHIF <- data.frame(t(
-  sapply(seppop(myData_genind_allMarkersOnly_allButBAR_SCHIF),
+locus_table_SY_allButBAR <- data.frame(t(
+  sapply(seppop(myData_genind_allMarkersOnly_allButBAR),
     function(ls) poppr::locus_table(ls,lev="genotype"))))
 
 # choose only the columns corresponding to Hexp values and rename them with their loci
 
-locus_table_SY_hexp_allButBAR_SCHIF <- 
-  select(locus_table_SY_allButBAR_SCHIF, X31:X45) %>%
+locus_table_SY_hexp_allButBAR <- 
+  select(locus_table_SY_allButBAR, X31:X45) %>%
   rename(aest06_1=X31,aest07_1=X32, aest15_1=X33, aest26_1=X34,aest28_1=X35, aest35_1=X36, aest36_1=X37, aest01_1=X38, aest10_1=X39, aest18_1=X40, aest24_1=X41, aest25_1=X42, aest29_1=X43, aest31_1=X44, mean=X45) %>%
   tibble::rownames_to_column("Pop") %>%
   separate(.,Pop,sep="_", into=c("Pop","SamplingYear"))
                                       
 #pivot to have Hexp values in columns as value to use in ggplot later
-locus_table_SY_hexp_allButBAR_SCHIF_pivot <- pivot_longer(locus_table_SY_hexp_allButBAR_SCHIF,cols=3:16,names_to="locus",values_to="value")
+locus_table_SY_hexp_allButBAR_pivot <- pivot_longer(locus_table_SY_hexp_allButBAR,cols=3:16,names_to="locus",values_to="value")
 
-ggplot(locus_table_SY_hexp_allButBAR_SCHIF_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
+ggplot(locus_table_SY_hexp_allButBAR_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
   geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
   facet_wrap(vars(Pop)) +
@@ -161,9 +161,9 @@ ggplot(locus_table_SY_hexp_allButBAR_SCHIF_pivot,aes(x=as.numeric(SamplingYear),
 
 #Adaptiere Facetten nach Geographie
 
-locus_table_SY_hexp_allButBAR_SCHIF_pivot$Pop <-factor(locus_table_SY_hexp_allButBAR_SCHIF_pivot$Pop, ordered=TRUE, levels=order_sites_WtoE)
+locus_table_SY_hexp_allButBAR_pivot$Pop <-factor(locus_table_SY_hexp_allButBAR_pivot$Pop, ordered=TRUE, levels=order_sites_WtoE)
 
-ggplot(locus_table_SY_hexp_allButBAR_SCHIF_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
+ggplot(locus_table_SY_hexp_allButBAR_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
   geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
   facet_wrap(vars(Pop)) +
@@ -176,10 +176,10 @@ ggplot(locus_table_SY_hexp_allButBAR_SCHIF_pivot,aes(x=as.numeric(SamplingYear),
     panel.spacing=unit(0.1,"lines"))
 
 
-n_samples_allMarkersOnly_SY_allButBAR_SCHIF <- poppr(myData_genind_allMarkersOnly_allButBAR_SCHIF) %>%
+n_samples_allMarkersOnly_SY_allButBAR <- poppr(myData_genind_allMarkersOnly_allButBAR) %>%
   separate(Pop, sep="_", into=c("Pop","SamplingYear"))
 
-n_samples_allMarkersOnly_SY_allButBAR_SCHIF %>%
+n_samples_allMarkersOnly_SY_allButBAR %>%
   select(Pop,SamplingYear,N) %>%
   pivot_wider(names_from=SamplingYear, values_from=N) %>%
   select(.,-"NA") %>%
@@ -187,10 +187,10 @@ n_samples_allMarkersOnly_SY_allButBAR_SCHIF %>%
   arrange(Pop) %>%
   kable()
 ```
-```{r high resolution locus_table_SY_hexp_allButBAR_SCHIF, eval=FALSE, include=FALSE}
+```{r high resolution locus_table_SY_hexp_allButBAR, eval=FALSE, include=FALSE}
 #create high resolution graph
-emf(file= "locus_table_SY_hexp_allButBAR_SCHIF_pivot.emf") # Opens a device
-ggplot(locus_table_SY_hexp_allButBAR_SCHIF_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
+emf(file= "locus_table_SY_hexp_allButBAR_pivot.emf") # Opens a device
+ggplot(locus_table_SY_hexp_allButBAR_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
   geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
   facet_wrap(vars(Pop)) +
@@ -206,7 +206,7 @@ dev.off()  # Close the device
 
 ```{r zoom-ins to hexp, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 #create zoom-in to BOB
-locus_table_SY_hexp_all_BOB <- locus_table_SY_hexp_allButBAR_SCHIF_pivot %>%
+locus_table_SY_hexp_all_BOB <- locus_table_SY_hexp_allButBAR_pivot %>%
   filter(Pop=="BOB") %>%
   ggplot(aes(x=as.double(SamplingYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
@@ -227,7 +227,7 @@ locus_table_SY_hexp_all_BOB
 dev.off()
 
 #create zoom-in to BUR
-locus_table_SY_hexp_all_BUR <- locus_table_SY_hexp_allButBAR_SCHIF_pivot %>%
+locus_table_SY_hexp_all_BUR <- locus_table_SY_hexp_allButBAR_pivot %>%
   filter(Pop=="BUR") %>%
   ggplot(aes(x=as.double(SamplingYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
@@ -248,7 +248,7 @@ locus_table_SY_hexp_all_BUR
 dev.off()
 
 #create zoom-in to FRE
-locus_table_SY_hexp_all_FRE <- locus_table_SY_hexp_allButBAR_SCHIF_pivot %>%
+locus_table_SY_hexp_all_FRE <- locus_table_SY_hexp_allButBAR_pivot %>%
   filter(Pop=="FRE") %>%
   ggplot(aes(x=as.double(SamplingYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
@@ -269,7 +269,7 @@ locus_table_SY_hexp_all_FRE
 dev.off()
 
 #create zoom-in to KON
-locus_table_SY_hexp_all_KON <- locus_table_SY_hexp_allButBAR_SCHIF_pivot %>%
+locus_table_SY_hexp_all_KON <- locus_table_SY_hexp_allButBAR_pivot %>%
   filter(Pop=="KON") %>%
   ggplot(aes(x=as.double(SamplingYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
@@ -290,7 +290,7 @@ locus_table_SY_hexp_all_KON
 dev.off()
 
 #create zoom-in to UEB
-locus_table_SY_hexp_all_UEB <- locus_table_SY_hexp_allButBAR_SCHIF_pivot %>%
+locus_table_SY_hexp_all_UEB <- locus_table_SY_hexp_allButBAR_pivot %>%
   filter(Pop=="UEB") %>%
   ggplot(aes(x=as.double(SamplingYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
@@ -310,12 +310,12 @@ emf(file="locus_table_SY_hexp_all_UEB.emf")
 locus_table_SY_hexp_all_UEB
 dev.off()
 
-n_samples_allMarkersOnly_allButBAR_SCHIF_SY <- poppr(myData_genind_allMarkersOnly_allButBAR_SCHIF) %>%
+n_samples_allMarkersOnly_allButBAR_SY <- poppr(myData_genind_allMarkersOnly_allButBAR) %>%
   separate(Pop, sep="_", into=c("Pop","SamplingYear")) %>%
   select(1:4) %>%
   pivot_longer(cols=c("N","MLG"),names_to="Number",values_to="Count")
 
-n_samples_allMarkersOnly_allButBAR_SCHIF_SY %>%
+n_samples_allMarkersOnly_allButBAR_SY %>%
   filter(Pop != "Total") %>%
   ggplot(aes(x=as.numeric(SamplingYear), y=Count, fill=Number)) +
   geom_col(stat="identity", position="dodge") +
@@ -328,8 +328,8 @@ n_samples_allMarkersOnly_allButBAR_SCHIF_SY %>%
     panel.grid = element_blank(),
     panel.spacing=unit(0.1,"lines"))
 
-emf(file="n_samples_allMarkersOnly_allButBAR_SCHIF_SY.emf")
-n_samples_allMarkersOnly_allButBAR_SCHIF_SY %>%
+emf(file="n_samples_allMarkersOnly_allButBAR_SY.emf")
+n_samples_allMarkersOnly_allButBAR_SY %>%
   filter(Pop != "Total") %>%
   ggplot(aes(x=as.numeric(SamplingYear), y=Count, fill=Number)) +
   geom_col(stat="identity", position="dodge") +
@@ -343,8 +343,8 @@ n_samples_allMarkersOnly_allButBAR_SCHIF_SY %>%
     panel.spacing=unit(0.1,"lines"))
 dev.off()
 
-emf(file="n_samples_allMarkersOnly_allButBAR_SCHIF_SY_y_limited.emf")
-n_samples_allMarkersOnly_allButBAR_SCHIF_SY %>%
+emf(file="n_samples_allMarkersOnly_allButBAR_SY_y_limited.emf")
+n_samples_allMarkersOnly_allButBAR_SY %>%
   filter(Pop != "Total") %>%
   ggplot(aes(x=as.numeric(SamplingYear), y=Count, fill=Number)) +
   geom_col(stat="identity", position="dodge") +
@@ -359,34 +359,34 @@ n_samples_allMarkersOnly_allButBAR_SCHIF_SY %>%
   coord_cartesian(ylim=c(0, 50))
 dev.off()
 
-write.csv(n_samples_allMarkersOnly_allButBAR_SCHIF_SY, file="n_samples_allMarkersOnly_allButBAR_SCHIF_SY.csv")
+write.csv(n_samples_allMarkersOnly_allButBAR_SY, file="n_samples_allMarkersOnly_allButBAR_SY.csv")
 ```
 
 
-#### myData_genind_allMarkersOnly locus table per Population, BAR and SCHIF removed (Strata: Population / TruffleYear)
+#### myData_genind_allMarkersOnly locus table per Population, BAR removed (Strata: Population / TruffleYear)
 ```{r Hexp table Pop TruffleYear without empty facets, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-setPop(myData_genind_allMarkersOnly_allButBAR_SCHIF) <- ~Pop/TruffleYear
+setPop(myData_genind_allMarkersOnly_allButBAR) <- ~Pop/TruffleYear
 
 # create a data frame and transpose the result;
 # use sapply to iterate over all populations calculated by seppop.
 # then use the locus_table function on the level Genotype
 
-locus_table_TY_allButBAR_SCHIF <- data.frame(t(
-  sapply(seppop(myData_genind_allMarkersOnly_allButBAR_SCHIF),
+locus_table_TY_allButBAR <- data.frame(t(
+  sapply(seppop(myData_genind_allMarkersOnly_allButBAR),
     function(ls) poppr::locus_table(ls,lev="genotype"))))
 
 # choose only the columns corresponding to Hexp values and rename them with their loci
 
-locus_table_TY_hexp_allButBAR_SCHIF <- 
-  select(locus_table_TY_allButBAR_SCHIF, X31:X45) %>%
+locus_table_TY_hexp_allButBAR <- 
+  select(locus_table_TY_allButBAR, X31:X45) %>%
   rename(aest06_1=X31,aest07_1=X32, aest15_1=X33, aest26_1=X34,aest28_1=X35, aest35_1=X36, aest36_1=X37, aest01_1=X38, aest10_1=X39, aest18_1=X40, aest24_1=X41, aest25_1=X42, aest29_1=X43, aest31_1=X44, mean=X45) %>%
   tibble::rownames_to_column("Pop") %>%
   separate(.,Pop,sep="_", into=c("Pop","TruffleYear"))
                                       
 #pivot to have Hexp values in columns as value to use in ggplot later
-locus_table_TY_hexp_allButBAR_SCHIF_pivot <- pivot_longer(locus_table_TY_hexp_allButBAR_SCHIF,cols=3:16,names_to="locus",values_to="value")
+locus_table_TY_hexp_allButBAR_pivot <- pivot_longer(locus_table_TY_hexp_allButBAR,cols=3:16,names_to="locus",values_to="value")
 
-ggplot(locus_table_TY_hexp_allButBAR_SCHIF_pivot,aes(x=as.numeric(TruffleYear), y=value)) +
+ggplot(locus_table_TY_hexp_allButBAR_pivot,aes(x=as.numeric(TruffleYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
   geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
   facet_wrap(vars(Pop)) +
@@ -398,10 +398,10 @@ ggplot(locus_table_TY_hexp_allButBAR_SCHIF_pivot,aes(x=as.numeric(TruffleYear), 
     panel.grid = element_blank(),
     panel.spacing=unit(0.1,"lines"))
 ```
-```{r high resolution locus_table_TY_hexp_allButBAR_SCHIF, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+```{r high resolution locus_table_TY_hexp_allButBAR, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 #create high resolution graph
-emf(file= "locus_table_TY_hexp_allButBAR_SCHIF_pivot.emf") # Opens a device
-ggplot(locus_table_TY_hexp_allButBAR_SCHIF_pivot,aes(x=as.numeric(TruffleYear), y=value)) +
+emf(file= "locus_table_TY_hexp_allButBAR_pivot.emf") # Opens a device
+ggplot(locus_table_TY_hexp_allButBAR_pivot,aes(x=as.numeric(TruffleYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
   geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
   facet_wrap(vars(Pop)) +
@@ -414,13 +414,12 @@ ggplot(locus_table_TY_hexp_allButBAR_SCHIF_pivot,aes(x=as.numeric(TruffleYear), 
     panel.spacing=unit(0.1,"lines"))
 dev.off()  # Close the device
 
-
-n_samples_allMarkersOnly_allButBAR_SCHIF_TY <- poppr(myData_genind_allMarkersOnly_allButBAR_SCHIF) %>%
+n_samples_allMarkersOnly_allButBAR_TY <- poppr(myData_genind_allMarkersOnly_allButBAR) %>%
   separate(Pop, sep="_", into=c("Pop","TruffleYear")) %>%
   select(1:4) %>%
   pivot_longer(cols=c("N","MLG"),names_to="Number",values_to="Count")
 
-n_samples_allMarkersOnly_allButBAR_SCHIF_TY %>%
+n_samples_allMarkersOnly_allButBAR_TY %>%
   filter(Pop != "Total") %>%
   ggplot(aes(x=as.numeric(TruffleYear), y=Count, fill=Number)) +
   geom_col(stat="identity", position="dodge") +
@@ -433,7 +432,7 @@ n_samples_allMarkersOnly_allButBAR_SCHIF_TY %>%
     panel.grid = element_blank(),
     panel.spacing=unit(0.1,"lines"))
 
-n_samples_allMarkersOnly_allButBAR_SCHIF_TY_y_limited <- n_samples_allMarkersOnly_allButBAR_SCHIF_TY %>%
+n_samples_allMarkersOnly_allButBAR_TY_y_limited <- n_samples_allMarkersOnly_allButBAR_TY %>%
   filter(Pop != "Total") %>%
   ggplot(aes(x=as.numeric(TruffleYear), y=Count, fill=Number)) +
   geom_col(stat="identity", position="dodge") +
@@ -447,14 +446,14 @@ n_samples_allMarkersOnly_allButBAR_SCHIF_TY_y_limited <- n_samples_allMarkersOnl
     panel.spacing=unit(0.1,"lines")) +
   coord_cartesian(ylim=c(0, 50))
 
-emf(file="n_samples_allMarkersOnly_allButBAR_SCHIF_TY_y_limited.emf")
-n_samples_allMarkersOnly_allButBAR_SCHIF_TY_y_limited
+emf(file="n_samples_allMarkersOnly_allButBAR_TY_y_limited.emf")
+n_samples_allMarkersOnly_allButBAR_TY_y_limited
 dev.off()
 
-write.csv(n_samples_allMarkersOnly_allButBAR_SCHIF_TY,file="n_samples_allMarkersOnly_allButBAR_SCHIF_TY.csv")
+write.csv(n_samples_allMarkersOnly_allButBAR_TY,file="n_samples_allMarkersOnly_allButBAR_TY.csv")
 
-emf(file="n_samples_allMarkersOnly_allButBAR_SCHIF_TY.emf")
-n_samples_allMarkersOnly_allButBAR_SCHIF_TY %>%
+emf(file="n_samples_allMarkersOnly_allButBAR_TY.emf")
+n_samples_allMarkersOnly_allButBAR_TY %>%
   filter(Pop != "Total") %>%
   ggplot(aes(x=as.numeric(TruffleYear), y=Count, fill=Number)) +
   geom_col(stat="identity", position="dodge") +
@@ -469,7 +468,7 @@ n_samples_allMarkersOnly_allButBAR_SCHIF_TY %>%
 dev.off()
 
 #create zoom-in to BOB
-locus_table_TY_hexp_all_BOB <- locus_table_TY_hexp_allButBAR_SCHIF_pivot %>%
+locus_table_TY_hexp_all_BOB <- locus_table_TY_hexp_allButBAR_pivot %>%
   filter(Pop=="BOB") %>%
   ggplot(aes(x=as.double(TruffleYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
@@ -490,7 +489,7 @@ locus_table_TY_hexp_all_BOB
 dev.off()
 
 #create zoom-in to BUR
-locus_table_TY_hexp_all_BUR <- locus_table_TY_hexp_allButBAR_SCHIF_pivot %>%
+locus_table_TY_hexp_all_BUR <- locus_table_TY_hexp_allButBAR_pivot %>%
   filter(Pop=="BUR") %>%
   ggplot(aes(x=as.double(TruffleYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
@@ -511,7 +510,7 @@ locus_table_TY_hexp_all_BUR
 dev.off()
 
 #create zoom-in to FRE
-locus_table_TY_hexp_all_FRE <- locus_table_TY_hexp_allButBAR_SCHIF_pivot %>%
+locus_table_TY_hexp_all_FRE <- locus_table_TY_hexp_allButBAR_pivot %>%
   filter(Pop=="FRE") %>%
   ggplot(aes(x=as.double(TruffleYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
@@ -532,7 +531,7 @@ locus_table_TY_hexp_all_FRE
 dev.off()
 
 #create zoom-in to KON
-locus_table_TY_hexp_all_KON <- locus_table_TY_hexp_allButBAR_SCHIF_pivot %>%
+locus_table_TY_hexp_all_KON <- locus_table_TY_hexp_allButBAR_pivot %>%
   filter(Pop=="KON") %>%
   ggplot(aes(x=as.double(TruffleYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
@@ -553,7 +552,7 @@ locus_table_TY_hexp_all_KON
 dev.off()
 
 #create zoom-in to UEB
-locus_table_TY_hexp_all_UEB <- locus_table_TY_hexp_allButBAR_SCHIF_pivot %>%
+locus_table_TY_hexp_all_UEB <- locus_table_TY_hexp_allButBAR_pivot %>%
   filter(Pop=="UEB") %>%
   ggplot(aes(x=as.double(TruffleYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
@@ -629,26 +628,26 @@ write_xlsx(locus_table_TY_hexp, "C:\\Users\\liaba\\OneDrive - Eidg. Forschungsan
 ### Rarefaction of Neis' diversity index
 Rarefied: Hexp * (N/N-1). N= Anzahl samples (nicht Allele)
 
-```{r rarefy Nei SamplingYear without BAR and SCHIF, echo=TRUE, warning=FALSE}
-setPop(myData_genind_allMarkersOnly_allButBAR_SCHIF) <- ~Pop/SamplingYear
-popdata_pop_year_rareNei_SY <- poppr(myData_genind_allMarkersOnly_allButBAR_SCHIF) %>%
+```{r rarefy Nei SamplingYear without BAR, echo=TRUE, warning=FALSE}
+setPop(myData_genind_allMarkersOnly_allButBAR) <- ~Pop/SamplingYear
+popdata_pop_year_rareNei_SY <- poppr(myData_genind_allMarkersOnly_allButBAR) %>%
   select(Pop, N)
 
 # choose only the columns corresponding to Hexp values and rename them with their loci
-locus_table_SY_hexp_N_allButBAR_SCHIF <- 
-  select(locus_table_SY_allButBAR_SCHIF, X31:X45) %>%
+locus_table_SY_hexp_N_allButBAR <- 
+  select(locus_table_SY_allButBAR, X31:X45) %>%
   rename(aest06_1=X31,aest07_1=X32, aest15_1=X33, aest26_1=X34,aest28_1=X35, aest35_1=X36, aest36_1=X37, aest01_1=X38, aest10_1=X39, aest18_1=X40, aest24_1=X41, aest25_1=X42, aest29_1=X43, aest31_1=X44, mean=X45) %>%
     tibble::rownames_to_column("Pop") %>%
   left_join(.,popdata_pop_year_rareNei_SY,by="Pop") %>%
   separate(.,Pop,sep="_", into=c("Pop","SamplingYear"))
 
-N_minus_SY <- locus_table_SY_hexp_N_allButBAR_SCHIF$N #number of samples
+N_minus_SY <- locus_table_SY_hexp_N_allButBAR$N #number of samples
 #calculate rarefaction over all the values (columns 3:17)
-rarHexpSY_minus <- (N_minus_SY/(N_minus_SY-1))*select(locus_table_SY_hexp_N_allButBAR_SCHIF,3:17)
+rarHexpSY_minus <- (N_minus_SY/(N_minus_SY-1))*select(locus_table_SY_hexp_N_allButBAR,3:17)
 #add the pop and year again
-rarHexpSY_minus <- bind_cols(rarHexpSY_minus,Pop = locus_table_SY_hexp_N_allButBAR_SCHIF$Pop, SamplingYear = locus_table_SY_hexp_N_allButBAR_SCHIF$SamplingYear)
+rarHexpSY_minus <- bind_cols(rarHexpSY_minus,Pop = locus_table_SY_hexp_N_allButBAR$Pop, SamplingYear = locus_table_SY_hexp_N_allButBAR$SamplingYear)
 
-rarHexpSY_minus_pivot <- pivot_longer(locus_table_SY_hexp_N_allButBAR_SCHIF,cols=3:16,names_to="locus",values_to="value")
+rarHexpSY_minus_pivot <- pivot_longer(locus_table_SY_hexp_N_allButBAR,cols=3:16,names_to="locus",values_to="value")
 
 ggplot(rarHexpSY_minus_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
@@ -680,10 +679,80 @@ ggplot(rarHexpSY_minus_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
     panel.spacing=unit(0.1,"lines"))
 ```
 
-```{r high res rar_locus_table_SY_hexp_allButBAR_SCHIF, eval=FALSE, include=FALSE}
+```{r rarHexp SY remove boundary effects, echo=TRUE, message=FALSE, warning=FALSE}
+setPop(myData_genind_allMarkersOnly_allButBAR) <- ~Pop
+myData_genind_allMarkersOnly_allButBAR <- popsub(myData_genind_allMarkersOnly_allButBAR,exclude="BAR")
+setPop(myData_genind_allMarkersOnly_allButBAR) <- ~Pop/SamplingYear
+myData_genind_allMarkersOnly_allButBAR_Boundaries <- popsub(myData_genind_allMarkersOnly_allButBAR,exclude=c("ALD_2014","ALD_2015","BOB_2011,FRB_2014","FRI_2018","GEN_2018","HAN_2016","HAN_2019","KON_2013","NEU_2021","RIE_2015","SCD_2017","SCG_2013","SCG_2014","SCS_2017","UEB_2019","WSL_2012","WSL_2021"))
+
+#BF = Boundary Effect
+popdata_pop_year_rareNei_SY_noBF <- poppr(myData_genind_allMarkersOnly_allButBAR_Boundaries) %>%
+  select(Pop, N)
+
+# create a data frame and transpose the result;
+# use sapply to iterate over all populations calculated by seppop.
+# then use the locus_table function on the level Genotype
+
+locus_table_SY_allButBAR_Boundaries <- data.frame(t(
+  sapply(seppop(myData_genind_allMarkersOnly_allButBAR_Boundaries),
+    function(ls) poppr::locus_table(ls,lev="genotype"))))
+
+# choose only the columns corresponding to Hexp values and rename them with their loci
+locus_table_SY_hexp_N_allButBAR_Boundaries <- 
+  select(locus_table_SY_allButBAR_Boundaries, X31:X45) %>%
+  rename(aest06_1=X31,aest07_1=X32, aest15_1=X33, aest26_1=X34,aest28_1=X35, aest35_1=X36, aest36_1=X37, aest01_1=X38, aest10_1=X39, aest18_1=X40, aest24_1=X41, aest25_1=X42, aest29_1=X43, aest31_1=X44, mean=X45) %>%
+    tibble::rownames_to_column("Pop") %>%
+  left_join(.,popdata_pop_year_rareNei_SY_noBF,by="Pop") %>%
+  separate(.,Pop,sep="_", into=c("Pop","SamplingYear"))
+
+N_minus_SY_BF <- locus_table_SY_hexp_N_allButBAR_Boundaries$N #number of samples
+#calculate rarefaction over all the values (columns 3:17)
+rarHexpSY_minus_BF <- (N_minus_SY/(N_minus_SY-1))*select(locus_table_SY_hexp_N_allButBAR_Boundaries,3:17)
+#add the pop and year again
+rarHexpSY_minus_BF <- bind_cols(rarHexpSY_minus_BF,Pop = locus_table_SY_hexp_N_allButBAR_Boundaries$Pop, SamplingYear = locus_table_SY_hexp_N_allButBAR_Boundaries$SamplingYear)
+
+rarHexpSY_minus_BF_pivot <- pivot_longer(locus_table_SY_hexp_N_allButBAR_Boundaries,cols=3:16,names_to="locus",values_to="value")
+
+ggplot(rarHexpSY_minus_BF_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
+  geom_point(pch=20, alpha=0.3, size=0.8) +
+  geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
+  facet_wrap(vars(Pop)) +
+  labs(y="Nei's genetic diversity rarefied Hexp", x="Sampling year") +
+  ggtitle("Nei's rarefied genetic diversity per locus, sampling year and population") +
+  theme(aspect.ratio=0.4,
+    strip.background = element_blank(),
+    strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
+    panel.grid = element_blank(),
+    panel.spacing=unit(0.1,"lines"))
+
+#Adaptiere Facetten nach Geographie
+
+rarHexpSY_minus_BF_pivot$Pop <-factor(rarHexpSY_minus_BF_pivot$Pop, ordered=TRUE, levels=order_sites_WtoE)
+
+locus_table_rarHexp_SY_noBF <- ggplot(rarHexpSY_minus_BF_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
+  geom_point(pch=20, alpha=0.3, size=0.8) +
+  geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
+  facet_wrap(vars(Pop)) +
+  labs(y="Nei's rarefied genetic diversity Hexp", x="Sampling year") +
+  ggtitle("Nei's rarefied genetic diversity per locus, sampling year and population") +
+  theme(aspect.ratio=0.4,
+    strip.background = element_blank(),
+    strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
+    panel.grid = element_blank(),
+    panel.spacing=unit(0.1,"lines"))
+
+locus_table_rarHexp_SY_noBF
+
+#emf(file="rarHexpSY_minus_BF_pivot.emf")
+#locus_table_rarHexp_SY_noBF
+#dev.off()
+
+```
+
+```{r high res rar_locus_table_SY_hexp_allButBAR, eval=FALSE, include=FALSE}
 #create high resolution graph
 library(devEMF)
-emf(file= "rar_locus_table_SY_hexp_allButBAR_SCHIF.emf") # Opens a device
+emf(file= "rar_locus_table_SY_hexp_allButBAR.emf") # Opens a device
 ggplot(rarHexpSY_minus_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
   geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
@@ -839,24 +908,24 @@ ggplot(locus_table_TY_hexp_pivot,aes(x=as.numeric(TruffleYear), y=value)) +
     panel.spacing=unit(0.1,"lines"))
 ```
 
-```{r rarefy Nei TruffleYear without BAR and SCHIF, eval=FALSE, warning=FALSE, include=FALSE}
-setPop(myData_genind_allMarkersOnly_allButBAR_SCHIF) <- ~Pop/TruffleYear
-popdata_pop_year_rareNei_TY <- poppr(myData_genind_allMarkersOnly_allButBAR_SCHIF) %>%
+```{r rarefy Nei TruffleYear without BAR, eval=FALSE, warning=FALSE, include=FALSE}
+setPop(myData_genind_allMarkersOnly_allButBAR) <- ~Pop/TruffleYear
+popdata_pop_year_rareNei_TY <- poppr(myData_genind_allMarkersOnly_allButBAR) %>%
   select(Pop, N)
 
 # choose only the columns corresponding to Hexp values and rename them with their loci
-locus_table_TY_hexp_N_allButBAR_SCHIF <- 
-  select(locus_table_TY_allButBAR_SCHIF, X31:X45) %>%
+locus_table_TY_hexp_N_allButBAR <- 
+  select(locus_table_TY_allButBAR, X31:X45) %>%
   rename(aest06_1=X31,aest07_1=X32, aest15_1=X33, aest26_1=X34,aest28_1=X35, aest35_1=X36, aest36_1=X37, aest01_1=X38, aest10_1=X39, aest18_1=X40, aest24_1=X41, aest25_1=X42, aest29_1=X43, aest31_1=X44, mean=X45) %>%
     tibble::rownames_to_column("Pop") %>%
   left_join(.,popdata_pop_year_rareNei_TY,by="Pop") %>%
   separate(.,Pop,sep="_", into=c("Pop","TruffleYear"))
 
-N_minus_TY <- locus_table_TY_hexp_N_allButBAR_SCHIF$N #number of samples
+N_minus_TY <- locus_table_TY_hexp_N_allButBAR$N #number of samples
 #calculate rarefaction over all the values (columns 3:17)
-rarHexpTY_minus <- (N_minus_TY/(N_minus_TY-1))*select(locus_table_TY_hexp_N_allButBAR_SCHIF,3:17)
+rarHexpTY_minus <- (N_minus_TY/(N_minus_TY-1))*select(locus_table_TY_hexp_N_allButBAR,3:17)
 #add the pop and year again
-rarHexpTY_minus <- bind_cols(Pop = locus_table_TY_hexp_N_allButBAR_SCHIF$Pop, TruffleYear = locus_table_TY_hexp_N_allButBAR_SCHIF$TruffleYear, rarHexpTY_minus)
+rarHexpTY_minus <- bind_cols(Pop = locus_table_TY_hexp_N_allButBAR$Pop, TruffleYear = locus_table_TY_hexp_N_allButBAR$TruffleYear, rarHexpTY_minus)
 
 rarHexpTY_minus_pivot <- pivot_longer(rarHexpTY_minus,cols=3:16,names_to="locus",values_to="value")
 
@@ -874,7 +943,7 @@ ggplot(rarHexpTY_minus_pivot,aes(x=as.numeric(TruffleYear), y=value)) +
 
 #create high resolution graph
 library(devEMF)
-emf(file= "rar_locus_table_TY_hexp_pivot_allButBAR_SCHIF.emf") # Opens a device
+emf(file= "rar_locus_table_TY_hexp_pivot_allButBAR.emf") # Opens a device
 ggplot(rarHexpTY_minus_pivot,aes(x=as.numeric(TruffleYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
   geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
@@ -1000,31 +1069,31 @@ write_xlsx(rarHexpTY, "C:\\Users\\liaba\\OneDrive - Eidg. Forschungsanstalt WSL\
 ```
 
 
-#### clone-corrected myData_genind_allMarkersOnly locus table per Population (Strata: Population / SamplingYear), removed BAR and SCHIF
-```{r cc Hexp table Pop SamplingYear removed BAR and SCHIF, echo=TRUE, warning=FALSE, message=FALSE}
+#### clone-corrected myData_genind_allMarkersOnly locus table per Population (Strata: Population / SamplingYear), removed BAR
+```{r cc Hexp table Pop SamplingYear removed BAR, echo=TRUE, warning=FALSE, message=FALSE}
 setPop(cc_myData_genind_allMarkersOnly_SY) <- ~Pop
-cc_myData_genind_allMarkersOnly_allButBAR_SCHIF_SY <- popsub(cc_myData_genind_allMarkersOnly_SY, exclude=c("BAR","SCHIF"))
-setPop(cc_myData_genind_allMarkersOnly_allButBAR_SCHIF_SY) <- ~Pop/SamplingYear
+cc_myData_genind_allMarkersOnly_allButBAR_SY <- popsub(cc_myData_genind_allMarkersOnly_SY, exclude=c("BAR"))
+setPop(cc_myData_genind_allMarkersOnly_allButBAR_SY) <- ~Pop/SamplingYear
 
 # create a data frame and transpose the result;
 # use sapply to iterate over all populations calculated by seppop.
 # then use the locus_table function on the level Genotype
 
-cc_locus_table_allButBAR_SCHIF_SY <- data.frame(t(
-  sapply(seppop(cc_myData_genind_allMarkersOnly_allButBAR_SCHIF_SY),
+cc_locus_table_allButBAR_SY <- data.frame(t(
+  sapply(seppop(cc_myData_genind_allMarkersOnly_allButBAR_SY),
     function(ls) poppr::locus_table(ls,lev="genotype"))))
 
 # choose only the columns corresponding to Hexp values and rename them with their loci
 
-cc_locus_table_SY_hexp_allButBAR_SCHIF <- 
-  select(cc_locus_table_allButBAR_SCHIF_SY, X31:X45) %>%
+cc_locus_table_SY_hexp_allButBAR <- 
+  select(cc_locus_table_allButBAR_SY, X31:X45) %>%
   rename(aest06_1=X31,aest07_1=X32, aest15_1=X33, aest26_1=X34,aest28_1=X35, aest35_1=X36, aest36_1=X37, aest01_1=X38, aest10_1=X39, aest18_1=X40, aest24_1=X41, aest25_1=X42, aest29_1=X43, aest31_1=X44, mean=X45) %>%
   tibble::rownames_to_column("Pop") %>%
   separate(.,Pop,sep="_", into=c("Pop","SamplingYear"))
-                                      
-cc_locus_table_SY_hexp_allButBAR_SCHIF_pivot <- pivot_longer(cc_locus_table_SY_hexp_allButBAR_SCHIF,cols=3:16,names_to="locus",values_to="value")
+                                    
+cc_locus_table_SY_hexp_allButBAR_pivot <- pivot_longer(cc_locus_table_SY_hexp_allButBAR,cols=3:16,names_to="locus",values_to="value")
 
-ggplot(cc_locus_table_SY_hexp_allButBAR_SCHIF_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
+ggplot(cc_locus_table_SY_hexp_allButBAR_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
   geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
   facet_wrap(vars(Pop)) +
@@ -1038,9 +1107,9 @@ ggplot(cc_locus_table_SY_hexp_allButBAR_SCHIF_pivot,aes(x=as.numeric(SamplingYea
 
 #Adaptiere mit Geographie
 
-cc_locus_table_SY_hexp_allButBAR_SCHIF_pivot$Pop <-factor(cc_locus_table_SY_hexp_allButBAR_SCHIF_pivot$Pop, ordered=TRUE, levels=order_sites_WtoE)
+cc_locus_table_SY_hexp_allButBAR_pivot$Pop <-factor(cc_locus_table_SY_hexp_allButBAR_pivot$Pop, ordered=TRUE, levels=order_sites_WtoE)
 
-ggplot(cc_locus_table_SY_hexp_allButBAR_SCHIF_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
+ggplot(cc_locus_table_SY_hexp_allButBAR_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
   geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
   facet_wrap(vars(Pop)) +
@@ -1052,7 +1121,7 @@ ggplot(cc_locus_table_SY_hexp_allButBAR_SCHIF_pivot,aes(x=as.numeric(SamplingYea
     panel.grid = element_blank(),
     panel.spacing=unit(0.1,"lines"))
 
-n_samples_cc_allMarkersOnly_SY <- poppr(cc_myData_genind_allMarkersOnly_allButBAR_SCHIF_SY) %>%
+n_samples_cc_allMarkersOnly_SY <- poppr(cc_myData_genind_allMarkersOnly_allButBAR_SY) %>%
   separate(Pop, sep="_", into=c("Pop","SamplingYear"))
 
 n_samples_cc_allMarkersOnly_SY %>%
@@ -1064,9 +1133,9 @@ n_samples_cc_allMarkersOnly_SY %>%
   kable()
 ```
 
-```{r high res cc_locus_table_SY_hexp_allButBAR_SCHIF_pivot, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-emf(file= "cc_locus_table_SY_hexp_allButBAR_SCHIF_pivot.emf") # Opens a device
-ggplot(cc_locus_table_SY_hexp_allButBAR_SCHIF_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
+```{r high res cc_locus_table_SY_hexp_allButBAR_pivot, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+emf(file= "cc_locus_table_SY_hexp_allButBAR_pivot.emf") # Opens a device
+ggplot(cc_locus_table_SY_hexp_allButBAR_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
   geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
   facet_wrap(vars(Pop)) +
@@ -1083,7 +1152,7 @@ dev.off()
 
 ```{r zoom in clone corrected, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 #create zoom-in to BOB
-cc_locus_table_SY_hexp_all_BOB <- cc_locus_table_SY_hexp_allButBAR_SCHIF_pivot %>%
+cc_locus_table_SY_hexp_all_BOB <- cc_locus_table_SY_hexp_allButBAR_pivot %>%
   filter(Pop=="BOB") %>%
   ggplot(aes(x=as.double(SamplingYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
@@ -1104,7 +1173,7 @@ cc_locus_table_SY_hexp_all_BOB
 dev.off()
 
 #create zoom-in to BUR
-cc_locus_table_SY_hexp_all_BUR <- cc_locus_table_SY_hexp_allButBAR_SCHIF_pivot %>%
+cc_locus_table_SY_hexp_all_BUR <- cc_locus_table_SY_hexp_allButBAR_pivot %>%
   filter(Pop=="BUR") %>%
   ggplot(aes(x=as.double(SamplingYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
@@ -1125,7 +1194,7 @@ cc_locus_table_SY_hexp_all_BUR
 dev.off()
 
 #create zoom-in to FRE
-cc_locus_table_SY_hexp_all_FRE <- cc_locus_table_SY_hexp_allButBAR_SCHIF_pivot %>%
+cc_locus_table_SY_hexp_all_FRE <- cc_locus_table_SY_hexp_allButBAR_pivot %>%
   filter(Pop=="FRE") %>%
   ggplot(aes(x=as.double(SamplingYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
@@ -1146,7 +1215,7 @@ cc_locus_table_SY_hexp_all_FRE
 dev.off()
 
 #create zoom-in to KON
-cc_locus_table_SY_hexp_all_KON <- cc_locus_table_SY_hexp_allButBAR_SCHIF_pivot %>%
+cc_locus_table_SY_hexp_all_KON <- cc_locus_table_SY_hexp_allButBAR_pivot %>%
   filter(Pop=="KON") %>%
   ggplot(aes(x=as.double(SamplingYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
@@ -1167,7 +1236,7 @@ cc_locus_table_SY_hexp_all_KON
 dev.off()
 
 #create zoom-in to UEB
-cc_locus_table_SY_hexp_all_UEB <- cc_locus_table_SY_hexp_allButBAR_SCHIF_pivot %>%
+cc_locus_table_SY_hexp_all_UEB <- cc_locus_table_SY_hexp_allButBAR_pivot %>%
   filter(Pop=="UEB") %>%
   ggplot(aes(x=as.double(SamplingYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
@@ -1237,31 +1306,32 @@ cc_n_samples_allMarkersOnly_TY %>%
   kable()
 ```
 
-#### clone-corrected myData_genind_allMarkersOnly locus table per Population (Strata: Population / TruffleYear), removed BAR, SCHIF and GEN
-```{r cc Hexp table Pop TruffleYear removed BAR SCHIF GEN, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+#### clone-corrected myData_genind_allMarkersOnly locus table per Population (Strata: Population / TruffleYear), removed BAR and GEN
+```{r cc Hexp table Pop TruffleYear removed BAR GEN, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 setPop(cc_myData_genind_allMarkersOnly_SY) <- ~Pop
-cc_myData_genind_allMarkersOnly_allButBAR_SCHIF_GEN_TY <- popsub(cc_myData_genind_allMarkersOnly_TY, exclude=c("BAR","SCHIF","GEN"))
-setPop(cc_myData_genind_allMarkersOnly_allButBAR_SCHIF_GEN_TY) <- ~Pop/TruffleYear
+cc_myData_genind_allMarkersOnly_allButBAR_GEN_TY <- popsub(cc_myData_genind_allMarkersOnly_TY, exclude=c("BAR","GEN"))
+setPop(cc_myData_genind_allMarkersOnly_allButBAR_GEN_TY) <- ~Pop/TruffleYear
+
 
 # create a data frame and transpose the result;
 # use sapply to iterate over all populations calculated by seppop.
 # then use the locus_table function on the level Genotype
 
-cc_locus_table_allButBAR_SCHIF_GEN_TY <- data.frame(t(
-  sapply(seppop(cc_myData_genind_allMarkersOnly_allButBAR_SCHIF_GEN_TY),
+cc_locus_table_allButBAR_GEN_TY <- data.frame(t(
+  sapply(seppop(cc_myData_genind_allMarkersOnly_allButBAR_GEN_TY),
     function(ls) poppr::locus_table(ls,lev="genotype"))))
 
 # choose only the columns corresponding to Hexp values and rename them with their loci
 
-cc_locus_table_TY_hexp_allButBAR_SCHIF_GEN <- 
-  select(cc_locus_table_allButBAR_SCHIF_GEN_TY, X31:X45) %>%
+cc_locus_table_TY_hexp_allButBAR_GEN <- 
+  select(cc_locus_table_allButBAR_GEN_TY, X31:X45) %>%
   rename(aest06_1=X31,aest07_1=X32, aest15_1=X33, aest26_1=X34,aest28_1=X35, aest35_1=X36, aest36_1=X37, aest01_1=X38, aest10_1=X39, aest18_1=X40, aest24_1=X41, aest25_1=X42, aest29_1=X43, aest31_1=X44, mean=X45) %>%
   tibble::rownames_to_column("Pop") %>%
   separate(.,Pop,sep="_", into=c("Pop","TruffleYear"))
                                       
-cc_locus_table_TY_hexp_allButBAR_SCHIF_GEN_pivot <- pivot_longer(cc_locus_table_TY_hexp_allButBAR_SCHIF_GEN,cols=3:16,names_to="locus",values_to="value")
+cc_locus_table_TY_hexp_allButBAR_GEN_pivot <- pivot_longer(cc_locus_table_TY_hexp_allButBAR_GEN,cols=3:16,names_to="locus",values_to="value")
 
-ggplot(cc_locus_table_TY_hexp_allButBAR_SCHIF_GEN_pivot,aes(x=as.numeric(TruffleYear), y=value)) +
+ggplot(cc_locus_table_TY_hexp_allButBAR_GEN_pivot,aes(x=as.numeric(TruffleYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
   geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
   facet_wrap(vars(Pop)) +
@@ -1273,8 +1343,8 @@ ggplot(cc_locus_table_TY_hexp_allButBAR_SCHIF_GEN_pivot,aes(x=as.numeric(Truffle
     panel.grid = element_blank(),
     panel.spacing=unit(0.1,"lines"))
 
-emf(file= "cc_locus_table_TY_hexp_allButBAR_SCHIF_GEN_pivot.emf") # Opens a device
-ggplot(cc_locus_table_TY_hexp_allButBAR_SCHIF_GEN_pivot,aes(x=as.numeric(TruffleYear), y=value)) +
+emf(file= "cc_locus_table_TY_hexp_allButBAR_GEN_pivot.emf") # Opens a device
+ggplot(cc_locus_table_TY_hexp_allButBAR_GEN_pivot,aes(x=as.numeric(TruffleYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
   geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
   facet_wrap(vars(Pop)) +
@@ -1288,7 +1358,7 @@ ggplot(cc_locus_table_TY_hexp_allButBAR_SCHIF_GEN_pivot,aes(x=as.numeric(Truffle
 dev.off()
 
 #create zoom-in to BOB
-cc_locus_table_TY_hexp_all_BOB <- cc_locus_table_TY_hexp_allButBAR_SCHIF_GEN_pivot %>%
+cc_locus_table_TY_hexp_all_BOB <- cc_locus_table_TY_hexp_allButBAR_GEN_pivot %>%
   filter(Pop=="BOB") %>%
   ggplot(aes(x=as.double(TruffleYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
@@ -1309,7 +1379,7 @@ cc_locus_table_TY_hexp_all_BOB
 dev.off()
 
 #create zoom-in to BUR
-cc_locus_table_TY_hexp_all_BUR <- cc_locus_table_TY_hexp_allButBAR_SCHIF_GEN_pivot %>%
+cc_locus_table_TY_hexp_all_BUR <- cc_locus_table_TY_hexp_allButBAR_GEN_pivot %>%
   filter(Pop=="BUR") %>%
   ggplot(aes(x=as.double(TruffleYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
@@ -1330,7 +1400,7 @@ cc_locus_table_TY_hexp_all_BUR
 dev.off()
 
 #create zoom-in to FRE
-cc_locus_table_TY_hexp_all_FRE <- cc_locus_table_TY_hexp_allButBAR_SCHIF_GEN_pivot %>%
+cc_locus_table_TY_hexp_all_FRE <- cc_locus_table_TY_hexp_allButBAR_GEN_pivot %>%
   filter(Pop=="FRE") %>%
   ggplot(aes(x=as.double(TruffleYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
@@ -1351,7 +1421,7 @@ cc_locus_table_TY_hexp_all_FRE
 dev.off()
 
 #create zoom-in to KON
-cc_locus_table_TY_hexp_all_KON <- cc_locus_table_TY_hexp_allButBAR_SCHIF_GEN_pivot %>%
+cc_locus_table_TY_hexp_all_KON <- cc_locus_table_TY_hexp_allButBAR_GEN_pivot %>%
   filter(Pop=="KON") %>%
   ggplot(aes(x=as.double(TruffleYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
@@ -1372,7 +1442,7 @@ cc_locus_table_TY_hexp_all_KON
 dev.off()
 
 #create zoom-in to UEB
-cc_locus_table_TY_hexp_all_UEB <- cc_locus_table_TY_hexp_allButBAR_SCHIF_GEN_pivot %>%
+cc_locus_table_TY_hexp_all_UEB <- cc_locus_table_TY_hexp_allButBAR_GEN_pivot %>%
   filter(Pop=="UEB") %>%
   ggplot(aes(x=as.double(TruffleYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
@@ -1434,12 +1504,12 @@ ggplot(aes(as.numeric(SamplingYear),rarLambda_all)) +
     panel.spacing=unit(0.1,"lines"))
 rar_popdata_all_pop_year_graph
 
-#remove BAR and SCHIF
-rar_popdata_all_pop_year_graph1 <- filter(popdata_all_pop_year,! Pop %in% c("Total", "BAR","SCHIF")) %>%
+#remove BAR
+rar_popdata_all_pop_year_graph1 <- filter(popdata_all_pop_year,! Pop %in% c("Total", "BAR")) %>%
 ggplot(aes(as.numeric(SamplingYear),rarLambda_all)) +
   geom_point(pch=20, size=0.9) +
   facet_wrap(vars(Pop)) +
-  labs(y="Rarefied Simpson's index", x="Sampling year", subtitle="BAR and SCHIF: sample size too small") +
+  labs(y="Rarefied Simpson's index", x="Sampling year", subtitle="BAR: sample size too small") +
   ggtitle("Rarefied Simpson's index over the sampling years") +
   theme(aspect.ratio=0.4,
     strip.background = element_blank(),
@@ -1448,7 +1518,7 @@ ggplot(aes(as.numeric(SamplingYear),rarLambda_all)) +
     panel.spacing=unit(0.1,"lines"))
 rar_popdata_all_pop_year_graph1
 
-#emf(file="rarSimpson_all_SY_minusBARSCHIF.emf")
+#emf(file="rarSimpson_all_SY_minusBAR.emf")
 #rar_popdata_all_pop_year_graph1
 #dev.off()
 
@@ -1498,12 +1568,12 @@ rar_popdata_all_pop_year_graph_TY
 #rar_popdata_all_pop_year_graph_TY
 #dev.off()
 
-#remove BAR and SCHIF
-rar_popdata_all_pop_year_TY_graph1 <- filter(popdata_all_pop_year,! Pop %in% c("Total", "BAR","SCHIF")) %>%
+#remove BAR
+rar_popdata_all_pop_year_TY_graph1 <- filter(popdata_all_pop_year,! Pop %in% c("Total", "BAR")) %>%
 ggplot(aes(as.numeric(TruffleYear),rarLambda_all)) +
   geom_point(pch=20, size=0.9) +
   facet_wrap(vars(Pop)) +
-  labs(y="Rarefied Simpson's index", x="Truffle year", subtitle="BAR and SCHIF: sample size too small") +
+  labs(y="Rarefied Simpson's index", x="Truffle year", subtitle="BAR: sample size too small") +
   ggtitle("Rarefied Simpson's index over the truffle years") +
   theme(aspect.ratio=0.4,
     strip.background = element_blank(),
@@ -1512,7 +1582,7 @@ ggplot(aes(as.numeric(TruffleYear),rarLambda_all)) +
     panel.spacing=unit(0.1,"lines"))
 rar_popdata_all_pop_year_TY_graph1
 
-#emf(file="rarSimpson_all_TY_minusBARSCHIF.emf")
+#emf(file="rarSimpson_all_TY_minusBAR.emf")
 #rar_popdata_all_pop_year_TY_graph1
 #dev.off()
 

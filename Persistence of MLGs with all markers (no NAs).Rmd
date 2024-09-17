@@ -61,7 +61,11 @@ Tuaest_allMarkersOnly \<- myData %\>% missingno("geno", cutoff = 0)
 ```{r poppr with Tuaest_allMarkersOnly}
 setPop(Tuaest_allMarkersOnly) <- ~Pop
 poppr_withoutNA <- poppr(Tuaest_allMarkersOnly)
+poppr_withoutNA_genind <- poppr(myData_genind_allMarkersOnly)
 kable(select(poppr_withoutNA,Pop,N,MLG,eMLG,SE,H,G,lambda,E.5,Hexp,Ia,rbarD))
+kable(select(poppr_withoutNA_genind, Pop, N, MLG, eMLG, SE, H, G, lambda, E.5, Hexp, Ia, rbarD))
+
+# sie machen dasselbe! die Klonkorrektur kann direkt über Poppr erfolgen :)
 ```
 
 Info zur Tabelle: N = Number of individuals, MLG = Number of multilocus
