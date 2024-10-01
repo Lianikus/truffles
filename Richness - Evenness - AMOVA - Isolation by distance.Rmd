@@ -38,6 +38,14 @@ library(reshape)
 library(reshape2)
 library(graph4lg)
 library(iNEXT)
+#library(LandGenCourse) 
+library(GeNetIt)
+library(EcoGenetics)
+library(gstudio)
+#library(PopGenReport)
+#library(spdep)
+library(popgraph)
+
 T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_Mai2024.xlsx")
 coord <- read_excel("Koordinaten_2024.xlsx")
 myData <- read.genalex("Daten_Genalex.csv",genclone=TRUE, ploidy=1)
@@ -95,6 +103,16 @@ poppr(myData_genind_allMarkersOnly_above5N)
 H.year <- mlg.table(myData_genind_allMarkersOnly_above5N, plot = FALSE)
 rarecurve(H.year, ylab="Number of expected MLGs", sample=min(rowSums(H.year)),
           border = NA, fill = NA, font = 2, cex = 1, col = "blue")
+title("Rarecurve of Pop")
+
+#rescale to see anything except for BOB
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+myData_genind_allMarkersOnly_above5N_withoutBOB <- popsub(myData_genind_allMarkersOnly_above5N,exclude="BOB")
+#summary(myData_genind_allMarkersOnly_above40N)
+poppr(myData_genind_allMarkersOnly_above5N_withoutBOB)
+H.year_withoutBOB <- mlg.table(myData_genind_allMarkersOnly_above5N_withoutBOB, plot = FALSE)
+rarecurve(H.year_withoutBOB, ylab="Number of expected MLGs", sample=min(rowSums(H.year_withoutBOB)),
+font = 2, cex = 1, col = "blue")
 title("Rarecurve of Pop")
 
 #Genotypic richness rises, the later the ascocarps were collected --> more different individuals produced fruiting bodies
@@ -239,9 +257,9 @@ scatter(dapc.allMarkers, cell = 0, pch = 18:23, cstar = 0, mstree = TRUE, lwd = 
 
 #BUR, FRB and FRE are separated from the cluster by their second axis (y) --> genetically distinct
 
-setPop(myData_genind_allMarkersOnly) <- ~Month
-dapc.allMarkers <- dapc(myData_genind_allMarkersOnly, var.contrib = TRUE, scale = FALSE, n.pca = 30, n.da = nPop(myData_genind_allMarkersOnly) - 1)
-scatter(dapc.allMarkers, cell = 0, pch = 18:23, cstar = 0, mstree = TRUE, lwd = 2, lty = 2)
+#setPop(myData_genind_allMarkersOnly) <- ~Month
+#dapc.allMarkers <- dapc(myData_genind_allMarkersOnly, var.contrib = TRUE, scale = FALSE, n.pca = 30, n.da = nPop(myData_genind_allMarkersOnly) - 1)
+#scatter(dapc.allMarkers, cell = 0, pch = 18:23, cstar = 0, mstree = TRUE, lwd = 2, lty = 2)
 
 #assess if there is alleles in BUR, FRB and FRE that distinguishes them
 set.seed(4)
@@ -254,19 +272,40 @@ aest01_1  <- tab(temp[["aest01_1"]])
 aest29_1  <- tab(temp[["aest29_1"]])
 
 # The following two commands find the average allele frequencies per population
+setPop(myData_genind_allMarkersOnly) <- ~Pop
 (freq07 <- apply(aest07_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
 #This allele 266 only appears in the three populations that are further discriminated on the second axis in the dapc
 
+setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
+(freq07 <- apply(aest07_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
+
+df_07 <- melt(freq07)
+names(df_07)[1] <- "SamplingYear"
+names(df_07)[2] <- "Allele"
+names(df_07)[3] <- "Allele frequencies"
+
+ggplot(df_07,aes(x=SamplingYear,y=`Allele frequencies`)) +
+  geom_line(aes(color=Allele)) +
+  labs(x="SamplingYear", y="Allele frequency", title="Allele frequencies of aest07 over the years") +
+  theme_classic()
+
+setPop(myData_genind_allMarkersOnly) <- ~Pop
 (freq01 <- apply(aest01_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
 # The allele 254 appears in many of the populations, also in Zurich regions, FRE, BOB, FRI, KON and BRU
+setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
+(freq01 <- apply(aest01_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
 
-(freq01 <- apply(aest29_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
+
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+(freq29 <- apply(aest29_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
 # the allele 204 appears only in FRE, FRB, NEU and FRI
+setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
+(freq29 <- apply(aest29_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
 
 #When did the alleles appear?
-setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
-dapc.allMarkers <- dapc(myData_genind_allMarkersOnly, var.contrib = TRUE, scale = FALSE, n.pca = 30, n.da = nPop(myData_genind_allMarkersOnly) - 1)
-scatter(dapc.allMarkers, cell = 0, pch = 18:23, cstar = 0, mstree = TRUE, lwd = 2, lty = 2)
+#setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
+#dapc.allMarkers <- dapc(myData_genind_allMarkersOnly, var.contrib = TRUE, scale = FALSE, n.pca = 30, n.da = nPop(myData_genind_allMarkersOnly) - 1)
+#scatter(dapc.allMarkers, cell = 0, pch = 18:23, cstar = 0, mstree = TRUE, lwd = 2, lty = 2)
 
 set.seed(4)
 setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
@@ -276,7 +315,10 @@ aest06_1  <- tab(temp[["aest06_1"]]) #allele 217
 aest24_1  <- tab(temp[["aest24_1"]]) #allele 295 & 301
 aest10_1  <- tab(temp[["aest10_1"]]) #allele 280
 
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+(freq06 <- apply(aest06_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
 # The following two commands find the average allele frequencies per population
+setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
 (freq06 <- apply(aest06_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
 #This allele 217 started appearing in the year 2016, but wasn't found in 2023
 
@@ -290,6 +332,11 @@ ggplot(df_06,aes(x=SamplingYear,y=`Allele frequencies`)) +
   labs(x="SamplingYear", y="Allele frequency", title="Allele frequencies of aest06 over the years") +
   theme_classic()
 
+
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+(freq24 <- apply(aest24_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
+# The following two commands find the average allele frequencies per population
+setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
 (freq24 <- apply(aest24_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
 # The allele 295 was always present since 2011 but increased during the last years, as can be seen also here graphically:
 
@@ -303,7 +350,10 @@ ggplot(df_24,aes(x=SamplingYear,y=`Allele frequencies`)) +
   labs(x="SamplingYear", y="Allele frequency", title="Allele frequencies of aest24 over the years") +
   theme_classic()
 
-
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+(freq10 <- apply(aest10_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
+# The following two commands find the average allele frequencies per population
+setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
 (freq10 <- apply(aest10_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
 # the allele 280 was always present, peaking in 2017.
 
@@ -342,4 +392,9 @@ plot(Dgeo, Dgen)
 #abline(lm(Dgen~log(Dgeo)), col="red",lty=2)
 
 #Hmm... das sieht nicht so befriedigend aus wie im Genalex...
+````
+
+```{r isolation by distance V2}
+# aus https://bookdown.org/hhwagner1/LandGenCourse_book/WE_5.html
+
 ```

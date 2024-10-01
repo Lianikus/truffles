@@ -32,6 +32,8 @@ library(reshape)
 library(reshape2)
 library(graph4lg)
 library(iNEXT)
+library(ggh4x)
+library(paletteer)
 T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_Mai2024.xlsx")
 myData_genind <- read.genalex("Daten_Genalex.csv",genclone=FALSE, ploidy=1)
 myData_genind_allMarkersOnly <- myData_genind %>%
@@ -47,7 +49,9 @@ cc_distinctMLGs_allMarkersOnly <- cc_FullTable_Tuaest_allMarkersOnly[!duplicated
 T_all <- separate_wider_delim(T_all,Code_Analyses2, delim="_", names = c("Code","Yr"))
 T_all_withMLGs_allMarkersOnly <- inner_join(T_all,cc_FullTable_Tuaest_allMarkersOnly,by=c("Code"="Sample")) %>%
   select(Code, MLG, Site_1_abrev, truffle_year, Sampling_year,Sampling_date)
-T_all_withMLGs_withClusters_allMarkersOnly <- left_join(T_all_withMLGs_allMarkersOnly,clusters,by=c("MLG"="MLG_ID"))
+T_all_withMLGs_withClusters_allMarkersOnly <- left_join(T_all_withMLGs_allMarkersOnly,clusters,by=c("MLG"="MLG_ID")) %>% select(-"IndID2") %>% distinct(.)
+
+#write.csv(T_all_withMLGs_withClusters_allMarkersOnly,file="T_all_withMLGs_withClusters_allMarkersOnly.csv", sep=";")
 ```
 
 ```{r how many clusters}
@@ -68,3 +72,56 @@ ggplot(T_all_withMLGs_withClusters_allMarkersOnly, aes(x=Sampling_date, y= fct_r
   scale_x_date(date_labels="%Y", date_breaks = "5 years") +
   labs(title = "Overview of samples in truffle monitoring dataset", y = "Sampling site abbreviation", x ="Sampling date", colour="Genetic cluster")
 ```
+
+```{r k-means clusters}
+grp <- find.clusters(myData_genind_allMarkersOnly, n.pca=3)
+# 1 PC axis retained and 6 clusters
+
+grp$size
+options(max.print=4000)
+grp_df <- as_tibble(data.frame(grp$grp), rownames="Sample")
+#write.csv(grp_df, file="kmeans_clusters_allMarkersOnly.csv",sep=";")
+compare_clusters <- left_join(T_all_withMLGs_withClusters_allMarkersOnly,grp_df,by=c("Code"="Sample"))
+
+#if I compare clusters from k-means and from STRUCTURE, they don't seem very similar and consistent
+```
+
+```{r another k-means approach, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+# find clusters
+grp1 <- find.clusters(myData_genind_allMarkersOnly, max.n.clust = 10) # 180 PCS, 6 clusters
+# Discriminant analysis using the groups identified by find.clusters
+myData_dapc1 <- dapc(myData_genind_allMarkersOnly, grp1$grp) # 160 PCs, 6 DFs
+# create an object with membership probabilities
+postprobs <- as.data.frame(round(myData_dapc1$posterior, 4))
+# put probabilities in a tibble with IDS and labels for sites
+myData_clusters1 <- tibble::rownames_to_column(postprobs, var = "ind")
+
+# melt into long format
+myDataclusters_long <- myData_clusters1 %>% pivot_longer(2:7, names_to = "cluster", values_to = "prob")
+
+ # set up custom facet strips
+facetstrips <- strip_nested(
+  text_x = elem_list_text(size = c(12, 4)),
+  by_layer_x = TRUE, clip = "off"
+)
+
+ggplot(myDataclusters_long, aes(factor(ind), prob, fill = factor(cluster))) +
+  geom_col(color = "gray", size = 0.01) +
+    facet_nested(~ loc,
+    switch = "x",
+    nest_line = element_line(linewidth = 1, lineend = "round"),
+    scales = "free", space = "free", strip = facetstrips,
+  ) +
+  theme_minimal(base_family = "Nimbus Sans") +
+  labs(x = "Individuals", y = "membership probability") +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_x_discrete(expand = expansion(add = 0.5)) +
+  scale_fill_paletteer_d("ghibli::PonyoMedium", guide = "none") +
+  theme(
+    panel.spacing.x = unit(0.18, "lines"),
+    axis.text.x = element_blank(),
+    panel.grid = element_blank()
+  )
+
+compoplot(myData_dapc1, col = funky, xlab = "individuals")
+````

@@ -40,7 +40,7 @@ summary(myData_genind_allMarkersOnly_above100N)
     ## // Observed heterozygosity: 0
 
 ``` r
-H.year <- mlg.table(myData_genind_allMarkersOnly, plot = FALSE)
+H.year <- mlg.table(myData_genind_allMarkersOnly_above100N, plot = FALSE)
 rarecurve(H.year, ylab="Number of expected MLGs", sample=min(rowSums(H.year)),
           border = NA, fill = NA, font = 2, cex = 1, col = "blue")
 title("Rarecurve of Sampling Years")
@@ -63,7 +63,7 @@ summary(myData_genind_allMarkersOnly_above100N)
     ## // Observed heterozygosity: 0
 
 ``` r
-H.year <- mlg.table(myData_genind_allMarkersOnly, plot = FALSE)
+H.year <- mlg.table(myData_genind_allMarkersOnly_above100N, plot = FALSE)
 rarecurve(H.year, ylab="Number of expected MLGs", sample=min(rowSums(H.year)),
           border = NA, fill = NA, font = 2, cex = 1, col = "blue")
 title("Rarecurve of Truffle Years")
@@ -73,8 +73,8 @@ title("Rarecurve of Truffle Years")
 
 ``` r
 setPop(myData_genind_allMarkersOnly) <- ~Month
-myData_genind_allMarkersOnly_above100N <- selPopSize(myData_genind_allMarkersOnly,pop=NULL,nMin=40)
-summary(myData_genind_allMarkersOnly_above100N)
+myData_genind_allMarkersOnly_above40N <- selPopSize(myData_genind_allMarkersOnly,pop=NULL,nMin=40)
+summary(myData_genind_allMarkersOnly_above40N)
 ```
 
     ## 
@@ -86,7 +86,7 @@ summary(myData_genind_allMarkersOnly_above100N)
     ## // Observed heterozygosity: 0
 
 ``` r
-poppr(myData_genind_allMarkersOnly_above100N)
+poppr(myData_genind_allMarkersOnly_above40N)
 ```
 
     ##      Pop    N MLG eMLG   SE    H    G lambda   E.5  Hexp   Ia rbarD
@@ -101,27 +101,156 @@ poppr(myData_genind_allMarkersOnly_above100N)
     ## 9     12  160  85 36.7 2.56 4.12 42.7  0.977 0.686 0.649 2.63 0.204
     ## 10     2   50  34 34.0 0.00 3.30 19.8  0.950 0.724 0.587 2.44 0.189
     ## 11 Total 2585 441 33.0 2.98 4.54 34.6  0.971 0.363 0.645 3.01 0.233
-    ##                                      File
-    ## 1  myData_genind_allMarkersOnly_above100N
-    ## 2  myData_genind_allMarkersOnly_above100N
-    ## 3  myData_genind_allMarkersOnly_above100N
-    ## 4  myData_genind_allMarkersOnly_above100N
-    ## 5  myData_genind_allMarkersOnly_above100N
-    ## 6  myData_genind_allMarkersOnly_above100N
-    ## 7  myData_genind_allMarkersOnly_above100N
-    ## 8  myData_genind_allMarkersOnly_above100N
-    ## 9  myData_genind_allMarkersOnly_above100N
-    ## 10 myData_genind_allMarkersOnly_above100N
-    ## 11 myData_genind_allMarkersOnly_above100N
+    ##                                     File
+    ## 1  myData_genind_allMarkersOnly_above40N
+    ## 2  myData_genind_allMarkersOnly_above40N
+    ## 3  myData_genind_allMarkersOnly_above40N
+    ## 4  myData_genind_allMarkersOnly_above40N
+    ## 5  myData_genind_allMarkersOnly_above40N
+    ## 6  myData_genind_allMarkersOnly_above40N
+    ## 7  myData_genind_allMarkersOnly_above40N
+    ## 8  myData_genind_allMarkersOnly_above40N
+    ## 9  myData_genind_allMarkersOnly_above40N
+    ## 10 myData_genind_allMarkersOnly_above40N
+    ## 11 myData_genind_allMarkersOnly_above40N
 
 ``` r
-H.year <- mlg.table(myData_genind_allMarkersOnly, plot = FALSE)
+H.year <- mlg.table(myData_genind_allMarkersOnly_above40N, plot = FALSE)
 rarecurve(H.year, ylab="Number of expected MLGs", sample=min(rowSums(H.year)),
           border = NA, fill = NA, font = 2, cex = 1, col = "blue")
 title("Rarecurve of Month")
 ```
 
 ![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/richness-3.png)<!-- -->
+
+``` r
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+myData_genind_allMarkersOnly_above5N <- selPopSize(myData_genind_allMarkersOnly,pop=NULL,nMin=5)
+#summary(myData_genind_allMarkersOnly_above40N)
+poppr(myData_genind_allMarkersOnly_above5N)
+```
+
+    ##      Pop    N MLG eMLG    SE     H     G lambda   E.5   Hexp     Ia  rbarD
+    ## 1    FRE  214   6 1.54 0.672 0.301  1.12 0.1083 0.346 0.0675  9.831 0.8436
+    ## 2    ALD   62  12 4.09 1.192 1.430  2.31 0.5671 0.412 0.1400  3.684 0.3652
+    ## 3    RIE   62  39 9.18 0.816 3.507 28.26 0.9646 0.843 0.4263  0.882 0.0778
+    ## 4    TRO   34   6 3.54 0.904 1.164  2.31 0.5675 0.596 0.1529  2.464 0.3408
+    ## 5    SCG   15   6 5.14 0.703 1.617  4.41 0.7733 0.845 0.2891  2.283 0.2888
+    ## 6    BOH   40  27 8.36 1.116 3.008 12.90 0.9225 0.618 0.2779  1.353 0.1364
+    ## 7    BOB  429 125 8.05 1.223 3.730 16.16 0.9381 0.373 0.3379  2.148 0.1900
+    ## 8    FRB   13   7 5.85 0.769 1.712  4.57 0.7811 0.786 0.5064  6.074 0.4700
+    ## 9    UEB  153  29 6.17 1.280 2.448  6.81 0.8533 0.551 0.1454  0.732 0.0910
+    ## 10   SCL   99  39 6.36 1.399 2.649  6.11 0.8364 0.389 0.1762  2.211 0.2492
+    ## 11   SCD  100  40 6.00 1.457 2.523  4.16 0.7598 0.276 0.2686  2.549 0.2569
+    ## 12   WSL  283   4 1.30 0.502 0.168  1.07 0.0621 0.362 0.0145  4.281 0.5055
+    ## 13   BUR  223  19 3.90 0.933 1.564  3.50 0.7146 0.663 0.2316  4.767 0.4420
+    ## 14   SCS   43   6 2.16 0.899 0.547  1.28 0.2163 0.380 0.0494  3.957 0.4517
+    ## 15   NEU   32   6 3.12 0.911 0.961  1.84 0.4551 0.518 0.1031  2.505 0.3431
+    ## 16   UST   35  22 8.36 1.050 2.877 13.76 0.9273 0.762 0.3733  1.116 0.0961
+    ## 17   KON  212  25 5.42 1.206 2.129  5.21 0.8082 0.569 0.2292  1.291 0.1187
+    ## 18   FRI  120  11 3.80 0.947 1.438  3.14 0.6814 0.666 0.2952  4.250 0.3842
+    ## 19   BRU  178  12 2.96 0.929 1.021  1.84 0.4555 0.471 0.4326 12.171 0.9362
+    ## 20   LIM  216  15 3.77 0.917 1.471  3.18 0.6855 0.650 0.4155  5.194 0.4137
+    ## 21   HAN   65   7 4.05 0.780 1.453  3.49 0.7138 0.761 0.2884  2.115 0.2208
+    ## 22   GEN   10   2 2.00 0.000 0.325  1.22 0.1800 0.571 0.0857  5.000 1.0000
+    ## 23 Total 2638 448 8.91 0.976 4.539 34.50 0.9710 0.362 0.6444  3.006 0.2326
+    ##                                    File
+    ## 1  myData_genind_allMarkersOnly_above5N
+    ## 2  myData_genind_allMarkersOnly_above5N
+    ## 3  myData_genind_allMarkersOnly_above5N
+    ## 4  myData_genind_allMarkersOnly_above5N
+    ## 5  myData_genind_allMarkersOnly_above5N
+    ## 6  myData_genind_allMarkersOnly_above5N
+    ## 7  myData_genind_allMarkersOnly_above5N
+    ## 8  myData_genind_allMarkersOnly_above5N
+    ## 9  myData_genind_allMarkersOnly_above5N
+    ## 10 myData_genind_allMarkersOnly_above5N
+    ## 11 myData_genind_allMarkersOnly_above5N
+    ## 12 myData_genind_allMarkersOnly_above5N
+    ## 13 myData_genind_allMarkersOnly_above5N
+    ## 14 myData_genind_allMarkersOnly_above5N
+    ## 15 myData_genind_allMarkersOnly_above5N
+    ## 16 myData_genind_allMarkersOnly_above5N
+    ## 17 myData_genind_allMarkersOnly_above5N
+    ## 18 myData_genind_allMarkersOnly_above5N
+    ## 19 myData_genind_allMarkersOnly_above5N
+    ## 20 myData_genind_allMarkersOnly_above5N
+    ## 21 myData_genind_allMarkersOnly_above5N
+    ## 22 myData_genind_allMarkersOnly_above5N
+    ## 23 myData_genind_allMarkersOnly_above5N
+
+``` r
+H.year <- mlg.table(myData_genind_allMarkersOnly_above5N, plot = FALSE)
+rarecurve(H.year, ylab="Number of expected MLGs", sample=min(rowSums(H.year)),
+          border = NA, fill = NA, font = 2, cex = 1, col = "blue")
+title("Rarecurve of Pop")
+```
+
+![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/richness-4.png)<!-- -->
+
+``` r
+#rescale to see anything except for BOB
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+myData_genind_allMarkersOnly_above5N_withoutBOB <- popsub(myData_genind_allMarkersOnly_above5N,exclude="BOB")
+#summary(myData_genind_allMarkersOnly_above40N)
+poppr(myData_genind_allMarkersOnly_above5N_withoutBOB)
+```
+
+    ##      Pop    N MLG eMLG    SE     H     G lambda   E.5   Hexp     Ia  rbarD
+    ## 1    FRE  214   6 1.54 0.672 0.301  1.12 0.1083 0.346 0.0675  9.831 0.8436
+    ## 2    ALD   62  12 4.09 1.192 1.430  2.31 0.5671 0.412 0.1400  3.684 0.3652
+    ## 3    RIE   62  39 9.18 0.816 3.507 28.26 0.9646 0.843 0.4263  0.882 0.0778
+    ## 4    TRO   34   6 3.54 0.904 1.164  2.31 0.5675 0.596 0.1529  2.464 0.3408
+    ## 5    SCG   15   6 5.14 0.703 1.617  4.41 0.7733 0.845 0.2891  2.283 0.2888
+    ## 6    BOH   40  27 8.36 1.116 3.008 12.90 0.9225 0.618 0.2779  1.353 0.1364
+    ## 7    FRB   13   7 5.85 0.769 1.712  4.57 0.7811 0.786 0.5064  6.074 0.4700
+    ## 8    UEB  153  29 6.17 1.280 2.448  6.81 0.8533 0.551 0.1454  0.732 0.0910
+    ## 9    SCL   99  39 6.36 1.399 2.649  6.11 0.8364 0.389 0.1762  2.211 0.2492
+    ## 10   SCD  100  40 6.00 1.457 2.523  4.16 0.7598 0.276 0.2686  2.549 0.2569
+    ## 11   WSL  283   4 1.30 0.502 0.168  1.07 0.0621 0.362 0.0145  4.281 0.5055
+    ## 12   BUR  223  19 3.90 0.933 1.564  3.50 0.7146 0.663 0.2316  4.767 0.4420
+    ## 13   SCS   43   6 2.16 0.899 0.547  1.28 0.2163 0.380 0.0494  3.957 0.4517
+    ## 14   NEU   32   6 3.12 0.911 0.961  1.84 0.4551 0.518 0.1031  2.505 0.3431
+    ## 15   UST   35  22 8.36 1.050 2.877 13.76 0.9273 0.762 0.3733  1.116 0.0961
+    ## 16   KON  212  25 5.42 1.206 2.129  5.21 0.8082 0.569 0.2292  1.291 0.1187
+    ## 17   FRI  120  11 3.80 0.947 1.438  3.14 0.6814 0.666 0.2952  4.250 0.3842
+    ## 18   BRU  178  12 2.96 0.929 1.021  1.84 0.4555 0.471 0.4326 12.171 0.9362
+    ## 19   LIM  216  15 3.77 0.917 1.471  3.18 0.6855 0.650 0.4155  5.194 0.4137
+    ## 20   HAN   65   7 4.05 0.780 1.453  3.49 0.7138 0.761 0.2884  2.115 0.2208
+    ## 21   GEN   10   2 2.00 0.000 0.325  1.22 0.1800 0.571 0.0857  5.000 1.0000
+    ## 22 Total 2209 325 8.59 1.073 4.170 25.67 0.9610 0.387 0.6567  3.412 0.2637
+    ##                                               File
+    ## 1  myData_genind_allMarkersOnly_above5N_withoutBOB
+    ## 2  myData_genind_allMarkersOnly_above5N_withoutBOB
+    ## 3  myData_genind_allMarkersOnly_above5N_withoutBOB
+    ## 4  myData_genind_allMarkersOnly_above5N_withoutBOB
+    ## 5  myData_genind_allMarkersOnly_above5N_withoutBOB
+    ## 6  myData_genind_allMarkersOnly_above5N_withoutBOB
+    ## 7  myData_genind_allMarkersOnly_above5N_withoutBOB
+    ## 8  myData_genind_allMarkersOnly_above5N_withoutBOB
+    ## 9  myData_genind_allMarkersOnly_above5N_withoutBOB
+    ## 10 myData_genind_allMarkersOnly_above5N_withoutBOB
+    ## 11 myData_genind_allMarkersOnly_above5N_withoutBOB
+    ## 12 myData_genind_allMarkersOnly_above5N_withoutBOB
+    ## 13 myData_genind_allMarkersOnly_above5N_withoutBOB
+    ## 14 myData_genind_allMarkersOnly_above5N_withoutBOB
+    ## 15 myData_genind_allMarkersOnly_above5N_withoutBOB
+    ## 16 myData_genind_allMarkersOnly_above5N_withoutBOB
+    ## 17 myData_genind_allMarkersOnly_above5N_withoutBOB
+    ## 18 myData_genind_allMarkersOnly_above5N_withoutBOB
+    ## 19 myData_genind_allMarkersOnly_above5N_withoutBOB
+    ## 20 myData_genind_allMarkersOnly_above5N_withoutBOB
+    ## 21 myData_genind_allMarkersOnly_above5N_withoutBOB
+    ## 22 myData_genind_allMarkersOnly_above5N_withoutBOB
+
+``` r
+H.year_withoutBOB <- mlg.table(myData_genind_allMarkersOnly_above5N_withoutBOB, plot = FALSE)
+rarecurve(H.year_withoutBOB, ylab="Number of expected MLGs", sample=min(rowSums(H.year_withoutBOB)),
+font = 2, cex = 1, col = "blue")
+title("Rarecurve of Pop")
+```
+
+![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/richness-5.png)<!-- -->
 
 ``` r
 #Genotypic richness rises, the later the ascocarps were collected --> more different individuals produced fruiting bodies
@@ -560,21 +689,17 @@ scatter(dapc.allMarkers, cell = 0, pch = 18:23, cstar = 0, mstree = TRUE, lwd = 
 ``` r
 #BUR, FRB and FRE are separated from the cluster by their second axis (y) --> genetically distinct
 
-setPop(myData_genind_allMarkersOnly) <- ~Month
-dapc.allMarkers <- dapc(myData_genind_allMarkersOnly, var.contrib = TRUE, scale = FALSE, n.pca = 30, n.da = nPop(myData_genind_allMarkersOnly) - 1)
-scatter(dapc.allMarkers, cell = 0, pch = 18:23, cstar = 0, mstree = TRUE, lwd = 2, lty = 2)
-```
+#setPop(myData_genind_allMarkersOnly) <- ~Month
+#dapc.allMarkers <- dapc(myData_genind_allMarkersOnly, var.contrib = TRUE, scale = FALSE, n.pca = 30, n.da = nPop(myData_genind_allMarkersOnly) - 1)
+#scatter(dapc.allMarkers, cell = 0, pch = 18:23, cstar = 0, mstree = TRUE, lwd = 2, lty = 2)
 
-![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/dapc-2.png)<!-- -->
-
-``` r
 #assess if there is alleles in BUR, FRB and FRE that distinguishes them
 set.seed(4)
 setPop(myData_genind_allMarkersOnly) <- ~Pop
 contrib <- loadingplot(dapc.allMarkers$var.contr, axis = 2, thres = 0.07, lab.jitter = 1, threshold=0.05)
 ```
 
-![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/dapc-3.png)<!-- -->
+![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/dapc-2.png)<!-- -->
 
 ``` r
 temp    <- seploc(myData_genind_allMarkersOnly)       # seploc {adegenet} creates a list of individual loci.
@@ -583,6 +708,7 @@ aest01_1  <- tab(temp[["aest01_1"]])
 aest29_1  <- tab(temp[["aest29_1"]])
 
 # The following two commands find the average allele frequencies per population
+setPop(myData_genind_allMarkersOnly) <- ~Pop
 (freq07 <- apply(aest07_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
 ```
 
@@ -638,6 +764,55 @@ aest29_1  <- tab(temp[["aest29_1"]])
 ``` r
 #This allele 266 only appears in the three populations that are further discriminated on the second axis in the dapc
 
+setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
+(freq07 <- apply(aest07_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
+```
+
+    ##      aest07_1.266 aest07_1.261 aest07_1.256 aest07_1.251 aest07_1.276
+    ## 2011   0.13138686    0.4306569    0.4379562  0.000000000   0.00000000
+    ## 2012   0.10824742    0.5206186    0.3659794  0.005154639   0.00000000
+    ## 2013   0.03333333    0.3363636    0.4636364  0.000000000   0.16666667
+    ## 2014   0.05208333    0.4739583    0.4635417  0.000000000   0.01041667
+    ## 2015   0.08433735    0.3253012    0.5421687  0.000000000   0.04819277
+    ## 2016   0.11111111    0.4989107    0.1655773  0.000000000   0.05010893
+    ## 2017   0.18568665    0.5280464    0.2649903  0.000000000   0.00000000
+    ## 2018   0.00000000    0.5507692    0.2830769  0.000000000   0.04923077
+    ## 2019   0.00000000    0.8592593    0.1185185  0.000000000   0.02222222
+    ## 2020   0.00000000    0.5939394    0.1272727  0.000000000   0.27878788
+    ## 2021   0.00000000    0.2222222    0.7592593  0.000000000   0.01851852
+    ## 2022   0.00000000    0.6000000    0.0400000  0.000000000   0.36000000
+    ## 2023   0.00000000    0.2173913    0.7826087  0.000000000   0.00000000
+    ##      aest07_1.311 aest07_1.281
+    ## 2011            0    0.0000000
+    ## 2012            0    0.0000000
+    ## 2013            0    0.0000000
+    ## 2014            0    0.0000000
+    ## 2015            0    0.0000000
+    ## 2016            0    0.1742919
+    ## 2017            0    0.0212766
+    ## 2018            0    0.1169231
+    ## 2019            0    0.0000000
+    ## 2020            0    0.0000000
+    ## 2021            0    0.0000000
+    ## 2022            0    0.0000000
+    ## 2023            0    0.0000000
+
+``` r
+df_07 <- melt(freq07)
+names(df_07)[1] <- "SamplingYear"
+names(df_07)[2] <- "Allele"
+names(df_07)[3] <- "Allele frequencies"
+
+ggplot(df_07,aes(x=SamplingYear,y=`Allele frequencies`)) +
+  geom_line(aes(color=Allele)) +
+  labs(x="SamplingYear", y="Allele frequency", title="Allele frequencies of aest07 over the years") +
+  theme_classic()
+```
+
+![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/dapc-3.png)<!-- -->
+
+``` r
+setPop(myData_genind_allMarkersOnly) <- ~Pop
 (freq01 <- apply(aest01_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
 ```
 
@@ -692,8 +867,42 @@ aest29_1  <- tab(temp[["aest29_1"]])
 
 ``` r
 # The allele 254 appears in many of the populations, also in Zurich regions, FRE, BOB, FRI, KON and BRU
+setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
+(freq01 <- apply(aest01_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
+```
 
-(freq01 <- apply(aest29_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
+    ##      aest01_1.254 aest01_1.242 aest01_1.236 aest01_1.248 aest01_1.260
+    ## 2011   0.20437956   0.57664234   0.10218978  0.116788321  0.000000000
+    ## 2012   0.44329897   0.38144330   0.09793814  0.072164948  0.005154639
+    ## 2013   0.05757576   0.43030303   0.26969697  0.060606061  0.181818182
+    ## 2014   0.22916667   0.38541667   0.31770833  0.036458333  0.031250000
+    ## 2015   0.20481928   0.51807229   0.19277108  0.012048193  0.060240964
+    ## 2016   0.24183007   0.11328976   0.38126362  0.032679739  0.045751634
+    ## 2017   0.21470019   0.23791103   0.49323017  0.030947776  0.001934236
+    ## 2018   0.02461538   0.28923077   0.44923077  0.009230769  0.104615385
+    ## 2019   0.02222222   0.13333333   0.77037037  0.051851852  0.022222222
+    ## 2020   0.00000000   0.03030303   0.52121212  0.090909091  0.357575758
+    ## 2021   0.00000000   0.03703704   0.46296296  0.129629630  0.370370370
+    ## 2022   0.00000000   0.20000000   0.44000000  0.000000000  0.360000000
+    ## 2023   0.00000000   0.00000000   0.86956522  0.130434783  0.000000000
+    ##      aest01_1.233 aest01_1.230 aest01_1.266
+    ## 2011            0  0.000000000    0.0000000
+    ## 2012            0  0.000000000    0.0000000
+    ## 2013            0  0.000000000    0.0000000
+    ## 2014            0  0.000000000    0.0000000
+    ## 2015            0  0.012048193    0.0000000
+    ## 2016            0  0.010893246    0.1742919
+    ## 2017            0  0.000000000    0.0212766
+    ## 2018            0  0.006153846    0.1169231
+    ## 2019            0  0.000000000    0.0000000
+    ## 2020            0  0.000000000    0.0000000
+    ## 2021            0  0.000000000    0.0000000
+    ## 2022            0  0.000000000    0.0000000
+    ## 2023            0  0.000000000    0.0000000
+
+``` r
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+(freq29 <- apply(aest29_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
 ```
 
     ##     aest29_1.204 aest29_1.211 aest29_1.216 aest29_1.241 aest29_1.209
@@ -747,29 +956,113 @@ aest29_1  <- tab(temp[["aest29_1"]])
 
 ``` r
 # the allele 204 appears only in FRE, FRB, NEU and FRI
-
-#When did the alleles appear?
 setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
-dapc.allMarkers <- dapc(myData_genind_allMarkersOnly, var.contrib = TRUE, scale = FALSE, n.pca = 30, n.da = nPop(myData_genind_allMarkersOnly) - 1)
-scatter(dapc.allMarkers, cell = 0, pch = 18:23, cstar = 0, mstree = TRUE, lwd = 2, lty = 2)
+(freq29 <- apply(aest29_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
 ```
 
-![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/dapc-4.png)<!-- -->
+    ##      aest29_1.204 aest29_1.211 aest29_1.216 aest29_1.241 aest29_1.209
+    ## 2011   0.13138686    0.5839416    0.2043796  0.080291971   0.00000000
+    ## 2012   0.10824742    0.6443299    0.2319588  0.015463918   0.00000000
+    ## 2013   0.03030303    0.3727273    0.3818182  0.030303030   0.18181818
+    ## 2014   0.05729167    0.4843750    0.3802083  0.046875000   0.03125000
+    ## 2015   0.07228916    0.5542169    0.1445783  0.144578313   0.08433735
+    ## 2016   0.11111111    0.3594771    0.2984749  0.000000000   0.22875817
+    ## 2017   0.18568665    0.3326886    0.4100580  0.000000000   0.02127660
+    ## 2018   0.00000000    0.2184615    0.5076923  0.000000000   0.22769231
+    ## 2019   0.00000000    0.6592593    0.2888889  0.007407407   0.02222222
+    ## 2020   0.00000000    0.4787879    0.1636364  0.000000000   0.35757576
+    ## 2021   0.00000000    0.1296296    0.5000000  0.000000000   0.37037037
+    ## 2022   0.00000000    0.2400000    0.4000000  0.000000000   0.36000000
+    ## 2023   0.00000000    0.0000000    1.0000000  0.000000000   0.00000000
+    ##      aest29_1.208 aest29_1.231 aest29_1.190 aest29_1.221
+    ## 2011  0.000000000  0.000000000  0.000000000   0.00000000
+    ## 2012  0.000000000  0.000000000  0.000000000   0.00000000
+    ## 2013  0.003030303  0.000000000  0.000000000   0.00000000
+    ## 2014  0.000000000  0.000000000  0.000000000   0.00000000
+    ## 2015  0.000000000  0.000000000  0.000000000   0.00000000
+    ## 2016  0.000000000  0.000000000  0.002178649   0.00000000
+    ## 2017  0.000000000  0.001934236  0.000000000   0.04835590
+    ## 2018  0.000000000  0.000000000  0.000000000   0.04615385
+    ## 2019  0.000000000  0.000000000  0.000000000   0.02222222
+    ## 2020  0.000000000  0.000000000  0.000000000   0.00000000
+    ## 2021  0.000000000  0.000000000  0.000000000   0.00000000
+    ## 2022  0.000000000  0.000000000  0.000000000   0.00000000
+    ## 2023  0.000000000  0.000000000  0.000000000   0.00000000
 
 ``` r
+#When did the alleles appear?
+#setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
+#dapc.allMarkers <- dapc(myData_genind_allMarkersOnly, var.contrib = TRUE, scale = FALSE, n.pca = 30, n.da = nPop(myData_genind_allMarkersOnly) - 1)
+#scatter(dapc.allMarkers, cell = 0, pch = 18:23, cstar = 0, mstree = TRUE, lwd = 2, lty = 2)
+
 set.seed(4)
 setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
 contrib <- loadingplot(dapc.allMarkers$var.contr, axis = 2, thres = 0.07, lab.jitter = 1, threshold=0.05)
 ```
 
-![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/dapc-5.png)<!-- -->
+![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/dapc-4.png)<!-- -->
 
 ``` r
 aest06_1  <- tab(temp[["aest06_1"]]) #allele 217
 aest24_1  <- tab(temp[["aest24_1"]]) #allele 295 & 301
 aest10_1  <- tab(temp[["aest10_1"]]) #allele 280
 
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+(freq06 <- apply(aest06_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
+```
+
+    ##     aest06_1.230 aest06_1.234 aest06_1.218 aest06_1.236 aest06_1.224
+    ## FRE  0.957943925    0.0000000  0.018691589   0.02336449   0.00000000
+    ## ALD  0.016129032    0.8548387  0.064516129   0.03225806   0.03225806
+    ## RIE  0.000000000    0.0000000  0.693548387   0.11290323   0.19354839
+    ## TRO  0.000000000    0.0000000  0.705882353   0.29411765   0.00000000
+    ## SCG  0.000000000    0.0000000  1.000000000   0.00000000   0.00000000
+    ## BOH  0.000000000    0.0000000  0.900000000   0.07500000   0.02500000
+    ## BOB  0.000000000    0.0000000  0.822843823   0.15850816   0.00000000
+    ## FRB  0.076923077    0.0000000  0.538461538   0.00000000   0.38461538
+    ## UEB  0.006535948    0.0000000  0.032679739   0.96078431   0.00000000
+    ## SCL  0.000000000    0.0000000  1.000000000   0.00000000   0.00000000
+    ## SCD  0.000000000    0.0000000  0.990000000   0.00000000   0.01000000
+    ## WSL  0.000000000    0.0000000  0.007067138   0.00000000   0.99293286
+    ## BUR  0.000000000    0.0000000  0.340807175   0.00000000   0.00000000
+    ## SCS  0.000000000    0.0000000  0.976744186   0.00000000   0.02325581
+    ## NEU  0.000000000    0.0000000  1.000000000   0.00000000   0.00000000
+    ## UST  0.000000000    0.0000000  0.485714286   0.51428571   0.00000000
+    ## KON  0.000000000    0.0000000  0.962264151   0.00000000   0.03773585
+    ## FRI  0.008333333    0.0000000  0.400000000   0.59166667   0.00000000
+    ## BAR  0.000000000    0.0000000  1.000000000   0.00000000   0.00000000
+    ## BRU  0.000000000    0.0000000  0.258426966   0.71910112   0.00000000
+    ## LIM  0.000000000    0.0000000  0.796296296   0.18981481   0.00000000
+    ## HAN  0.000000000    0.0000000  0.369230769   0.00000000   0.63076923
+    ## GEN  0.000000000    0.0000000  0.100000000   0.90000000   0.00000000
+    ##     aest06_1.212 aest06_1.217
+    ## FRE    0.0000000   0.00000000
+    ## ALD    0.0000000   0.00000000
+    ## RIE    0.0000000   0.00000000
+    ## TRO    0.0000000   0.00000000
+    ## SCG    0.0000000   0.00000000
+    ## BOH    0.0000000   0.00000000
+    ## BOB    0.0000000   0.01864802
+    ## FRB    0.0000000   0.00000000
+    ## UEB    0.0000000   0.00000000
+    ## SCL    0.0000000   0.00000000
+    ## SCD    0.0000000   0.00000000
+    ## WSL    0.0000000   0.00000000
+    ## BUR    0.2556054   0.40358744
+    ## SCS    0.0000000   0.00000000
+    ## NEU    0.0000000   0.00000000
+    ## UST    0.0000000   0.00000000
+    ## KON    0.0000000   0.00000000
+    ## FRI    0.0000000   0.00000000
+    ## BAR    0.0000000   0.00000000
+    ## BRU    0.0000000   0.02247191
+    ## LIM    0.0000000   0.01388889
+    ## HAN    0.0000000   0.00000000
+    ## GEN    0.0000000   0.00000000
+
+``` r
 # The following two commands find the average allele frequencies per population
+setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
 (freq06 <- apply(aest06_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
 ```
 
@@ -816,9 +1109,65 @@ ggplot(df_06,aes(x=SamplingYear,y=`Allele frequencies`)) +
   theme_classic()
 ```
 
-![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/dapc-6.png)<!-- -->
+![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/dapc-5.png)<!-- -->
 
 ``` r
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+(freq24 <- apply(aest24_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
+```
+
+    ##     aest24_1.304 aest24_1.298 aest24_1.292 aest24_1.295 aest24_1.301
+    ## FRE  0.957943925  0.009345794  0.000000000   0.03271028   0.00000000
+    ## ALD  0.000000000  0.983870968  0.016129032   0.00000000   0.00000000
+    ## RIE  0.000000000  0.274193548  0.596774194   0.11290323   0.00000000
+    ## TRO  0.000000000  0.264705882  0.735294118   0.00000000   0.00000000
+    ## SCG  0.000000000  1.000000000  0.000000000   0.00000000   0.00000000
+    ## BOH  0.000000000  1.000000000  0.000000000   0.00000000   0.00000000
+    ## BOB  0.000000000  0.897435897  0.032634033   0.02097902   0.04895105
+    ## FRB  0.076923077  0.000000000  0.000000000   0.92307692   0.00000000
+    ## UEB  0.000000000  0.993464052  0.006535948   0.00000000   0.00000000
+    ## SCL  0.000000000  1.000000000  0.000000000   0.00000000   0.00000000
+    ## SCD  0.000000000  1.000000000  0.000000000   0.00000000   0.00000000
+    ## WSL  0.000000000  0.978798587  0.021201413   0.00000000   0.00000000
+    ## BUR  0.000000000  0.017937220  0.000000000   0.00000000   0.00000000
+    ## SCS  0.000000000  0.976744186  0.000000000   0.02325581   0.00000000
+    ## NEU  0.000000000  0.968750000  0.000000000   0.03125000   0.00000000
+    ## UST  0.000000000  0.942857143  0.000000000   0.00000000   0.00000000
+    ## KON  0.000000000  0.226415094  0.000000000   0.22169811   0.55188679
+    ## FRI  0.008333333  0.975000000  0.000000000   0.01666667   0.00000000
+    ## BAR  0.000000000  1.000000000  0.000000000   0.00000000   0.00000000
+    ## BRU  0.000000000  0.269662921  0.000000000   0.71910112   0.00000000
+    ## LIM  0.000000000  0.791666667  0.189814815   0.00462963   0.00000000
+    ## HAN  0.000000000  0.846153846  0.000000000   0.15384615   0.00000000
+    ## GEN  0.000000000  1.000000000  0.000000000   0.00000000   0.00000000
+    ##     aest24_1.313 aest24_1.319 aest24_1.322 aest24_1.310
+    ## FRE   0.00000000            0            0  0.000000000
+    ## ALD   0.00000000            0            0  0.000000000
+    ## RIE   0.01612903            0            0  0.000000000
+    ## TRO   0.00000000            0            0  0.000000000
+    ## SCG   0.00000000            0            0  0.000000000
+    ## BOH   0.00000000            0            0  0.000000000
+    ## BOB   0.00000000            0            0  0.000000000
+    ## FRB   0.00000000            0            0  0.000000000
+    ## UEB   0.00000000            0            0  0.000000000
+    ## SCL   0.00000000            0            0  0.000000000
+    ## SCD   0.00000000            0            0  0.000000000
+    ## WSL   0.00000000            0            0  0.000000000
+    ## BUR   0.97757848            0            0  0.004484305
+    ## SCS   0.00000000            0            0  0.000000000
+    ## NEU   0.00000000            0            0  0.000000000
+    ## UST   0.05714286            0            0  0.000000000
+    ## KON   0.00000000            0            0  0.000000000
+    ## FRI   0.00000000            0            0  0.000000000
+    ## BAR   0.00000000            0            0  0.000000000
+    ## BRU   0.01123596            0            0  0.000000000
+    ## LIM   0.01388889            0            0  0.000000000
+    ## HAN   0.00000000            0            0  0.000000000
+    ## GEN   0.00000000            0            0  0.000000000
+
+``` r
+# The following two commands find the average allele frequencies per population
+setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
 (freq24 <- apply(aest24_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
 ```
 
@@ -865,9 +1214,65 @@ ggplot(df_24,aes(x=SamplingYear,y=`Allele frequencies`)) +
   theme_classic()
 ```
 
-![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/dapc-7.png)<!-- -->
+![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/dapc-6.png)<!-- -->
 
 ``` r
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+(freq10 <- apply(aest10_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
+```
+
+    ##     aest10_1.294 aest10_1.295 aest10_1.290 aest10_1.280 aest10_1.288
+    ## FRE   0.95794393   0.03271028  0.000000000  0.009345794  0.000000000
+    ## ALD   0.00000000   0.88709677  0.064516129  0.048387097  0.000000000
+    ## RIE   0.00000000   0.20967742  0.548387097  0.241935484  0.000000000
+    ## TRO   0.00000000   0.02941176  0.000000000  0.970588235  0.000000000
+    ## SCG   0.00000000   0.00000000  1.000000000  0.000000000  0.000000000
+    ## BOH   0.00000000   0.32500000  0.000000000  0.675000000  0.000000000
+    ## BOB   0.00000000   0.07692308  0.000000000  0.920745921  0.002331002
+    ## FRB   0.46153846   0.53846154  0.000000000  0.000000000  0.000000000
+    ## UEB   0.00000000   0.73856209  0.000000000  0.078431373  0.183006536
+    ## SCL   0.00000000   0.03030303  0.969696970  0.000000000  0.000000000
+    ## SCD   0.00000000   0.68000000  0.320000000  0.000000000  0.000000000
+    ## WSL   0.00000000   0.99293286  0.007067138  0.000000000  0.000000000
+    ## BUR   0.00000000   0.01345291  0.008968610  0.000000000  0.000000000
+    ## SCS   0.00000000   0.02325581  0.976744186  0.000000000  0.000000000
+    ## NEU   0.00000000   0.00000000  0.062500000  0.937500000  0.000000000
+    ## UST   0.00000000   0.51428571  0.257142857  0.228571429  0.000000000
+    ## KON   0.00000000   0.00000000  0.853773585  0.146226415  0.000000000
+    ## FRI   0.01666667   0.85833333  0.008333333  0.116666667  0.000000000
+    ## BAR   0.00000000   1.00000000  0.000000000  0.000000000  0.000000000
+    ## BRU   0.71910112   0.03370787  0.213483146  0.011235955  0.000000000
+    ## LIM   0.00462963   0.29629630  0.013888889  0.671296296  0.000000000
+    ## HAN   0.00000000   0.18461538  0.015384615  0.800000000  0.000000000
+    ## GEN   0.00000000   0.00000000  1.000000000  0.000000000  0.000000000
+    ##     aest10_1.299 aest10_1.285 aest10_1.309
+    ## FRE    0.0000000            0   0.00000000
+    ## ALD    0.0000000            0   0.00000000
+    ## RIE    0.0000000            0   0.00000000
+    ## TRO    0.0000000            0   0.00000000
+    ## SCG    0.0000000            0   0.00000000
+    ## BOH    0.0000000            0   0.00000000
+    ## BOB    0.0000000            0   0.00000000
+    ## FRB    0.0000000            0   0.00000000
+    ## UEB    0.0000000            0   0.00000000
+    ## SCL    0.0000000            0   0.00000000
+    ## SCD    0.0000000            0   0.00000000
+    ## WSL    0.0000000            0   0.00000000
+    ## BUR    0.9775785            0   0.00000000
+    ## SCS    0.0000000            0   0.00000000
+    ## NEU    0.0000000            0   0.00000000
+    ## UST    0.0000000            0   0.00000000
+    ## KON    0.0000000            0   0.00000000
+    ## FRI    0.0000000            0   0.00000000
+    ## BAR    0.0000000            0   0.00000000
+    ## BRU    0.0000000            0   0.02247191
+    ## LIM    0.0000000            0   0.01388889
+    ## HAN    0.0000000            0   0.00000000
+    ## GEN    0.0000000            0   0.00000000
+
+``` r
+# The following two commands find the average allele frequencies per population
+setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
 (freq10 <- apply(aest10_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
 ```
 
@@ -909,7 +1314,7 @@ dapc.allMarkers <- dapc(myData_genind_allMarkersOnly, var.contrib = TRUE, scale 
 scatter(dapc.allMarkers, cell = 0, pch = 18:23, cstar = 0, mstree = TRUE, lwd = 2, lty = 2)
 ```
 
-![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/dapc-8.png)<!-- -->
+![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/dapc-7.png)<!-- -->
 
 ``` r
 set.seed(4)
@@ -917,7 +1322,7 @@ setPop(myData_genind_allMarkersOnly) <- ~TruffleYear
 contrib <- loadingplot(dapc.allMarkers$var.contr, axis = 2, thres = 0.07, lab.jitter = 1, threshold=0.05)
 ```
 
-![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/dapc-9.png)<!-- -->
+![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/dapc-8.png)<!-- -->
 
 ``` r
 #not really a difference
@@ -999,4 +1404,8 @@ plot(Dgeo, Dgen)
 #abline(lm(Dgen~log(Dgeo)), col="red",lty=2)
 
 #Hmm... das sieht nicht so befriedigend aus wie im Genalex...
+```
+
+``` r
+# aus https://bookdown.org/hhwagner1/LandGenCourse_book/WE_5.html
 ```
