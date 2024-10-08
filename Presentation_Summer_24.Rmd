@@ -1645,10 +1645,15 @@ x.pops_allMarkersOnly <- tab(myData_genind_allMarkersOnly,
                              freq=TRUE, NA.method="mean")
 #x.pops_allMarkersOnly[grep("FRE", rownames(x.pops_allMarkersOnly)), ]
 
-pca.pops.allMarkersOnly <- dudi.pca(df = x.pops_allMarkersOnly,
+pca.pops.allMarkersOnly_2 <- dudi.pca(df = x.pops_allMarkersOnly,
                                     center = TRUE, scale = FALSE, scannf = FALSE, nf = 2)
 
-s.class(pca.pops.allMarkersOnly$li, fac=pop(myData_genind_allMarkersOnly),
+pca.pops.allMarkersOnly_3 <- dudi.pca(df = x.pops_allMarkersOnly,
+                                    center = TRUE, scale = FALSE, scannf = FALSE, nf = 3)
+par(mfrow=c(2,1))
+s.class(pca.pops.allMarkersOnly_2$li, fac=pop(myData_genind_allMarkersOnly),
+        col=funky(15))
+s.class(pca.pops.allMarkersOnly_3$li, fac=pop(myData_genind_allMarkersOnly),
         col=funky(15))
 
 #emf(file="pca.allMarkersOnly.emf")

@@ -13,6 +13,40 @@ knitr::opts_chunk$set(
 )
 ```
 
+```{r Tabellen laden, message=FALSE, warning=FALSE, include=FALSE}
+library(readxl)
+library(knitr)
+library(tidyverse)
+library(ggplot2)
+theme_set(theme_bw())
+library(envalysis)
+library(forcats)
+library(poppr)
+library(treemap)
+library(pegas)
+library(adegenet)
+library(devtools)
+library(hierfstat)
+library(mmod)
+library(diveRsity)
+library(vegan)
+library(writexl)
+library(devEMF)
+T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_Mai2024.xlsx")
+myData <- read.genalex("Daten_Genalex.csv",genclone=TRUE, ploidy=1)
+myData_genind <- read.genalex("Daten_Genalex.csv",genclone=FALSE, ploidy=1)
+myData_genind_allMarkersOnly <- myData_genind %>%
+  missingno("geno", cutoff = 0)
+splitStrata(myData) <- ~Pop/Month/SamplingYear/TruffleYear
+splitStrata(myData_genind) <- ~Pop/Month/SamplingYear/TruffleYear
+splitStrata(myData_genind_allMarkersOnly) <- ~Pop/Month/SamplingYear/TruffleYear
+cc_myData_genind_allMarkersOnly_SY <- clonecorrect(myData_genind_allMarkersOnly,
+                                                   strata=~Pop/SamplingYear)
+cc_myData_genind_allMarkersOnly_TY <- clonecorrect(myData_genind_allMarkersOnly,
+                                                   strata=~Pop/TruffleYear)
+order_sites_WtoE <- factor(c("BUR","GEN","NEU","SCS","KON","FRB","FRE","FRI","SCD","SCG","SCL","WSL","LIM","BRU","RIE","TRO","ALD","UST","BAR","UEB","BOB","BOH","HAN"))
+```
+
 ## PCA
 from https://www.molecularecologist.com/2015/07/30/pca-of-multilocus-genotypes-in-r/
 
@@ -49,3 +83,78 @@ legend(p$xyz.convert(-80, 20, -10), col= c("red","blue","maroon","green"), bg="w
   legend = c("WSL", "BUR", "BRU", "SCG"), cex = 1.1)
 ```
 
+## 3. PCA
+
+```{r pca, echo=TRUE}
+#uncorrected PCA with allMarkersOnly dataset
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+x.pops_allMarkersOnly <- tab(myData_genind_allMarkersOnly,
+                             freq=TRUE, NA.method="mean")
+
+pca.pops.allMarkersOnly <- dudi.pca(x.pops_allMarkersOnly,center=TRUE,scale=FALSE, nf=3, scannf=FALSE)
+s.label(pca.pops.allMarkersOnly$li)
+#looking at first two axes:
+s.class(pca.pops.allMarkersOnly$li,fac=pop(myData_genind_allMarkersOnly),col=transp(funky(15),0.6),axesel=FALSE,cstar=0,cpoint=3)
+add.scatter.eig(pca.pops.allMarkersOnly$eig[1:50],3,1,2, ratio=.17)
+#looking at 2 and 3 axis:
+s.class(pca.pops.allMarkersOnly$li, fac=pop(myData_genind_allMarkersOnly),
+xax=2, yax=3, col=transp(funky(15),.6),
+axesel=FALSE, cstar=0, cpoint=3)
+add.scatter.eig(pca.pops.allMarkersOnly$eig[1:50],3,2,3, ratio=.2)
+
+
+#emf(file="pca.allMarkersOnly.emf")
+#s.class(pca.pops.allMarkersOnly$li, fac=pop(myData_genind_allMarkersOnly),
+ #       col=funky(15))
+#dev.off()
+
+#clonecorrected PCA  with samplingYear
+setPop(cc_myData_genind_allMarkersOnly_SY) <- ~Pop
+x.pops_cc.SY <- tab(cc_myData_genind_allMarkersOnly_SY,
+                    freq=TRUE, NA.method="mean")
+pca.pops_cc.SY <- dudi.pca(df = x.pops_cc.SY,
+                           center = TRUE, scale = FALSE, scannf = FALSE, nf = 3)
+#looking at first two axes:
+s.class(pca.pops_cc.SY$li,
+        fac=pop(cc_myData_genind_allMarkersOnly_SY),
+        col=transp(funky(15),0.6),axesel=FALSE,cstar=0,cpoint=3)
+add.scatter.eig(pca.pops_cc.SY$eig[1:50],3,1,2, ratio=.17)
+
+#looking at 2 and 3 axis:
+s.class(pca.pops_cc.SY$li, fac=pop(cc_myData_genind_allMarkersOnly_SY),
+xax=2, yax=3, col=transp(funky(15),.6),
+axesel=FALSE, cstar=0, cpoint=3)
+add.scatter.eig(pca.pops_cc.SY$eig[1:50],3,2,3, ratio=.2)
+
+#emf(file="pca.cc.allMarkersOnly_SY.emf")
+#s.class(pca.pops_cc.SY$li,
+#        fac=pop(cc_myData_genind_allMarkersOnly_SY),
+#        col=funky(15))
+#dev.off()
+
+#clonecorrected PCA  with TruffleYear
+setPop(cc_myData_genind_allMarkersOnly_TY) <- ~Pop
+x.pops_cc.TY <- tab(cc_myData_genind_allMarkersOnly_TY,
+                    freq=TRUE, NA.method="mean")
+pca.pops_cc.TY <- dudi.pca(df = x.pops_cc.TY,
+                           center = TRUE, scale = FALSE, scannf = FALSE, nf = 3)
+#looking at first two axes:
+s.class(pca.pops_cc.TY$li,
+        fac=pop(cc_myData_genind_allMarkersOnly_TY),
+        col=transp(funky(15),0.6),axesel=FALSE,cstar=0,cpoint=3)
+add.scatter.eig(pca.pops_cc.TY$eig[1:50],3,1,2, ratio=.17)
+
+#looking at 2 and 3 axis:
+s.class(pca.pops_cc.TY$li, fac=pop(cc_myData_genind_allMarkersOnly_TY),
+xax=2, yax=3, col=transp(funky(15),.6),
+axesel=FALSE, cstar=0, cpoint=3)
+add.scatter.eig(pca.pops_cc.TY$eig[1:50],3,2,3, ratio=.2)
+
+#emf(file="pca.cc.allMarkersOnly_TY.emf")
+#s.class(pca.pops_cc.TY_2$li,
+#        fac=pop(cc_myData_genind_allMarkersOnly_TY),
+#        col=funky(15))
+#dev.off()
+
+#plot(pca.pops_cc.TY$li, col=
+```
