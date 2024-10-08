@@ -52,6 +52,8 @@ T_all_withMLGs_allMarkersOnly <- inner_join(T_all,cc_FullTable_Tuaest_allMarkers
 T_all_withMLGs_withClusters_allMarkersOnly <- left_join(T_all_withMLGs_allMarkersOnly,clusters,by=c("MLG"="MLG_ID")) %>% select(-"IndID2") %>% distinct(.)
 
 #write.csv(T_all_withMLGs_withClusters_allMarkersOnly,file="T_all_withMLGs_withClusters_allMarkersOnly.csv", sep=";")
+myData_genind_withClusters <- read.genalex("DatenGenalex_withMLGs_withClusters_allMarkersOnly.csv",genclone=FALSE,ploidy=1)
+splitStrata(myData_genind_withClusters) <- ~Pop/Month/SamplingYear/TruffleYear/cluster
 ```
 
 ```{r how many clusters}
@@ -125,3 +127,11 @@ ggplot(myDataclusters_long, aes(factor(ind), prob, fill = factor(cluster))) +
 
 compoplot(myData_dapc1, col = funky, xlab = "individuals")
 ````
+
+```{r FST with clusters}
+setPop(myData_genind_withClusters) <- ~cluster
+(truffleClusters.matFst <- mat_pw_fst(myData_genind_withClusters))
+
+boxplot(truffleClusters.matFst, col=funky(nPop(myData_genind_withClusters)), las=3,
+xlab="Cluster", ylab="Fst")
+```

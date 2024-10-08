@@ -59,6 +59,14 @@ cc_myData_genind_allMarkersOnly_SY <- clonecorrect(myData_genind_allMarkersOnly,
                                                    strata=~Pop/SamplingYear)
 cc_myData_genind_allMarkersOnly_TY <- clonecorrect(myData_genind_allMarkersOnly,
                                                    strata=~Pop/TruffleYear)
+
+#based on the PCA, we remove BUR, FRB and FRE for some of the analyses and check the stats again
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+myData_genind_aMO_noOutliers <- popsub(myData_genind_allMarkersOnly,exclude=c("BUR","FRB","FRE"))
+cc_myData_genind_aMO_noOutliers <- popsub(cc_myData_genind_allMarkersOnly_SY,exclude=c("BUR","FRB","FRE"))
+
+myData_genind_withClusters <- read.genalex("DatenGenalex_withMLGs_withClusters_allMarkersOnly.csv",genclone=FALSE,ploidy=1)
+splitStrata(myData_genind_withClusters) <- ~Pop/Month/SamplingYear/TruffleYear/cluster
 ```
 
 # Hardy-Weinberg equilibrium
@@ -98,7 +106,6 @@ title("Rarecurve of Month")
 
 setPop(myData_genind_allMarkersOnly) <- ~Pop
 myData_genind_allMarkersOnly_above5N <- selPopSize(myData_genind_allMarkersOnly,pop=NULL,nMin=5)
-#summary(myData_genind_allMarkersOnly_above40N)
 poppr(myData_genind_allMarkersOnly_above5N)
 H.year <- mlg.table(myData_genind_allMarkersOnly_above5N, plot = FALSE)
 rarecurve(H.year, ylab="Number of expected MLGs", sample=min(rowSums(H.year)),
@@ -108,7 +115,6 @@ title("Rarecurve of Pop")
 #rescale to see anything except for BOB
 setPop(myData_genind_allMarkersOnly) <- ~Pop
 myData_genind_allMarkersOnly_above5N_withoutBOB <- popsub(myData_genind_allMarkersOnly_above5N,exclude="BOB")
-#summary(myData_genind_allMarkersOnly_above40N)
 poppr(myData_genind_allMarkersOnly_above5N_withoutBOB)
 H.year_withoutBOB <- mlg.table(myData_genind_allMarkersOnly_above5N_withoutBOB, plot = FALSE)
 rarecurve(H.year_withoutBOB, ylab="Number of expected MLGs", sample=min(rowSums(H.year_withoutBOB)),
@@ -116,6 +122,53 @@ font = 2, cex = 1, col = "blue")
 title("Rarecurve of Pop")
 
 #Genotypic richness rises, the later the ascocarps were collected --> more different individuals produced fruiting bodies
+```
+# Population structure using Fst
+
+```{r Fst values}
+truffles.matFst <- mat_pw_fst(myData_genind_allMarkersOnly)
+truffles.matFst
+truffles.tree <- nj(truffles.matFst)
+plot(truffles.tree, type="unr", tip.col=funky(nPop(myData_genind_allMarkersOnly)), font=2)
+annot <- round(truffles.tree$edge.length,2)
+edgelabels(annot[annot>0], which(annot>0), frame="n")
+add.scale.bar()
+
+table.paint(truffles.matFst,col.labels=1:23)
+
+boxplot(truffles.matFst, col=funky(nPop(myData_genind_allMarkersOnly)), las=3,
+xlab="Population", ylab="Fst")
+
+
+#repeat without excluded populations
+truffles.matFst_noOutliers <- mat_pw_fst(myData_genind_aMO_noOutliers)
+truffles.tree_noOutliers <- nj(truffles.matFst_noOutliers)
+plot(truffles.tree_noOutliers, type="unr", tip.col=funky(nPop(myData_genind_aMO_noOutliers)), font=2)
+annot <- round(truffles.tree_noOutliers$edge.length,2)
+edgelabels(annot[annot>0], which(annot>0), frame="n")
+add.scale.bar()
+
+table.paint(truffles.matFst_noOutliers,col.labels=1:23)
+
+boxplot(truffles.matFst_noOutliers, col=funky(nPop(myData_genind_aMO_noOutliers)), las=3,
+xlab="Population", ylab="Fst")
+```
+# Population structure using Gst
+
+```{r GST Hedrick}
+kable(Gst_Hedrick(myData_genind_allMarkersOnly))
+#very high differentiation for all loci!
+
+# test the same without the excluded populations
+kable(Gst_Hedrick(myData_genind_aMO_noOutliers))
+#still quite high differentiation
+
+
+```
+
+```{r locus summary}
+kable(locus_table(myData_genind_allMarkersOnly))
+kable(locus_table(myData_genind_aMO_noOutliers))
 ```
 
 #Genotypic diversity
@@ -131,16 +184,29 @@ lambda <- allMarkersOnly_diversity$lambda # Simpson's index
 lambda_corr <- (N/(N - 1)) * lambda              # Corrected Simpson's index
 allMarkersOnly_diversity$lambda_corr <- lambda_corr
 allMarkersOnly_diversity
+
+setPop(myData_genind_aMO_noOutliers) <- ~Pop
+allMarkersOnly_noOutliers_diversity <- poppr(myData_genind_aMO_noOutliers)
+N      <- allMarkersOnly_noOutliers_diversity$N      # number of samples
+lambda <- allMarkersOnly_noOutliers_diversity$lambda # Simpson's index
+lambda_corr <- (N/(N - 1)) * lambda              # Corrected Simpson's index
+allMarkersOnly_noOutliers_diversity$lambda_corr <- lambda_corr
+allMarkersOnly_noOutliers_diversity
+```
+
+```{r diversity auf level cluster}
+setPop(myData_genind_withClusters) <- ~cluster
+poppr(myData_genind_withClusters)
 ```
 
 #Genotypic evenness
 Evenness is a measure of the distribution of genotype abundances, wherein a population with equally abundant genotypes yields a value equal to 1 and a population dominated by a single genotype is closer to zero --> Value E.5
 ```{r evenness}
-allMarkersTable <- mlg.table(myData_genind_allMarkersOnly)
+(allMarkersTable <- mlg.table(myData_genind_allMarkersOnly))
 ```
 
 # Genetic distance
-One common way to visualize a genetic distance is with a dendrogram. For this example, we will use the microbov data set (Laloe et al., 2007). This contains information on 704 cattle from both Africa and France over several different breeds. We can create a dendrogram over all 704 samples, but that would be difficult to visualize. For our purposes, let’s take ten random samples and calculate Provesti’s distance, which will return the fraction of the number of differences between samples:
+One common way to visualize a genetic distance is with a dendrogram. For this example, we will use the microbov data set (Laloe et al., 2001). This contains information on 704 cattle from both Africa and France over several different breeds. We can create a dendrogram over all 704 samples, but that would be difficult to visualize. For our purposes, let’s take ten random samples and calculate Provesti’s distance, which will return the fraction of the number of differences between samples:
 
 ```{r genetic distance}
 setPop(myData_genind_allMarkersOnly) <- ~Pop/SamplingYear
@@ -230,13 +296,26 @@ table(strata(myData_genclone_allMarkersOnly, ~Pop/Month, combine = FALSE))  # Su
 
 #In panmictic populations, we would expect to see most of the variance arise from within samples. If we see that the most of the variance occurs among samples within populations or among populations, then there is evidence that we have some sort of population structure. In the case of clonal organisms, this would help support a hypothesis of clonal reproduction.
 allMarkers_amova <- poppr.amova(myData_genclone_allMarkersOnly, ~Pop)
-allMarkers_amovacc <- poppr.amova(myData_genclone_allMarkersOnly, ~Pop, clonecorrect = TRUE)
-allMarkers_amovaCC <- poppr.amova(cc_myData_genind_allMarkersOnly_TY, ~Pop)
 allMarkers_amova
+allMarkers_amovacc <- poppr.amova(myData_genclone_allMarkersOnly, ~Pop, clonecorrect = TRUE)
 allMarkers_amovacc
+allMarkers_amovaCC <- poppr.amova(cc_myData_genind_allMarkersOnly_TY, ~Pop)
 allMarkers_amovaCC
+allMarkers_cluster_amova <- poppr.amova(myData_genind_withClusters, ~cluster)
+allMarkers_cluster_amova
 
 #Keines davon ergibt das gleiche Resultat wie im Genalex --> Check datasets!
+
+#Ich schaue noch die AMOVAS an ohne BUR, FRB und FRE
+myData_genclone_aMO_noOutliers <- as.genclone(myData_genind_aMO_noOutliers)
+table(strata(myData_genclone_aMO_noOutliers, ~Pop/Month, combine = FALSE))  # Subpopulations
+cc_myData_genclone_aMO_noOutliers <- as.genclone(cc_myData_genind_aMO_noOutliers)
+table(strata(cc_myData_genclone_aMO_noOutliers, ~Pop/Month, combine = FALSE))  # Subpopulations
+
+allMarkers_noOutliers_amova <- poppr.amova(myData_genclone_aMO_noOutliers, ~Pop)
+allMarkers_noOutliers_amova
+allMarkers_amovacc_noOutliers <- poppr.amova(myData_genclone_aMO_noOutliers, ~Pop, clonecorrect = TRUE)
+allMarkers_amovacc_noOutliers
 
 #significance testing
 set.seed(1999)
@@ -244,76 +323,58 @@ allMarkers_signif   <- randtest(allMarkers_amova, nrepet = 999)
 plot(allMarkers_signif)
 allMarkers_ccsignif <- randtest(allMarkers_amovacc, nrepet = 999)
 plot(allMarkers_ccsignif)
-
 ```
 
-# DAPC
-DAPC was pioneered by Jombart and colleagues (Jombart et al., 2010) and can be used to infer the number of clusters of genetically related individuals. In this multivariate statistical approach variance in the sample is partitioned into a between-group and within- group component, in an effort to maximize discrimination between groups. In DAPC, data is first transformed using a principal components analysis (PCA) and subsequently clusters are identified using discriminant analysis (DA). This tutorial is based on the vignette written by Thibaut Jombart. We encourage the user to explore this vignette further. The vignette can also be opened within R by executing adegenetTutorial("dapc")
+# Alleles contributing to differentiation of BUR,FRB and FRE
 
-```{r dapc}
-setPop(myData_genind_allMarkersOnly) <- ~Pop
-dapc.allMarkers <- dapc(myData_genind_allMarkersOnly, var.contrib = TRUE, scale = FALSE, n.pca = 30, n.da = nPop(myData_genind_allMarkersOnly) - 1)
-scatter(dapc.allMarkers, cell = 0, pch = 18:23, cstar = 0, mstree = TRUE, lwd = 2, lty = 2)
-
-#BUR, FRB and FRE are separated from the cluster by their second axis (y) --> genetically distinct
-
-#setPop(myData_genind_allMarkersOnly) <- ~Month
-#dapc.allMarkers <- dapc(myData_genind_allMarkersOnly, var.contrib = TRUE, scale = FALSE, n.pca = 30, n.da = nPop(myData_genind_allMarkersOnly) - 1)
-#scatter(dapc.allMarkers, cell = 0, pch = 18:23, cstar = 0, mstree = TRUE, lwd = 2, lty = 2)
-
+```{r find private alleles}
 #assess if there is alleles in BUR, FRB and FRE that distinguishes them
 set.seed(4)
 setPop(myData_genind_allMarkersOnly) <- ~Pop
-contrib <- loadingplot(dapc.allMarkers$var.contr, axis = 2, thres = 0.07, lab.jitter = 1, threshold=0.05)
+dapc.allMarkers <- dapc(myData_genind_allMarkersOnly, var.contrib = TRUE, scale = FALSE, n.pca = 30, n.da = nPop(myData_genind_allMarkersOnly) - 1)
+contrib <- loadingplot(dapc.allMarkers$var.contr, axis = 2, thres = 0.01, lab.jitter = 1, threshold=0.05)
 
 temp    <- seploc(myData_genind_allMarkersOnly)       # seploc {adegenet} creates a list of individual loci.
-aest07_1  <- tab(temp[["aest07_1"]]) # tab {adegenet} returns a matrix of genotypes
-aest01_1  <- tab(temp[["aest01_1"]])
 aest29_1  <- tab(temp[["aest29_1"]])
-
-# The following two commands find the average allele frequencies per population
-setPop(myData_genind_allMarkersOnly) <- ~Pop
-(freq07 <- apply(aest07_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
-#This allele 266 only appears in the three populations that are further discriminated on the second axis in the dapc
-
-setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
-(freq07 <- apply(aest07_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
-
-df_07 <- melt(freq07)
-names(df_07)[1] <- "SamplingYear"
-names(df_07)[2] <- "Allele"
-names(df_07)[3] <- "Allele frequencies"
-
-ggplot(df_07,aes(x=SamplingYear,y=`Allele frequencies`)) +
-  geom_line(aes(color=Allele)) +
-  labs(x="SamplingYear", y="Allele frequency", title="Allele frequencies of aest07 over the years") +
-  theme_classic()
-
-setPop(myData_genind_allMarkersOnly) <- ~Pop
-(freq01 <- apply(aest01_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
-# The allele 254 appears in many of the populations, also in Zurich regions, FRE, BOB, FRI, KON and BRU
-setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
-(freq01 <- apply(aest01_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
-
-
-setPop(myData_genind_allMarkersOnly) <- ~Pop
-(freq29 <- apply(aest29_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
-# the allele 204 appears only in FRE, FRB, NEU and FRI
-setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
-(freq29 <- apply(aest29_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
-
-#When did the alleles appear?
-#setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
-#dapc.allMarkers <- dapc(myData_genind_allMarkersOnly, var.contrib = TRUE, scale = FALSE, n.pca = 30, n.da = nPop(myData_genind_allMarkersOnly) - 1)
-#scatter(dapc.allMarkers, cell = 0, pch = 18:23, cstar = 0, mstree = TRUE, lwd = 2, lty = 2)
-
-set.seed(4)
-setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
-contrib <- loadingplot(dapc.allMarkers$var.contr, axis = 2, thres = 0.07, lab.jitter = 1, threshold=0.05)
-
 aest06_1  <- tab(temp[["aest06_1"]]) #allele 217
 aest24_1  <- tab(temp[["aest24_1"]]) #allele 295 & 301
 aest10_1  <- tab(temp[["aest10_1"]]) #allele 280
+aest28_1  <- tab(temp[["aest28_1"]])
+aest36_1  <- tab(temp[["aest36_1"]])
+
+# The following two commands find the average allele frequencies per population
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+(freq29 <- apply(aest29_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
+
+setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
+(freq29 <- apply(aest29_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
+
+df_29 <- melt(freq29)
+names(df_29)[1] <- "SamplingYear"
+names(df_29)[2] <- "Allele"
+names(df_29)[3] <- "Allele frequencies"
+
+ggplot(df_29,aes(x=SamplingYear,y=`Allele frequencies`)) +
+  geom_line(aes(color=Allele)) +
+  labs(x="SamplingYear", y="Allele frequency", title="Allele frequencies of aest29 over the years") +
+  theme_classic()
+
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+(freq36 <- apply(aest36_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
+
+setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
+(freq36 <- apply(aest36_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
+
+df_36 <- melt(freq36)
+names(df_36)[1] <- "SamplingYear"
+names(df_36)[2] <- "Allele"
+names(df_36)[3] <- "Allele frequencies"
+
+ggplot(df_36,aes(x=SamplingYear,y=`Allele frequencies`)) +
+  geom_line(aes(color=Allele)) +
+  labs(x="SamplingYear", y="Allele frequency", title="Allele frequencies of aest36 over the years") +
+  theme_classic()
+
 
 setPop(myData_genind_allMarkersOnly) <- ~Pop
 (freq06 <- apply(aest06_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
@@ -357,19 +418,38 @@ setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
 (freq10 <- apply(aest10_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
 # the allele 280 was always present, peaking in 2017.
 
-#The same with TruffleYear
-setPop(myData_genind_allMarkersOnly) <- ~TruffleYear
-dapc.allMarkers <- dapc(myData_genind_allMarkersOnly, var.contrib = TRUE, scale = FALSE, n.pca = 30, n.da = nPop(myData_genind_allMarkersOnly) - 1)
-scatter(dapc.allMarkers, cell = 0, pch = 18:23, cstar = 0, mstree = TRUE, lwd = 2, lty = 2)
+df_10 <- melt(freq10)
+names(df_10)[1] <- "SamplingYear"
+names(df_10)[2] <- "Allele"
+names(df_10)[3] <- "Allele frequencies"
 
-set.seed(4)
-setPop(myData_genind_allMarkersOnly) <- ~TruffleYear
-contrib <- loadingplot(dapc.allMarkers$var.contr, axis = 2, thres = 0.07, lab.jitter = 1, threshold=0.05)
-#not really a difference
+ggplot(df_10,aes(x=SamplingYear,y=`Allele frequencies`)) +
+  geom_line(aes(color=Allele)) +
+  labs(x="SamplingYear", y="Allele frequency", title="Allele frequencies of aest10 over the years") +
+  theme_classic()
+
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+(freq28 <- apply(aest28_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
+# The following two commands find the average allele frequencies per population
+setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
+(freq28 <- apply(aest28_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
+# the allele 280 was always present, peaking in 2017.
+
+df_28 <- melt(freq28)
+names(df_28)[1] <- "SamplingYear"
+names(df_28)[2] <- "Allele"
+names(df_28)[3] <- "Allele frequencies"
+
+ggplot(df_28,aes(x=SamplingYear,y=`Allele frequencies`)) +
+  geom_line(aes(color=Allele)) +
+  labs(x="SamplingYear", y="Allele frequency", title="Allele frequencies of aest28 over the years") +
+  theme_classic()
+
+
 ```
 
 #Isolation by distance (Mantel test)
-```{r isolation by distance}
+```{r isolation by distance, eval=FALSE, include=FALSE}
 #https://cran.r-project.org/web/packages/graph4lg/vignettes/input_data_processing_1.html
 dist_allMarkersOnly <- mat_gen_dist(myData_genind_allMarkersOnly,dist="basic")
 coord_dist <- data.frame(coord$Site_1_abrev,coord$LAT,coord$LON)
@@ -383,6 +463,7 @@ mat_geo <- mat_geo_dist(coord_dist, ID="ID",x="X",y="Y", crds_type="polar")
 setPop(myData_genind_allMarkersOnly) <- ~Pop
 myData_genind_allMarkersOnly@other$xy <- coord_dist[,2:3]
 myData_genpop_allMarkersOnly2 <- genind2genpop(myData_genind_allMarkersOnly)
+myData_genpop_allMarkersOnly2
 Dgen <- dist.genpop(myData_genpop_allMarkersOnly2,method=2)
 Dgeo <- dist(myData_genpop_allMarkersOnly2@other$xy)
 ibd <- mantel.randtest(Dgen,Dgeo)
@@ -392,7 +473,28 @@ plot(Dgeo, Dgen)
 #abline(lm(Dgen~log(Dgeo)), col="red",lty=2)
 
 #Hmm... das sieht nicht so befriedigend aus wie im Genalex...
-````
+
+#noch ein Versuch mit dem neuen Dataset
+
+dist_allMarkersOnly_noOutliers <- mat_gen_dist(myData_genind_aMO_noOutliers,dist="basic")
+coord_dist_noOutliers <- coord_dist %>%
+  filter(.,ID != "BUR") %>%
+  filter(.,ID != "FRB") %>%
+  filter(.,ID != "FRE")
+
+setPop(myData_genind_aMO_noOutliers) <- ~Pop
+myData_genind_aMO_noOutliers@other$xy <- coord_dist_noOutliers[,2:3]
+myData_genpop_aMO_noOutliers <- genind2genpop(myData_genind_aMO_noOutliers)
+Dgen_noOutliers <- dist.genpop(myData_genpop_aMO_noOutliers,method=2)
+Dgen_noOutliers <- as.vector(Dgen_noOutliers$propShared.PopGenReport)
+Dgeo_noOutliers <- dist(myData_genpop_aMO_noOutliers@other$xy)
+ibd_noOutliers <- mantel.randtest(Dgen_noOutliers,Dgeo_noOutliers)
+ibd
+plot(ibd)
+plot(log(Dgeo_noOutliers), Dgen_noOutliers)
+abline(lm(Dgen_noOutliers~Dgeo_noOutliers), col="red")
+
+```
 
 ```{r isolation by distance V2}
 # aus https://bookdown.org/hhwagner1/LandGenCourse_book/WE_5.html
