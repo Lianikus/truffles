@@ -75,6 +75,22 @@ ggplot(T_all_withMLGs_withClusters_allMarkersOnly, aes(x=Sampling_date, y= fct_r
   labs(title = "Overview of samples in truffle monitoring dataset", y = "Sampling site abbreviation", x ="Sampling date", colour="Genetic cluster")
 ```
 
+```{r how many per cluster}
+setPop(myData_genind_withClusters) <- ~cluster
+myData_genind_allMarkersOnly_withoutCluster3_SY <- popsub(myData_genind_withClusters,sublist=c("1","2","4","5","6"))
+poppr(myData_genind_allMarkersOnly_withoutCluster3_SY)
+setPop(myData_genind_allMarkersOnly_withoutCluster3_SY) <- ~Pop/SamplingYear
+n_samples_allMarkersOnly_withoutCluster3_SY <- poppr(myData_genind_allMarkersOnly_withoutCluster3_SY) %>%
+  separate(Pop, sep="_", into=c("Pop","SamplingYear"))
+
+n_samples_allMarkersOnly_withoutCluster3_SY %>%
+  select(Pop,SamplingYear,N) %>%
+  pivot_wider(names_from=SamplingYear, values_from=N) %>%
+  select(.,-"NA") %>%
+  replace(is.na(.),0) %>%
+  kable()
+```
+
 ```{r k-means clusters}
 grp <- find.clusters(myData_genind_allMarkersOnly, n.pca=3)
 # 1 PC axis retained and 6 clusters

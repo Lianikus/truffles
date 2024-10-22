@@ -1,0 +1,56 @@
+---
+title: "Pie Charts"
+author: "Lia Baumann"
+date: "2024-10-22"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r Tabellen laden, message=FALSE, warning=FALSE, include=FALSE}
+library(readxl)
+library(knitr)
+library(tidyverse)
+library(ggplot2)
+theme_set(theme_bw())
+library(envalysis)
+library(forcats)
+library(poppr)
+library(treemap)
+library(pegas)
+library(adegenet)
+library(devtools)
+library(hierfstat)
+library(mmod)
+library(diveRsity)
+library(vegan)
+library(writexl)
+library(devEMF)
+library(PopGenHelpR)
+
+T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_Mai2024.xlsx")
+T_all <- separate_wider_delim(T_all,Code_Analyses2, delim="_", names = c("Code","Yr"))
+Structure_ClusterAssignMLGs <- read_excel("Structure_ClusterAssignMLGs.xlsx")
+
+anc.mat <- data.frame(Structure_ClusterAssignMLGs) %>%
+  select(12,"Pop",5:10)
+colnames(anc.mat) <-c("Sample","Pop","1","2","3","4","5","6")
+pops <- data.frame(inner_join(T_all,coord,by="Site_1_abrev")) %>%
+  select(Code,Site_1_abrev,LON,LAT)
+colnames(pops) <- c("Sample","Pop","Long","Lat")
+```
+
+```{r calculate Piechart}
+Piechart <- Piechart_map(
+  anc.mat=anc.mat,
+  pops=pops,
+  K=6,
+  plot.type="all",
+  col = c("#d73027", "#fc8d59", "#e0f3f8", "#91bfdb", "#4575b4", "#000000"),
+  piesize = 0.35,
+  Lat_buffer=1,
+  Long_buffer=1
+)
+```
