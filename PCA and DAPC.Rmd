@@ -33,6 +33,7 @@ library(vegan)
 library(writexl)
 library(devEMF)
 library(RColorBrewer)
+library(plotly)
 
 T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_Mai2024.xlsx")
 myData <- read.genalex("Daten_Genalex.csv",genclone=TRUE, ploidy=1)
@@ -100,6 +101,18 @@ s.label(pca.pops.allMarkersOnly$li)
 #looking at first two axes:
 s.class(pca.pops.allMarkersOnly$li,fac=pop(myData_genind_allMarkersOnly),col=transp(funky(15),0.6),axesel=FALSE,cstar=0,cpoint=3)
 add.scatter.eig(pca.pops.allMarkersOnly$eig[1:50],3,1,2, ratio=.17)
+
+ggplotly(
+  p = ggplot2::last_plot(),
+  width = NULL,
+  height = NULL,
+  tooltip = "all",
+  dynamicTicks = FALSE,
+  layerData = 1,
+  originalData = TRUE,
+  source = "A"
+)
+
 #looking at 2 and 3 axis:
 s.class(pca.pops.allMarkersOnly$li, fac=pop(myData_genind_allMarkersOnly),
 xax=2, yax=3, col=transp(funky(15),.6),

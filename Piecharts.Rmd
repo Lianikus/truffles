@@ -31,6 +31,7 @@ library(devEMF)
 library(mapmixture)
 library(rnaturalearthhires)
 library(gridExtra)
+library(plotly)
 
 Structure_ClusterAssignMLGs <- read_excel("Structure_ClusterAssignMLGs.xlsx")
 coord <- read_excel("Koordinaten_2024.xlsx")
@@ -127,6 +128,9 @@ structure_barplot <- structure_plot(
   type = "structure",
   cluster_cols = c("#f1a340","#998ec3","salmon2","plum","springgreen3","turquoise"),
   site_dividers = TRUE,
+  site_order=NULL,
+  display_site_labels=TRUE,
+  #site_order=c("BUR","GEN","NEU","SCS","KON","FRB","FRE","FRI","SCD","SCG","SCL","WSL","LIM","BRU","RIE","TRO","ALD","UST","BAR","UEB","BOB","BOH","HAN"),
   site_labels_x=1,
   divider_width = 0.4,
   labels = "Population",
@@ -158,4 +162,15 @@ facet_barplot <- structure_plot(anc.mat,
 grid.arrange(map4, structure_barplot, nrow = 2, heights = c(4,1))
 
 grid.arrange(map4, facet_barplot, ncol = 2, widths = c(3,2))
+
+ggplotly(
+  p = ggplot2::last_plot(),
+  width = NULL,
+  height = NULL,
+  tooltip = "all",
+  dynamicTicks = FALSE,
+  layerData = 1,
+  originalData = TRUE,
+  source = "A"
+)
 ```
