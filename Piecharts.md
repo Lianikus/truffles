@@ -1,53 +1,16 @@
----
-title: "Pie Charts"
-author: "Lia Baumann"
-date: "2024-10-22"
-output: github_document
----
+Pie Charts
+================
+Lia Baumann
+2024-10-22
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-```{r Tabellen laden, message=FALSE, warning=FALSE, include=FALSE}
-library(readxl)
-library(knitr)
-library(tidyverse)
-library(ggplot2)
-theme_set(theme_bw())
-library(envalysis)
-library(forcats)
-library(poppr)
-library(treemap)
-library(pegas)
-library(adegenet)
-library(devtools)
-library(hierfstat)
-library(mmod)
-library(diveRsity)
-library(vegan)
-library(writexl)
-library(devEMF)
-library(mapmixture)
-library(rnaturalearthhires)
-library(gridExtra)
-
-Structure_ClusterAssignMLGs <- read_excel("Structure_ClusterAssignMLGs.xlsx")
-coord <- read_excel("Koordinaten_2024.xlsx")
-
-anc.mat <- Structure_ClusterAssignMLGs %>%
-  select(4,12,5:10) %>%
-  data.frame()
-colnames(anc.mat) <-c("Site","Ind","Cluster 1","Cluster 2","Cluster 3","Cluster 4","Cluster 5","Cluster 6")
-pops <- coord %>%
-  select(1,3,4)
-colnames(pops) <- c("Site","Lat","Lon")
-```
-
-```{r calculate Piechart}
+``` r
 map1 <- mapmixture(anc.mat,pops,crs=2056)
 map1
+```
 
+![](Piecharts_files/figure-gfm/calculate%20Piechart-1.png)<!-- -->
+
+``` r
 map2 <- mapmixture(
   admixture_df = anc.mat,
   coords_df = pops,
@@ -75,7 +38,11 @@ map2 <- mapmixture(
   axis_text_size = 8
 )
 map2
+```
 
+![](Piecharts_files/figure-gfm/calculate%20Piechart-2.png)<!-- -->
+
+``` r
 map3_ohneHannover <- mapmixture(
   admixture_df = anc.mat,
   coords_df = pops,
@@ -103,7 +70,11 @@ map3_ohneHannover <- mapmixture(
   axis_text_size = 8
 )
 map3_ohneHannover
+```
 
+![](Piecharts_files/figure-gfm/calculate%20Piechart-3.png)<!-- -->
+
+``` r
 map4 <- mapmixture(
   admixture_df = anc.mat,
   coords_df = pops,
@@ -141,7 +112,11 @@ structure_barplot <- structure_plot(
     axis.text.y = element_text(size = 5),
   )
 structure_barplot
+```
 
+![](Piecharts_files/figure-gfm/calculate%20Piechart-4.png)<!-- -->
+
+``` r
 facet_barplot <- structure_plot(anc.mat,
   type = "facet",
   cluster_cols = c("#f1a340","#998ec3","salmon2","plum","springgreen3","turquoise"),
@@ -156,6 +131,12 @@ facet_barplot <- structure_plot(anc.mat,
 
 # Arrange plots
 grid.arrange(map4, structure_barplot, nrow = 2, heights = c(4,1))
+```
 
+![](Piecharts_files/figure-gfm/calculate%20Piechart-5.png)<!-- -->
+
+``` r
 grid.arrange(map4, facet_barplot, ncol = 2, widths = c(3,2))
 ```
+
+![](Piecharts_files/figure-gfm/calculate%20Piechart-6.png)<!-- -->

@@ -32,6 +32,8 @@ library(diveRsity)
 library(vegan)
 library(writexl)
 library(devEMF)
+library(RColorBrewer)
+
 T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_Mai2024.xlsx")
 myData <- read.genalex("Daten_Genalex.csv",genclone=TRUE, ploidy=1)
 myData_genind <- read.genalex("Daten_Genalex.csv",genclone=FALSE, ploidy=1)
@@ -193,6 +195,35 @@ add.scatter.eig(pca.pops_cc.TY$eig[1:50],3,2,3, ratio=.2)
 
 #plot(pca.pops_cc.TY$li, col=
 ```
+
+```{r another pca}
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+pca1 = dudi.pca(myData_genind_allMarkersOnly, scannf = FALSE, nf = 3)
+cols = brewer.pal(nPop(myData_genind_allMarkersOnly), "RdYlBu")
+
+# Percent of genetic variance explained by each axis
+percent = round(pca1$eig/sum(pca1$eig)*100, digits = 1)
+scatter1 <- scatter_plot(
+  dataframe = pca1$li,
+  group_ids = myData_genind_allMarkersOnly$pop,
+  type = "points",
+  axes = c(1,2),
+  percent = percent,
+  colours = cols,
+  point_size = 2,
+  point_type = 21,
+  centroid_size = 2,
+  stroke = 0.1,
+  plot_title = "PCA coloured by group_ids"
+)+
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 8),
+    axis.text = element_text(size = 6),
+    plot.title = element_text(size = 10),
+  )
+scatter1
+```
 # 2. DAPC
 
 DAPC was pioneered by Jombart and colleagues (Jombart et al., 2010) and can be used to infer the number of clusters of genetically related individuals. In this multivariate statistical approach variance in the sample is partitioned into a between-group and within- group component, in an effort to maximize discrimination between groups. In DAPC, data is first transformed using a principal components analysis (PCA) and subsequently clusters are identified using discriminant analysis (DA). This tutorial is based on the vignette written by Thibaut Jombart. We encourage the user to explore this vignette further. The vignette can also be opened within R by executing adegenetTutorial("dapc")
@@ -201,6 +232,9 @@ DAPC was pioneered by Jombart and colleagues (Jombart et al., 2010) and can be u
 setPop(myData_genind_allMarkersOnly) <- ~Pop
 dapc.allMarkers <- dapc(myData_genind_allMarkersOnly, var.contrib = TRUE, scale = FALSE, n.pca = 30, n.da = nPop(myData_genind_allMarkersOnly) - 1)
 scatter(dapc.allMarkers, cell = 0, pch = 18:23, cstar = 0, mstree = TRUE, lwd = 2, lty = 2)
+
+#clonecorrected
+
 
 #BUR, FRB and FRE are separated from the cluster by their second axis (y) --> genetically distinct
 #look at the DAPC without these populations:

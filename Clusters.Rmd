@@ -92,16 +92,47 @@ n_samples_allMarkersOnly_withoutCluster3_SY %>%
 ```
 
 ```{r k-means clusters}
-grp <- find.clusters(myData_genind_allMarkersOnly, n.pca=3)
-# 1 PC axis retained and 6 clusters
+grp.1pca <- find.clusters(myData_genind_allMarkersOnly, n.pca=1, n.clust=6)
+grp.3pca <- find.clusters(myData_genind_allMarkersOnly, n.pca=3, n.clust=6)
+# 3 PC axis retained and 6 clusters
+grp.5pca <- find.clusters(myData_genind_allMarkersOnly, n.pca=5, n.clust=6)
+grp.21pca <- find.clusters(myData_genind_allMarkersOnly, n.pca=21, n.clust=6)
 
 grp$size
 options(max.print=4000)
-grp_df <- as_tibble(data.frame(grp$grp), rownames="Sample")
+grp.1pca_df <- as_tibble(data.frame(grp.1pca$grp), rownames="Sample")
+grp.3pca_df <- as_tibble(data.frame(grp.3pca$grp), rownames="Sample")
+grp.5pca_df <- as_tibble(data.frame(grp.5pca$grp), rownames="Sample")
+grp.21pca_df <- as_tibble(data.frame(grp.21pca$grp), rownames="Sample")
 #write.csv(grp_df, file="kmeans_clusters_allMarkersOnly.csv",sep=";")
-compare_clusters <- left_join(T_all_withMLGs_withClusters_allMarkersOnly,grp_df,by=c("Code"="Sample"))
+compare_clusters <- left_join(T_all_withMLGs_withClusters_allMarkersOnly,grp.3pca_df,by=c("Code"="Sample"))
+compare_clusters <- left_join(compare_clusters,grp.5pca_df,by=c("Code"="Sample"))
+compare_clusters <- left_join(compare_clusters,grp.1pca_df,by=c("Code"="Sample"))
+compare_clusters <- left_join(compare_clusters,grp.21pca_df,by=c("Code"="Sample"))
+compare_clusters
+write.csv(compare_clusters,file="compare_clusters.csv")
 
 #if I compare clusters from k-means and from STRUCTURE, they don't seem very similar and consistent
+```
+
+```{r define a-score}
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+dapc2 <- dapc(myData_genind_allMarkersOnly, n.da=100, n.pca=10)
+temp <- a.score(dapc2)
+names(temp)
+temp$pop.score
+temp$mean
+dapc2 <- dapc(myData_genind_allMarkersOnly, n.da=100, n.pca=50)
+temp <- optim.a.score(dapc2)
+
+#optimal score is 21 PCAs
+
+dapc21 <- dapc(myData_genind_allMarkersOnly, n.da=100, n.pca=21)
+summary(dapc21)
+
+compoplot(dapc21, posi="bottomright",
+txt.leg=paste("Cluster", 1:6), lab="",
+ncol=1, xlab="individuals", col=funky(6))
 ```
 
 ```{r another k-means approach, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
@@ -149,5 +180,13 @@ setPop(myData_genind_withClusters) <- ~cluster
 (truffleClusters.matFst <- mat_pw_fst(myData_genind_withClusters))
 
 boxplot(truffleClusters.matFst, col=funky(nPop(myData_genind_withClusters)), las=3,
+xlab="Cluster", ylab="Fst")
+
+
+#only clusters 1,2,4,5,6 allMarkersOnly
+setPop(myData_genind_allMarkersOnly_withoutCluster3_SY) <- ~cluster
+(myData_genind_allMarkersOnly_withoutCluster3_SY.matFst <- mat_pw_fst(myData_genind_allMarkersOnly_withoutCluster3_SY))
+
+boxplot(myData_genind_allMarkersOnly_withoutCluster3_SY.matFst, col=funky(nPop(myData_genind_allMarkersOnly_withoutCluster3_SY)), las=3,
 xlab="Cluster", ylab="Fst")
 ```
