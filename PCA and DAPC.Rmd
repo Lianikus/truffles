@@ -33,7 +33,6 @@ library(vegan)
 library(writexl)
 library(devEMF)
 library(RColorBrewer)
-library(plotly)
 
 T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_Mai2024.xlsx")
 myData <- read.genalex("Daten_Genalex.csv",genclone=TRUE, ploidy=1)
@@ -48,10 +47,20 @@ cc_myData_genind_allMarkersOnly_SY <- clonecorrect(myData_genind_allMarkersOnly,
 cc_myData_genind_allMarkersOnly_TY <- clonecorrect(myData_genind_allMarkersOnly,
                                                    strata=~Pop/TruffleYear)
 order_sites_WtoE <- factor(c("BUR","GEN","NEU","SCS","KON","FRB","FRE","FRI","SCD","SCG","SCL","WSL","LIM","BRU","RIE","TRO","ALD","UST","BAR","UEB","BOB","BOH","HAN"))
+```
 
-#based on the PCA, we remove BUR, FRB and FRE for some of the analyses and check what it changes
-myData_genind_aMO_noOutliers <- popsub(myData_genind_allMarkersOnly,exclude=c("BUR","FRB","FRE"))
-cc_myData_genind_aMO_noOutliers <- popsub(cc_myData_genind_allMarkersOnly_SY,exclude=c("BUR","FRB","FRE"))
+```{r plotly, eval=FALSE, include=FALSE}
+#Plotly use:
+ggplotly(
+  p = ggplot2::last_plot(),
+  width = NULL,
+  height = NULL,
+  tooltip = "all",
+  dynamicTicks = FALSE,
+  layerData = 1,
+  originalData = TRUE,
+  source = "A"
+)
 ```
 
 
@@ -98,20 +107,14 @@ x.pops_allMarkersOnly <- tab(myData_genind_allMarkersOnly,
 
 pca.pops.allMarkersOnly <- dudi.pca(x.pops_allMarkersOnly,center=TRUE,scale=FALSE, nf=3, scannf=FALSE)
 s.label(pca.pops.allMarkersOnly$li)
+
+# Calculate explained variance for each PCA axis
+explained_variance <- pca.pops.allMarkersOnly$eig / sum(pca.pops.allMarkersOnly$eig) * 100
+barplot(explained_variance, main = "Explained Variance per PCA Axis", xlab = "Principal Component", ylab = "Variance Explained (%)")
+
 #looking at first two axes:
 s.class(pca.pops.allMarkersOnly$li,fac=pop(myData_genind_allMarkersOnly),col=transp(funky(15),0.6),axesel=FALSE,cstar=0,cpoint=3)
 add.scatter.eig(pca.pops.allMarkersOnly$eig[1:50],3,1,2, ratio=.17)
-
-ggplotly(
-  p = ggplot2::last_plot(),
-  width = NULL,
-  height = NULL,
-  tooltip = "all",
-  dynamicTicks = FALSE,
-  layerData = 1,
-  originalData = TRUE,
-  source = "A"
-)
 
 #looking at 2 and 3 axis:
 s.class(pca.pops.allMarkersOnly$li, fac=pop(myData_genind_allMarkersOnly),
@@ -125,22 +128,6 @@ add.scatter.eig(pca.pops.allMarkersOnly$eig[1:50],3,2,3, ratio=.2)
  #       col=funky(15))
 #dev.off()
 
-#check after removal of outliers:
-setPop(myData_genind_aMO_noOutliers) <- ~Pop
-x.pops_allMarkersOnly_noOutliers <- tab(myData_genind_aMO_noOutliers,
-                             freq=TRUE, NA.method="mean")
-
-pca.pops.aMO.noOutliers <- dudi.pca(x.pops_allMarkersOnly_noOutliers,center=TRUE,scale=FALSE, nf=3, scannf=FALSE)
-s.label(pca.pops.aMO.noOutliers$li)
-#looking at first two axes:
-s.class(pca.pops.aMO.noOutliers$li,fac=pop(myData_genind_aMO_noOutliers),col=transp(funky(15),0.6),axesel=FALSE,cstar=0,cpoint=3)
-add.scatter.eig(pca.pops.aMO.noOutliers$eig[1:50],3,1,2, ratio=.17)
-#looking at 2 and 3 axis:
-s.class(pca.pops.aMO.noOutliers$li, fac=pop(myData_genind_aMO_noOutliers),
-xax=2, yax=3, col=transp(funky(15),.6),
-axesel=FALSE, cstar=0, cpoint=3)
-add.scatter.eig(pca.pops.aMO.noOutliers$eig[1:50],3,2,3, ratio=.2)
-
 
 #clonecorrected PCA  with samplingYear
 setPop(cc_myData_genind_allMarkersOnly_SY) <- ~Pop
@@ -148,6 +135,11 @@ x.pops_cc.SY <- tab(cc_myData_genind_allMarkersOnly_SY,
                     freq=TRUE, NA.method="mean")
 pca.pops_cc.SY <- dudi.pca(df = x.pops_cc.SY,
                            center = TRUE, scale = FALSE, scannf = FALSE, nf = 3)
+
+# Calculate explained variance for each PCA axis
+cc.explained_variance <- pca.pops_cc.SY$eig / sum(pca.pops_cc.SY$eig) * 100
+barplot(cc.explained_variance, main = "Explained Variance per PCA Axis", xlab = "Principal Component", ylab = "Variance Explained (%)")
+
 #looking at first two axes:
 s.class(pca.pops_cc.SY$li,
         fac=pop(cc_myData_genind_allMarkersOnly_SY),
@@ -166,21 +158,6 @@ add.scatter.eig(pca.pops_cc.SY$eig[1:50],3,2,3, ratio=.2)
 #        col=funky(15))
 #dev.off()
 
-#check after removal of outliers:
-setPop(cc_myData_genind_aMO_noOutliers) <- ~Pop
-x.pops.cc_allMarkersOnly_noOutliers <- tab(cc_myData_genind_aMO_noOutliers,
-                             freq=TRUE, NA.method="mean")
-
-pca.pops.cc.aMO.noOutliers <- dudi.pca(x.pops.cc_allMarkersOnly_noOutliers,center=TRUE,scale=FALSE, nf=3, scannf=FALSE)
-s.label(pca.pops.cc.aMO.noOutliers$li)
-#looking at first two axes:
-s.class(pca.pops.cc.aMO.noOutliers$li,fac=pop(cc_myData_genind_aMO_noOutliers),col=transp(funky(15),0.6),axesel=FALSE,cstar=0,cpoint=3)
-add.scatter.eig(pca.pops.cc.aMO.noOutliers$eig[1:50],3,1,2, ratio=.17)
-#looking at 2 and 3 axis:
-s.class(pca.pops.cc.aMO.noOutliers$li, fac=pop(cc_myData_genind_aMO_noOutliers),
-xax=2, yax=3, col=transp(funky(15),.6),
-axesel=FALSE, cstar=0, cpoint=3)
-add.scatter.eig(pca.pops.cc.aMO.noOutliers$eig[1:50],3,2,3, ratio=.2)
 
 #clonecorrected PCA  with TruffleYear
 setPop(cc_myData_genind_allMarkersOnly_TY) <- ~Pop
@@ -209,7 +186,7 @@ add.scatter.eig(pca.pops_cc.TY$eig[1:50],3,2,3, ratio=.2)
 #plot(pca.pops_cc.TY$li, col=
 ```
 
-```{r another pca}
+```{r another pca, eval=FALSE, include=FALSE}
 setPop(myData_genind_allMarkersOnly) <- ~Pop
 pca1 = dudi.pca(myData_genind_allMarkersOnly, scannf = FALSE, nf = 3)
 cols = brewer.pal(nPop(myData_genind_allMarkersOnly), "RdYlBu")
@@ -239,25 +216,163 @@ scatter1
 ```
 # 2. DAPC
 
-DAPC was pioneered by Jombart and colleagues (Jombart et al., 2010) and can be used to infer the number of clusters of genetically related individuals. In this multivariate statistical approach variance in the sample is partitioned into a between-group and within- group component, in an effort to maximize discrimination between groups. In DAPC, data is first transformed using a principal components analysis (PCA) and subsequently clusters are identified using discriminant analysis (DA). This tutorial is based on the vignette written by Thibaut Jombart. We encourage the user to explore this vignette further. The vignette can also be opened within R by executing adegenetTutorial("dapc")
+DAPC was pioneered by Jombart and colleagues (Jombart et al., 2010) and can be used to infer the number of clusters of genetically related individuals. In this multivariate statistical approach variance in the sample is partitioned into a between-group and within- group component, in an effort to maximize discrimination between groups. In DAPC, data is first transformed using a principal components analysis (PCA) and subsequently clusters are identified using discriminant analysis (DA). This tutorial is based on the vignette written by Thibaut Jombart. We encourage the user to explore this vignette further. The vignette can also be opened within R by executing adegenetTutorial or https://adegenet.r-forge.r-project.org/files/tutorial-dapc.pdf
+
+Usual approaches such as Principal Component Analysis (PCA) or Principal Coordinates
+Analysis (PCoA / MDS) focus on V AR(X) (--> total variance = (variance between groups) + (variance within groups)).
+That is, they only describe the global diversity, possibly overlooking differences between groups. On the contrary, DAPC optimizes variances between groups while minimizing variances within groups: it seeks synthetic variables, the discriminant functions, which show differences between groups as best as possible while minimizing variation within clusters.
+
+
+The trade-off between power of discrimination and over-fitting can be measured by the ascore, which is simply the difference between the proportion of successful reassignment of the analysis (observed discrimination) and values obtained using random groups (random discrimination). It can be seen as the proportion of successful reassignment corrected for
+the number of retained PCs. It is implemented by a.score, which relies on repeating the DAPC analysis using randomized groups, and computing a-scores for each group, as well as the average a-score
+
+```{r define a-score}
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+dapc2 <- dapc(myData_genind_allMarkersOnly, n.da=100, n.pca=10)
+temp <- a.score(dapc2)
+names(temp)
+temp$pop.score
+temp$mean
+dapc2 <- dapc(myData_genind_allMarkersOnly, n.da=100, n.pca=50)
+temp <- optim.a.score(dapc2)
+
+#optimal score is 21 PCAs
+
+#now the same corrected
+setPop(cc_myData_genind_allMarkersOnly_SY) <- ~Pop
+cc.dapc2 <- dapc(cc_myData_genind_allMarkersOnly_SY, n.da=100, n.pca=10)
+temp <- a.score(cc.dapc2)
+names(temp)
+temp$pop.score
+temp$mean
+cc.dapc2 <- dapc(cc_myData_genind_allMarkersOnly_SY, n.da=100, n.pca=50)
+temp <- optim.a.score(cc.dapc2)
+temp
+
+#optimal score is 23 PCAs
+```
+
+```{r dapc define clusters}
+# Idea: to find the optimal number of clusters, we use k-means, which will maximise the variance between groups (B(X)).
+# Therefore we run k-means sequentially with rising numbers of k and compare it with the Bayesian Information Criterion BIC where we will choose the clustering solution corresponding to the lowest BIC.
+# First, a PCA is performed but no information is lost due to keeping the principal components and therefore all variation in the original data. The analysis will go faster if we reduce the number of PCs to be retained, though.
+# Clusters can be identified using find.clusters() which will first run the PCA and then the kmeans()
+
+# Route 1: uncorrected AllMarkersOnly
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+grp <- find.clusters(myData_genind_allMarkersOnly, max.n.clust=6, max.n.pca=40, n.pca=21)
+#no clear model exists, the more the merrier but it's not very useful / more than 30 PCAs retained don't give a lot more information so we keep it at 30 for the moment
+table(pop(myData_genind_allMarkersOnly), grp$grp)
+table.value(table(pop(myData_genind_allMarkersOnly), grp$grp), col.lab=paste("inf", 1:6),
+row.lab=paste("ori", 1:6))
+#this looks horrible and I don't understand it at all
+
+# Route 2: corrected AllMarkersOnly
+setPop(cc_myData_genind_allMarkersOnly_SY) <- ~Pop
+cc_grp <- find.clusters(cc_myData_genind_allMarkersOnly_SY, max.n.clust=6, max.n.pca=40, n.pca=23)
+#no clear model exists, the more the merrier but it's not very useful
+table(pop(cc_myData_genind_allMarkersOnly_SY), cc_grp$grp)
+table.value(table(pop(cc_myData_genind_allMarkersOnly_SY), cc_grp$grp), col.lab=paste("inf", 1:6),
+row.lab=paste("ori", 1:6))
+```
+
+
+DAPC aims to provide an efficient description of genetic clusters using a few synthetic variables. These are constructed as linear combinations of the original variables (alleles) which have the largest between-group variance and the smallest within-group variance. Coefficients of the alleles used in the linear combination are called loadings, while the
+synthetic variables are themselves referred to as discriminant functions.
+While these are different from the admixture coefficients of software like STRUCTURE, they can still be interpreted as proximities of individuals to the different clusters. Membership probabilities also provide indications of how clear-cut genetic clusters are. Loose clusters will result in fairly flat distributions of membership probabilities of individuals across clusters, pointing to possible admixture. Lastly, using the allele loadings, it is possible to represent new individuals (which have not participated to the analysis) onto the factorial planes, and derive membership probabilities
+as welll. Such individuals are referred to as supplementary individuals.
+
+
 
 ```{r dapc}
+#uncorrected AllMarkersOnly, only visualising the DAPC only preset clusters
 setPop(myData_genind_allMarkersOnly) <- ~Pop
-dapc.allMarkers <- dapc(myData_genind_allMarkersOnly, var.contrib = TRUE, scale = FALSE, n.pca = 30, n.da = nPop(myData_genind_allMarkersOnly) - 1)
-scatter(dapc.allMarkers, cell = 0, pch = 18:23, cstar = 0, mstree = TRUE, lwd = 2, lty = 2)
+dapc.allMarkers <- dapc(myData_genind_allMarkersOnly,var.contrib = TRUE, scale = FALSE, n.pca = 21, n.da = nPop(myData_genind_allMarkersOnly) - 1)
+scatter(dapc.allMarkers, cell = 0, pch = 18:23, cstar = 0, mstree = TRUE, lwd = 2, lty = 2, scree.pca=TRUE,posi.pca="bottomleft", scree.da=TRUE, posi.da="top")
+```
+```{r dapc2, eval=FALSE, include=FALSE}
+#STRUCTURE like when knowing about number of clusters:
+dapc.allMarkers <- dapc(myData_genind_allMarkersOnly,grp$grp, var.contrib = TRUE, scale = FALSE, n.pca = 21, n.da = nPop(myData_genind_allMarkersOnly) - 1)
 
-#clonecorrected
+compoplot(dapc.allMarkers, posi="bottomright",
+txt.leg=paste("Cluster", 1:6),
+ncol=2, xlab="individuals", col=funky(6))
 
+scatter(dapc.allMarkers,1,1, bg="white",
+scree.da=FALSE, legend=TRUE, solid=.4)
+```
+```{r dapc3}
+#clonecorrected  AllMarkersOnly
+setPop(cc_myData_genind_allMarkersOnly_SY) <- ~Pop
+cc_dapc.allMarkers <- dapc(cc_myData_genind_allMarkersOnly_SY, var.contrib = TRUE, scale = FALSE, n.pca = 23, n.da = nPop(cc_myData_genind_allMarkersOnly_SY) - 1)
+scatter(cc_dapc.allMarkers, cell = 0, pch = 18:23, cstar = 0, mstree = TRUE, lwd = 2, lty = 2, scree.pca=TRUE,posi.pca="bottomleft", scree.da=TRUE, posi.da="top")
+```
+```{r dapc4, eval=FALSE, include=FALSE}
+#now looking at STRUCTURE like plot:
+cc_dapc.allMarkers <- dapc(cc_myData_genind_allMarkersOnly_SY, cc_grp$grp,var.contrib = TRUE, scale = FALSE, n.pca = 23, n.da = nPop(cc_myData_genind_allMarkersOnly_SY) - 1)
+compoplot(cc_dapc.allMarkers, posi="bottomright",
+txt.leg=paste("Cluster", 1:6),
+ncol=2, xlab="individuals", col=funky(6))
 
-#BUR, FRB and FRE are separated from the cluster by their second axis (y) --> genetically distinct
-#look at the DAPC without these populations:
-setPop(myData_genind_aMO_noOutliers) <- ~Pop
-dapc.allMarkers_noOutliers <- dapc(myData_genind_aMO_noOutliers, var.contrib = TRUE, scale = FALSE, n.pca = 30, n.da = nPop(myData_genind_aMO_noOutliers) - 1)
-scatter(dapc.allMarkers_noOutliers, cell = 0, pch = 18:23, cstar = 0, mstree = TRUE, lwd = 2, lty = 2)
+scatter(cc_dapc.allMarkers,1,1, bg="white",
+scree.da=FALSE, legend=TRUE, solid=.4)
+```
 
-#and clonecorrected without outliers:
-setPop(cc_myData_genind_aMO_noOutliers) <- ~Pop
-dapc.cc.allMarkers_noOutliers <- dapc(cc_myData_genind_aMO_noOutliers, var.contrib = TRUE, scale = FALSE, n.pca = 30, n.da = nPop(cc_myData_genind_aMO_noOutliers) - 1)
-scatter(dapc.cc.allMarkers_noOutliers, cell = 0, pch = 18:23, cstar = 0, mstree = TRUE, lwd = 2, lty = 2)
+```{r structure like plot, eval=FALSE, include=FALSE}
+# Assigning names to Inds in DAPC
+individual_names <- rownames(myData_genind_allMarkersOnly@tab)
 
+dapc21 <- dapc(myData_genind_allMarkersOnly, grp$grp, n.da=100, n.pca=21)
+dapc21$ind.names <- individual_names
+summary(dapc21)
+
+compoplot(dapc21, posi="bottomright",
+txt.leg=paste("Cluster", 1:6),
+ncol=1, xlab="individuals", col=funky(6), show.lab=TRUE, lab = dapc21$ind.names)
+
+#ordering west-to-east
+# Extract the population assignments from the genind object
+pop_assignments <- as.character(pop(myData_genind_allMarkersOnly))
+
+# Create an index that orders individuals according to the custom population order
+population_order <- order(match(pop_assignments, order_sites_WtoE))
+
+# Make a reordered copy of your DAPC result
+dapc21_sorted <- dapc21
+dapc21_sorted$posterior <- dapc21$posterior[population_order, ]
+dapc21_sorted$assign <- dapc21$assign[population_order]
+dapc21_sorted$ind.names <- dapc21$ind.names[population_order]
+
+compoplot(dapc21_sorted, posi="bottomright",
+txt.leg=paste("Cluster", 1:6),
+ncol=1, xlab="individuals", col=funky(6), show.lab=TRUE, lab = dapc21_sorted$ind.names)
+
+#doing the same clone-corrected
+# Assigning names to Inds in DAPC
+cc_individual_names <- rownames(cc_myData_genind_allMarkersOnly_SY@tab)
+
+cc.dapc23 <- dapc(cc_myData_genind_allMarkersOnly_SY, cc_grp$grp, n.da=100, n.pca=23)
+cc.dapc23$ind.names <- cc_individual_names
+summary(cc.dapc23)
+
+compoplot(cc.dapc23, posi="bottomright",
+txt.leg=paste("Cluster", 1:6),
+ncol=1, xlab="individuals", col=funky(6), show.lab=TRUE, lab = cc.dapc23$ind.names)
+
+#ordering west-to-east
+# Extract the population assignments from the genind object
+cc.pop_assignments <- as.character(pop(cc_myData_genind_allMarkersOnly_SY))
+
+# Create an index that orders individuals according to the custom population order
+cc.population_order <- order(match(cc.pop_assignments, order_sites_WtoE))
+
+# Make a reordered copy of your DAPC result
+cc.dapc23_sorted <- cc.dapc23
+cc.dapc23_sorted$posterior <- cc.dapc23$posterior[cc.population_order, ]
+cc.dapc23_sorted$assign <- cc.dapc23$assign[cc.population_order]
+cc.dapc23_sorted$ind.names <- cc.dapc23$ind.names[cc.population_order]
+
+compoplot(cc.dapc23_sorted, posi="bottomright",
+txt.leg=paste("Cluster", 1:6),
+ncol=1, xlab="individuals", col=funky(6), show.lab=TRUE, lab = cc.dapc23_sorted$ind.names)
 ```

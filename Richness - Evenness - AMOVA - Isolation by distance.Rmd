@@ -60,13 +60,20 @@ cc_myData_genind_allMarkersOnly_SY <- clonecorrect(myData_genind_allMarkersOnly,
 cc_myData_genind_allMarkersOnly_TY <- clonecorrect(myData_genind_allMarkersOnly,
                                                    strata=~Pop/TruffleYear)
 
-#based on the PCA, we remove BUR, FRB and FRE for some of the analyses and check the stats again
-setPop(myData_genind_allMarkersOnly) <- ~Pop
-myData_genind_aMO_noOutliers <- popsub(myData_genind_allMarkersOnly,exclude=c("BUR","FRB","FRE"))
-cc_myData_genind_aMO_noOutliers <- popsub(cc_myData_genind_allMarkersOnly_SY,exclude=c("BUR","FRB","FRE"))
-
 myData_genind_withClusters <- read.genalex("DatenGenalex_withMLGs_withClusters_allMarkersOnly.csv",genclone=FALSE,ploidy=1)
 splitStrata(myData_genind_withClusters) <- ~Pop/Month/SamplingYear/TruffleYear/cluster
+```
+
+```{r crosspop mlgs}
+mlg_data <- data.frame(
+  mlg = mlg.vector(myData_genind_allMarkersOnly),
+  pop = pop(myData_genind_allMarkersOnly)
+)
+shared_mlgs <- mlg_data %>%
+  group_by(mlg) %>%
+  summarize(n_pops = n_distinct(pop)) %>%
+  filter(n_pops > 1)
+print(shared_mlgs)
 ```
 
 # Hardy-Weinberg equilibrium
@@ -139,19 +146,6 @@ table.paint(truffles.matFst,col.labels=1:23)
 boxplot(truffles.matFst, col=funky(nPop(myData_genind_allMarkersOnly)), las=3,
 xlab="Population", ylab="Fst")
 
-
-#repeat without excluded populations
-truffles.matFst_noOutliers <- mat_pw_fst(myData_genind_aMO_noOutliers)
-truffles.tree_noOutliers <- nj(truffles.matFst_noOutliers)
-plot(truffles.tree_noOutliers, type="unr", tip.col=funky(nPop(myData_genind_aMO_noOutliers)), font=2)
-annot <- round(truffles.tree_noOutliers$edge.length,2)
-edgelabels(annot[annot>0], which(annot>0), frame="n")
-add.scale.bar()
-
-table.paint(truffles.matFst_noOutliers,col.labels=1:23)
-
-boxplot(truffles.matFst_noOutliers, col=funky(nPop(myData_genind_aMO_noOutliers)), las=3,
-xlab="Population", ylab="Fst")
 ```
 # Population structure using Gst
 
@@ -159,16 +153,10 @@ xlab="Population", ylab="Fst")
 kable(Gst_Hedrick(myData_genind_allMarkersOnly))
 #very high differentiation for all loci!
 
-# test the same without the excluded populations
-kable(Gst_Hedrick(myData_genind_aMO_noOutliers))
-#still quite high differentiation
-
-
 ```
 
 ```{r locus summary}
 kable(locus_table(myData_genind_allMarkersOnly))
-kable(locus_table(myData_genind_aMO_noOutliers))
 ```
 
 #Genotypic diversity
@@ -184,14 +172,6 @@ lambda <- allMarkersOnly_diversity$lambda # Simpson's index
 lambda_corr <- (N/(N - 1)) * lambda              # Corrected Simpson's index
 allMarkersOnly_diversity$lambda_corr <- lambda_corr
 allMarkersOnly_diversity
-
-setPop(myData_genind_aMO_noOutliers) <- ~Pop
-allMarkersOnly_noOutliers_diversity <- poppr(myData_genind_aMO_noOutliers)
-N      <- allMarkersOnly_noOutliers_diversity$N      # number of samples
-lambda <- allMarkersOnly_noOutliers_diversity$lambda # Simpson's index
-lambda_corr <- (N/(N - 1)) * lambda              # Corrected Simpson's index
-allMarkersOnly_noOutliers_diversity$lambda_corr <- lambda_corr
-allMarkersOnly_noOutliers_diversity
 ```
 
 ```{r diversity auf level cluster}
@@ -289,33 +269,15 @@ In this chapter, we will utilize AMOVA to analyze our populations. AMOVA stands 
 The distance matrix can be calculated using any distance as long as it is euclidean. The distance that is used in the program Arlequin is the opposite of the Kronecker Delta function that counts the number of differences summed over L loci
 
 ```{r amova}
-myData_genclone_allMarkersOnly <- as.genclone(myData_genind_allMarkersOnly)
-myData_genclone_allMarkersOnly
-myData_genclone_allMarkersOnlyCC <- as.genclone(cc_myData_genind_allMarkersOnly_SY)
-table(strata(myData_genclone_allMarkersOnly, ~Pop/Month, combine = FALSE))  # Subpopulations
-
 #In panmictic populations, we would expect to see most of the variance arise from within samples. If we see that the most of the variance occurs among samples within populations or among populations, then there is evidence that we have some sort of population structure. In the case of clonal organisms, this would help support a hypothesis of clonal reproduction.
-allMarkers_amova <- poppr.amova(myData_genclone_allMarkersOnly, ~Pop)
+allMarkers_amova <- poppr.amova(myData_genind_allMarkersOnly, ~Pop)
 allMarkers_amova
-allMarkers_amovacc <- poppr.amova(myData_genclone_allMarkersOnly, ~Pop, clonecorrect = TRUE)
+allMarkers_amovacc <- poppr.amova(myData_genind_allMarkersOnly, ~Pop, clonecorrect = TRUE)
 allMarkers_amovacc
-allMarkers_amovaCC <- poppr.amova(cc_myData_genind_allMarkersOnly_TY, ~Pop)
-allMarkers_amovaCC
 allMarkers_cluster_amova <- poppr.amova(myData_genind_withClusters, ~cluster)
 allMarkers_cluster_amova
 
 #Keines davon ergibt das gleiche Resultat wie im Genalex --> Check datasets!
-
-#Ich schaue noch die AMOVAS an ohne BUR, FRB und FRE
-myData_genclone_aMO_noOutliers <- as.genclone(myData_genind_aMO_noOutliers)
-table(strata(myData_genclone_aMO_noOutliers, ~Pop/Month, combine = FALSE))  # Subpopulations
-cc_myData_genclone_aMO_noOutliers <- as.genclone(cc_myData_genind_aMO_noOutliers)
-table(strata(cc_myData_genclone_aMO_noOutliers, ~Pop/Month, combine = FALSE))  # Subpopulations
-
-allMarkers_noOutliers_amova <- poppr.amova(myData_genclone_aMO_noOutliers, ~Pop)
-allMarkers_noOutliers_amova
-allMarkers_amovacc_noOutliers <- poppr.amova(myData_genclone_aMO_noOutliers, ~Pop, clonecorrect = TRUE)
-allMarkers_amovacc_noOutliers
 
 #significance testing
 set.seed(1999)
@@ -324,6 +286,7 @@ plot(allMarkers_signif)
 allMarkers_ccsignif <- randtest(allMarkers_amovacc, nrepet = 999)
 plot(allMarkers_ccsignif)
 ```
+
 
 # Alleles contributing to differentiation of BUR,FRB and FRE
 
@@ -473,27 +436,6 @@ plot(Dgeo, Dgen)
 #abline(lm(Dgen~log(Dgeo)), col="red",lty=2)
 
 #Hmm... das sieht nicht so befriedigend aus wie im Genalex...
-
-#noch ein Versuch mit dem neuen Dataset
-
-dist_allMarkersOnly_noOutliers <- mat_gen_dist(myData_genind_aMO_noOutliers,dist="basic")
-coord_dist_noOutliers <- coord_dist %>%
-  filter(.,ID != "BUR") %>%
-  filter(.,ID != "FRB") %>%
-  filter(.,ID != "FRE")
-
-setPop(myData_genind_aMO_noOutliers) <- ~Pop
-myData_genind_aMO_noOutliers@other$xy <- coord_dist_noOutliers[,2:3]
-myData_genpop_aMO_noOutliers <- genind2genpop(myData_genind_aMO_noOutliers)
-Dgen_noOutliers <- dist.genpop(myData_genpop_aMO_noOutliers,method=2)
-Dgen_noOutliers <- as.vector(Dgen_noOutliers$propShared.PopGenReport)
-Dgeo_noOutliers <- dist(myData_genpop_aMO_noOutliers@other$xy)
-ibd_noOutliers <- mantel.randtest(Dgen_noOutliers,Dgeo_noOutliers)
-ibd
-plot(ibd)
-plot(log(Dgeo_noOutliers), Dgen_noOutliers)
-abline(lm(Dgen_noOutliers~Dgeo_noOutliers), col="red")
-
 ```
 
 ```{r isolation by distance V2}

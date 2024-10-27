@@ -3,6 +3,33 @@ Richness, Evenness, AMOVA, Isolation by distance
 Lia Baumann
 2024-09-03
 
+``` r
+mlg_data <- data.frame(
+  mlg = mlg.vector(myData_genind_allMarkersOnly),
+  pop = pop(myData_genind_allMarkersOnly)
+)
+shared_mlgs <- mlg_data %>%
+  group_by(mlg) %>%
+  summarize(n_pops = n_distinct(pop)) %>%
+  filter(n_pops > 1)
+print(shared_mlgs)
+```
+
+    ## # A tibble: 145 × 2
+    ##      mlg n_pops
+    ##    <int>  <int>
+    ##  1     1     20
+    ##  2     2      4
+    ##  3     3      2
+    ##  4     6      4
+    ##  5     9     16
+    ##  6    11      2
+    ##  7    14      3
+    ##  8    15      2
+    ##  9    16      4
+    ## 10    19     10
+    ## # ℹ 135 more rows
+
 # Hardy-Weinberg equilibrium
 
 Cannot be determined for haploids.
@@ -380,31 +407,6 @@ xlab="Population", ylab="Fst")
 ```
 
 ![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/Fst%20values-3.png)<!-- -->
-
-``` r
-#repeat without excluded populations
-truffles.matFst_noOutliers <- mat_pw_fst(myData_genind_aMO_noOutliers)
-truffles.tree_noOutliers <- nj(truffles.matFst_noOutliers)
-plot(truffles.tree_noOutliers, type="unr", tip.col=funky(nPop(myData_genind_aMO_noOutliers)), font=2)
-annot <- round(truffles.tree_noOutliers$edge.length,2)
-edgelabels(annot[annot>0], which(annot>0), frame="n")
-add.scale.bar()
-```
-
-![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/Fst%20values-4.png)<!-- -->
-
-``` r
-table.paint(truffles.matFst_noOutliers,col.labels=1:23)
-```
-
-![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/Fst%20values-5.png)<!-- -->
-
-``` r
-boxplot(truffles.matFst_noOutliers, col=funky(nPop(myData_genind_aMO_noOutliers)), las=3,
-xlab="Population", ylab="Fst")
-```
-
-![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/Fst%20values-6.png)<!-- -->
 \# Population structure using Gst
 
 ``` r
@@ -447,47 +449,6 @@ kable(Gst_Hedrick(myData_genind_allMarkersOnly))
 
 ``` r
 #very high differentiation for all loci!
-
-# test the same without the excluded populations
-kable(Gst_Hedrick(myData_genind_aMO_noOutliers))
-```
-
-<table class="kable_wrapper">
-<tbody>
-<tr>
-<td>
-
-|          |         x |
-|:---------|----------:|
-| aest06_1 | 0.7786853 |
-| aest07_1 | 0.7156961 |
-| aest15_1 | 0.6929982 |
-| aest26_1 | 0.8719466 |
-| aest28_1 | 0.8952665 |
-| aest35_1 | 0.7895130 |
-| aest36_1 | 0.7738502 |
-| aest01_1 | 0.8686310 |
-| aest10_1 | 0.8680439 |
-| aest18_1 | 0.7879809 |
-| aest24_1 | 0.6052179 |
-| aest25_1 | 0.7567458 |
-| aest29_1 | 0.7773246 |
-| aest31_1 | 0.7605688 |
-
-</td>
-<td>
-
-|         x |
-|----------:|
-| 0.7704288 |
-
-</td>
-</tr>
-</tbody>
-</table>
-
-``` r
-#still quite high differentiation
 ```
 
 ``` r
@@ -511,28 +472,6 @@ kable(locus_table(myData_genind_allMarkersOnly))
 | aest29_1 |  9.000000 | 0.6922076 | 0.6924700 | 0.7836765 |
 | aest31_1 |  7.000000 | 0.6665609 | 0.6668136 | 0.8004907 |
 | mean     |  7.785714 | 0.6441650 | 0.6444092 | 0.7465604 |
-
-``` r
-kable(locus_table(myData_genind_aMO_noOutliers))
-```
-
-|          |    allele |       1-D |      Hexp |  Evenness |
-|:---------|----------:|----------:|----------:|----------:|
-| aest06_1 |  6.000000 | 0.5862119 | 0.5864798 | 0.7286411 |
-| aest07_1 |  6.000000 | 0.5245710 | 0.5248108 | 0.7961772 |
-| aest15_1 |  3.000000 | 0.1185190 | 0.1185732 | 0.4779053 |
-| aest26_1 | 11.000000 | 0.7731573 | 0.7735106 | 0.8566074 |
-| aest28_1 | 19.000000 | 0.8106353 | 0.8110058 | 0.8119527 |
-| aest35_1 |  7.000000 | 0.2920516 | 0.2921851 | 0.4873423 |
-| aest36_1 |  6.000000 | 0.5552072 | 0.5554610 | 0.8541307 |
-| aest01_1 |  7.000000 | 0.6657253 | 0.6660296 | 0.7443799 |
-| aest10_1 |  6.000000 | 0.6987585 | 0.6990779 | 0.8574771 |
-| aest18_1 |  5.000000 | 0.7048758 | 0.7051979 | 0.8592467 |
-| aest24_1 |  6.000000 | 0.3729412 | 0.3731116 | 0.5064529 |
-| aest25_1 |  5.000000 | 0.4302508 | 0.4304475 | 0.6669807 |
-| aest29_1 |  7.000000 | 0.5921722 | 0.5924429 | 0.7711524 |
-| aest31_1 |  7.000000 | 0.6286539 | 0.6289412 | 0.7279071 |
-| mean     |  7.214286 | 0.5538379 | 0.5540911 | 0.7247395 |
 
 \#Genotypic diversity Diversity measures incorporate both genotypic
 richness and abundance. There are three measures of genotypic diversity
@@ -617,61 +556,6 @@ allMarkersOnly_diversity
     ## 22 myData_genind_allMarkersOnly      0.7250
     ## 23 myData_genind_allMarkersOnly      0.2000
     ## 24 myData_genind_allMarkersOnly      0.9714
-
-``` r
-setPop(myData_genind_aMO_noOutliers) <- ~Pop
-allMarkersOnly_noOutliers_diversity <- poppr(myData_genind_aMO_noOutliers)
-N      <- allMarkersOnly_noOutliers_diversity$N      # number of samples
-lambda <- allMarkersOnly_noOutliers_diversity$lambda # Simpson's index
-lambda_corr <- (N/(N - 1)) * lambda              # Corrected Simpson's index
-allMarkersOnly_noOutliers_diversity$lambda_corr <- lambda_corr
-allMarkersOnly_noOutliers_diversity
-```
-
-    ##      Pop    N MLG eMLG    SE     H     G lambda   E.5   Hexp     Ia  rbarD
-    ## 1    ALD   62  12 4.09 1.192 1.430  2.31 0.5671 0.412 0.1400  3.684 0.3652
-    ## 2    RIE   62  39 9.18 0.816 3.507 28.26 0.9646 0.843 0.4263  0.882 0.0778
-    ## 3    TRO   34   6 3.54 0.904 1.164  2.31 0.5675 0.596 0.1529  2.464 0.3408
-    ## 4    SCG   15   6 5.14 0.703 1.617  4.41 0.7733 0.845 0.2891  2.283 0.2888
-    ## 5    BOH   40  27 8.36 1.116 3.008 12.90 0.9225 0.618 0.2779  1.353 0.1364
-    ## 6    BOB  429 125 8.05 1.223 3.730 16.16 0.9381 0.373 0.3379  2.148 0.1900
-    ## 7    UEB  153  29 6.17 1.280 2.448  6.81 0.8533 0.551 0.1454  0.732 0.0910
-    ## 8    SCL   99  39 6.36 1.399 2.649  6.11 0.8364 0.389 0.1762  2.211 0.2492
-    ## 9    SCD  100  40 6.00 1.457 2.523  4.16 0.7598 0.276 0.2686  2.549 0.2569
-    ## 10   WSL  283   4 1.30 0.502 0.168  1.07 0.0621 0.362 0.0145  4.281 0.5055
-    ## 11   SCS   43   6 2.16 0.899 0.547  1.28 0.2163 0.380 0.0494  3.957 0.4517
-    ## 12   NEU   32   6 3.12 0.911 0.961  1.84 0.4551 0.518 0.1031  2.505 0.3431
-    ## 13   UST   35  22 8.36 1.050 2.877 13.76 0.9273 0.762 0.3733  1.116 0.0961
-    ## 14   KON  212  25 5.42 1.206 2.129  5.21 0.8082 0.569 0.2292  1.291 0.1187
-    ## 15   FRI  120  11 3.80 0.947 1.438  3.14 0.6814 0.666 0.2952  4.250 0.3842
-    ## 16   BAR    1   1 1.00 0.000 0.000  1.00 0.0000   NaN    NaN     NA     NA
-    ## 17   BRU  178  12 2.96 0.929 1.021  1.84 0.4555 0.471 0.4326 12.171 0.9362
-    ## 18   LIM  216  15 3.77 0.917 1.471  3.18 0.6855 0.650 0.4155  5.194 0.4137
-    ## 19   HAN   65   7 4.05 0.780 1.453  3.49 0.7138 0.761 0.2884  2.115 0.2208
-    ## 20   GEN   10   2 2.00 0.000 0.325  1.22 0.1800 0.571 0.0857  5.000 1.0000
-    ## 21 Total 2189 418 8.89 0.997 4.561 32.68 0.9694 0.335 0.5541  2.100 0.1635
-    ##                            File lambda_corr
-    ## 1  myData_genind_aMO_noOutliers      0.5764
-    ## 2  myData_genind_aMO_noOutliers      0.9804
-    ## 3  myData_genind_aMO_noOutliers      0.5847
-    ## 4  myData_genind_aMO_noOutliers      0.8286
-    ## 5  myData_genind_aMO_noOutliers      0.9462
-    ## 6  myData_genind_aMO_noOutliers      0.9403
-    ## 7  myData_genind_aMO_noOutliers      0.8589
-    ## 8  myData_genind_aMO_noOutliers      0.8450
-    ## 9  myData_genind_aMO_noOutliers      0.7675
-    ## 10 myData_genind_aMO_noOutliers      0.0623
-    ## 11 myData_genind_aMO_noOutliers      0.2215
-    ## 12 myData_genind_aMO_noOutliers      0.4698
-    ## 13 myData_genind_aMO_noOutliers      0.9546
-    ## 14 myData_genind_aMO_noOutliers      0.8120
-    ## 15 myData_genind_aMO_noOutliers      0.6871
-    ## 16 myData_genind_aMO_noOutliers         NaN
-    ## 17 myData_genind_aMO_noOutliers      0.4581
-    ## 18 myData_genind_aMO_noOutliers      0.6887
-    ## 19 myData_genind_aMO_noOutliers      0.7250
-    ## 20 myData_genind_aMO_noOutliers      0.2000
-    ## 21 myData_genind_aMO_noOutliers      0.9698
 
 ``` r
 setPop(myData_genind_withClusters) <- ~cluster
@@ -2061,58 +1945,8 @@ that is used in the program Arlequin is the opposite of the Kronecker
 Delta function that counts the number of differences summed over L loci
 
 ``` r
-myData_genclone_allMarkersOnly <- as.genclone(myData_genind_allMarkersOnly)
-myData_genclone_allMarkersOnly
-```
-
-    ## 
-    ## This is a genclone object
-    ## -------------------------
-    ## Genotype information:
-    ## 
-    ##     449 original multilocus genotypes 
-    ##    2639 haploid individuals
-    ##      14 codominant loci
-    ## 
-    ## Population information:
-    ## 
-    ##       4 strata - Pop, Month, SamplingYear, TruffleYear
-    ##      23 populations defined - FRE, ALD, RIE, ..., LIM, HAN, GEN
-
-``` r
-myData_genclone_allMarkersOnlyCC <- as.genclone(cc_myData_genind_allMarkersOnly_SY)
-table(strata(myData_genclone_allMarkersOnly, ~Pop/Month, combine = FALSE))  # Subpopulations
-```
-
-    ##      Month
-    ## Pop     1   3   4   5   6   7   8   9  10  11  12   2   0
-    ##   FRE   3   5   2   4   3  81   8  44  42  14   7   1   0
-    ##   ALD   7   6   1   3   2   1   5   1   9   9  11   7   0
-    ##   RIE   7   8   2   0   2   0   3   2   9  12  10   7   0
-    ##   TRO   5  10   1   0   0   0   1   0   2   7   6   2   0
-    ##   SCG   1   3   0   0   2   4   0   0   1   3   0   1   0
-    ##   BOH   0   0   0   1   1   1   7  10   8  11   1   0   0
-    ##   BOB  15  15   3   2   9  37  44 101  93  70  34   6   0
-    ##   FRB   0   0   0   0   0   0   0   0   6   2   3   2   0
-    ##   UEB   7  10   1   4   1   7  11  24  67   9   5   7   0
-    ##   SCL   1   0   5   0   6  53   4  10  15   4   1   0   0
-    ##   SCD   1   1   0   0   0   7   4  28  40  16   3   0   0
-    ##   WSL   1   2   1   4  10  46  51  78  62  26   2   0   0
-    ##   BUR   0   0   0   1   2   6  41  46  84  32  11   0   0
-    ##   SCS   1   0   0   1   0   6  10  12   8   2   2   0   1
-    ##   NEU   0   0   0   0   0   1   4  12   8   4   1   2   0
-    ##   UST   2   1   0   0   0   0   1  13   8   9   1   0   0
-    ##   KON   5   0   0   0   0   8  28  34  70  38  28   1   0
-    ##   FRI   4   1   0   0   0   0   2  14  50  43   6   0   0
-    ##   BAR   0   0   0   0   1   0   0   0   0   0   0   0   0
-    ##   BRU   3  14   0   1  11  25  40  17  48   6  10   3   0
-    ##   LIM   3   0  10   4  10  36  33  40  38  26  13   3   0
-    ##   HAN   7   4   0   0  21  12   0   2   0   5   4   8   2
-    ##   GEN   2   0   0   0   0   1   2   0   1   3   1   0   0
-
-``` r
 #In panmictic populations, we would expect to see most of the variance arise from within samples. If we see that the most of the variance occurs among samples within populations or among populations, then there is evidence that we have some sort of population structure. In the case of clonal organisms, this would help support a hypothesis of clonal reproduction.
-allMarkers_amova <- poppr.amova(myData_genclone_allMarkersOnly, ~Pop)
+allMarkers_amova <- poppr.amova(myData_genind_allMarkersOnly, ~Pop)
 allMarkers_amova
 ```
 
@@ -2136,7 +1970,7 @@ allMarkers_amova
     ## Phi-samples-total 0.6469709
 
 ``` r
-allMarkers_amovacc <- poppr.amova(myData_genclone_allMarkersOnly, ~Pop, clonecorrect = TRUE)
+allMarkers_amovacc <- poppr.amova(myData_genind_allMarkersOnly, ~Pop, clonecorrect = TRUE)
 allMarkers_amovacc
 ```
 
@@ -2158,30 +1992,6 @@ allMarkers_amovacc
     ## $statphi
     ##                         Phi
     ## Phi-samples-total 0.3094564
-
-``` r
-allMarkers_amovaCC <- poppr.amova(cc_myData_genind_allMarkersOnly_TY, ~Pop)
-allMarkers_amovaCC
-```
-
-    ## $call
-    ## ade4::amova(samples = xtab, distances = xdist, structures = xstruct)
-    ## 
-    ## $results
-    ##                  Df   Sum Sq    Mean Sq
-    ## Between samples  22 2238.765 101.762027
-    ## Within samples  703 3568.492   5.076090
-    ## Total           725 5807.256   8.010009
-    ## 
-    ## $componentsofcovariance
-    ##                                Sigma         %
-    ## Variations  Between samples 3.287761  39.30917
-    ## Variations  Within samples  5.076090  60.69083
-    ## Total variations            8.363851 100.00000
-    ## 
-    ## $statphi
-    ##                         Phi
-    ## Phi-samples-total 0.3930917
 
 ``` r
 allMarkers_cluster_amova <- poppr.amova(myData_genind_withClusters, ~cluster)
@@ -2210,111 +2020,6 @@ allMarkers_cluster_amova
 ``` r
 #Keines davon ergibt das gleiche Resultat wie im Genalex --> Check datasets!
 
-#Ich schaue noch die AMOVAS an ohne BUR, FRB und FRE
-myData_genclone_aMO_noOutliers <- as.genclone(myData_genind_aMO_noOutliers)
-table(strata(myData_genclone_aMO_noOutliers, ~Pop/Month, combine = FALSE))  # Subpopulations
-```
-
-    ##      Month
-    ## Pop     3   4   5   6   7   8   9  10  11  12   1   2   0
-    ##   ALD   6   1   3   2   1   5   1   9   9  11   7   7   0
-    ##   RIE   8   2   0   2   0   3   2   9  12  10   7   7   0
-    ##   TRO  10   1   0   0   0   1   0   2   7   6   5   2   0
-    ##   SCG   3   0   0   2   4   0   0   1   3   0   1   1   0
-    ##   BOH   0   0   1   1   1   7  10   8  11   1   0   0   0
-    ##   BOB  15   3   2   9  37  44 101  93  70  34  15   6   0
-    ##   UEB  10   1   4   1   7  11  24  67   9   5   7   7   0
-    ##   SCL   0   5   0   6  53   4  10  15   4   1   1   0   0
-    ##   SCD   1   0   0   0   7   4  28  40  16   3   1   0   0
-    ##   WSL   2   1   4  10  46  51  78  62  26   2   1   0   0
-    ##   SCS   0   0   1   0   6  10  12   8   2   2   1   0   1
-    ##   NEU   0   0   0   0   1   4  12   8   4   1   0   2   0
-    ##   UST   1   0   0   0   0   1  13   8   9   1   2   0   0
-    ##   KON   0   0   0   0   8  28  34  70  38  28   5   1   0
-    ##   FRI   1   0   0   0   0   2  14  50  43   6   4   0   0
-    ##   BAR   0   0   0   1   0   0   0   0   0   0   0   0   0
-    ##   BRU  14   0   1  11  25  40  17  48   6  10   3   3   0
-    ##   LIM   0  10   4  10  36  33  40  38  26  13   3   3   0
-    ##   HAN   4   0   0  21  12   0   2   0   5   4   7   8   2
-    ##   GEN   0   0   0   0   1   2   0   1   3   1   2   0   0
-
-``` r
-cc_myData_genclone_aMO_noOutliers <- as.genclone(cc_myData_genind_aMO_noOutliers)
-table(strata(cc_myData_genclone_aMO_noOutliers, ~Pop/Month, combine = FALSE))  # Subpopulations
-```
-
-    ##      Month
-    ## Pop    3  7  8 10 12  4  6 11  5  9  1  2
-    ##   ALD  2  1  3  2  2  0  0  2  0  1  5  3
-    ##   RIE  8  0  2  7  7  2  2 11  0  2  6  7
-    ##   TRO  3  0  0  0  0  1  0  1  0  0  4  1
-    ##   SCG  2  2  0  0  0  0  2  1  0  0  1  1
-    ##   BOH  0  1  7  6  1  0  1  6  1 10  0  0
-    ##   BOB 10 12 30 36 19  3  4 28  2 39 12  6
-    ##   UEB  5  4  5 13  2  1  1  1  1 11  4  5
-    ##   SCL  0 17  3  8  1  5  3  2  0  8  1  0
-    ##   SCD  1  4  3  9  0  0  0 13  0 17  1  0
-    ##   WSL  1  1  2  2  0  1  2  0  0  3  1  0
-    ##   SCS  0  0  2  1  2  0  0  1  1  1  1  0
-    ##   NEU  0  1  2  3  0  0  0  3  0  4  0  1
-    ##   UST  0  0  1  5  0  0  0  7  0  8  2  0
-    ##   KON  0  5  7 18  6  0  0  8  0 11  4  1
-    ##   FRI  1  0  1  5  0  0  0  5  0  5  3  0
-    ##   BAR  0  0  0  0  0  0  1  0  0  0  0  0
-    ##   BRU  4  2  3  3  1  0  3  1  0  0  1  0
-    ##   LIM  0  6  3  1  4  2  1  3  0  0  2  2
-    ##   HAN  0  3  0  0  1  0  2  1  0  1  4  1
-    ##   GEN  0  0  1  1  1  0  0  0  0  0  2  0
-
-``` r
-allMarkers_noOutliers_amova <- poppr.amova(myData_genclone_aMO_noOutliers, ~Pop)
-allMarkers_noOutliers_amova
-```
-
-    ## $call
-    ## ade4::amova(samples = xtab, distances = xdist, structures = xstruct)
-    ## 
-    ## $results
-    ##                   Df    Sum Sq    Mean Sq
-    ## Between samples   19  9192.124 483.795996
-    ## Within samples  2169  7780.793   3.587272
-    ## Total           2188 16972.917   7.757275
-    ## 
-    ## $componentsofcovariance
-    ##                                Sigma         %
-    ## Variations  Between samples 4.615108  56.26547
-    ## Variations  Within samples  3.587272  43.73453
-    ## Total variations            8.202380 100.00000
-    ## 
-    ## $statphi
-    ##                         Phi
-    ## Phi-samples-total 0.5626547
-
-``` r
-allMarkers_amovacc_noOutliers <- poppr.amova(myData_genclone_aMO_noOutliers, ~Pop, clonecorrect = TRUE)
-allMarkers_amovacc_noOutliers
-```
-
-    ## $call
-    ## ade4::amova(samples = xtab, distances = xdist, structures = xstruct)
-    ## 
-    ## $results
-    ##                  Df    Sum Sq   Mean Sq
-    ## Between samples  19  954.6079 50.242521
-    ## Within samples  414 2303.8575  5.564873
-    ## Total           433 3258.4654  7.525324
-    ## 
-    ## $componentsofcovariance
-    ##                                Sigma         %
-    ## Variations  Between samples 2.238742  28.68852
-    ## Variations  Within samples  5.564873  71.31148
-    ## Total variations            7.803615 100.00000
-    ## 
-    ## $statphi
-    ##                         Phi
-    ## Phi-samples-total 0.2868852
-
-``` r
 #significance testing
 set.seed(1999)
 allMarkers_signif   <- randtest(allMarkers_amova, nrepet = 999)
