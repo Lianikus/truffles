@@ -115,25 +115,6 @@ write.csv(compare_clusters,file="compare_clusters.csv")
 #if I compare clusters from k-means and from STRUCTURE, they don't seem very similar and consistent
 ```
 
-```{r define a-score}
-setPop(myData_genind_allMarkersOnly) <- ~Pop
-dapc2 <- dapc(myData_genind_allMarkersOnly, n.da=100, n.pca=10)
-temp <- a.score(dapc2)
-names(temp)
-temp$pop.score
-temp$mean
-dapc2 <- dapc(myData_genind_allMarkersOnly, n.da=100, n.pca=50)
-temp <- optim.a.score(dapc2)
-
-#optimal score is 21 PCAs
-
-dapc21 <- dapc(myData_genind_allMarkersOnly, n.da=100, n.pca=21)
-summary(dapc21)
-
-compoplot(dapc21, posi="bottomright",
-txt.leg=paste("Cluster", 1:6), lab="",
-ncol=1, xlab="individuals", col=funky(6))
-```
 
 ```{r another k-means approach, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 # find clusters

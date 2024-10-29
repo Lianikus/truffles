@@ -249,7 +249,7 @@ cc.dapc2 <- dapc(cc_myData_genind_allMarkersOnly_SY, n.da=100, n.pca=50)
 temp <- optim.a.score(cc.dapc2)
 temp
 
-#optimal score is 23 PCAs
+#optimal score is 30 PCAs and increasing with increasing number of runs
 ```
 
 ```{r dapc define clusters}
@@ -269,7 +269,7 @@ row.lab=paste("ori", 1:6))
 
 # Route 2: corrected AllMarkersOnly
 setPop(cc_myData_genind_allMarkersOnly_SY) <- ~Pop
-cc_grp <- find.clusters(cc_myData_genind_allMarkersOnly_SY, max.n.clust=6, max.n.pca=40, n.pca=23)
+cc_grp <- find.clusters(cc_myData_genind_allMarkersOnly_SY, max.n.clust=6, max.n.pca=40, n.pca=26)
 #no clear model exists, the more the merrier but it's not very useful
 table(pop(cc_myData_genind_allMarkersOnly_SY), cc_grp$grp)
 table.value(table(pop(cc_myData_genind_allMarkersOnly_SY), cc_grp$grp), col.lab=paste("inf", 1:6),
@@ -288,7 +288,12 @@ as welll. Such individuals are referred to as supplementary individuals.
 #uncorrected AllMarkersOnly, only visualising the DAPC only preset clusters
 setPop(myData_genind_allMarkersOnly) <- ~Pop
 dapc.allMarkers <- dapc(myData_genind_allMarkersOnly,var.contrib = TRUE, scale = FALSE, n.pca = 21, n.da = nPop(myData_genind_allMarkersOnly) - 1)
-scatter(dapc.allMarkers, cell = 0, pch = 18:23, cstar = 0, mstree = TRUE, lwd = 2, lty = 2, scree.pca=TRUE,posi.pca="bottomleft", scree.da=TRUE, posi.da="top")
+scatter(dapc.allMarkers, cell = 0, pch = 18:23, cstar = 0, mstree = TRUE, lwd = 2, lty = 2, scree.pca=TRUE,posi.pca="topright", scree.da=TRUE, posi.da="top")
+
+# corrected AllMarkersOnly without presetting clusters
+setPop(cc_myData_genind_allMarkersOnly_SY) <- ~Pop
+cc.dapc.allMarkers <- dapc(cc_myData_genind_allMarkersOnly_SY,var.contrib = TRUE, scale = FALSE, n.pca = 21, n.da = nPop(cc_myData_genind_allMarkersOnly_SY) - 1)
+scatter(cc.dapc.allMarkers, cell = 0, pch = 18:23, cstar = 0, mstree = TRUE, lwd = 2, lty = 2, scree.pca=TRUE,posi.pca="topright", scree.da=TRUE, posi.da="top")
 ```
 ```{r dapc2, eval=FALSE, include=FALSE}
 #STRUCTURE like when knowing about number of clusters:

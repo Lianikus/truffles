@@ -46,6 +46,7 @@ colnames(pops) <- c("Site","Lat","Lon")
 ```
 
 ```{r calculate Piechart}
+# from https://github.com/Tom-Jenkins/mapmixture/blob/main/README.md
 map1 <- mapmixture(anc.mat,pops,crs=2056)
 map1
 
