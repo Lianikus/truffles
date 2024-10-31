@@ -34,6 +34,10 @@ library(graph4lg)
 library(iNEXT)
 library(ggh4x)
 library(paletteer)
+library(factoextra)
+library(gridExtra)
+library(mclust)
+
 T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_Mai2024.xlsx")
 myData_genind <- read.genalex("Daten_Genalex.csv",genclone=FALSE, ploidy=1)
 myData_genind_allMarkersOnly <- myData_genind %>%
@@ -54,6 +58,64 @@ T_all_withMLGs_withClusters_allMarkersOnly <- left_join(T_all_withMLGs_allMarker
 #write.csv(T_all_withMLGs_withClusters_allMarkersOnly,file="T_all_withMLGs_withClusters_allMarkersOnly.csv", sep=";")
 myData_genind_withClusters <- read.genalex("DatenGenalex_withMLGs_withClusters_allMarkersOnly.csv",genclone=FALSE,ploidy=1)
 splitStrata(myData_genind_withClusters) <- ~Pop/Month/SamplingYear/TruffleYear/cluster
+
+qmatrix_k6 <- read_excel("qmatrix_k6_mlg.xlsx")
+qmatrix_k6 <- left_join(T_all_withMLGs_allMarkersOnly,qmatrix_k6,by=c("MLG"="MLG_ID"), keep=FALSE, multiple="first") %>%
+  select("Code","1","2","3","4","5","6")
+```
+
+```{r compare structure with k-means, message=FALSE, warning=FALSE}
+# Convert genind to a matrix if needed
+geno_matrix <- tab(myData_genind_allMarkersOnly, NA.method = "mean")
+
+# Set K to the same number as the optimal STRUCTURE K
+optimal_k <- 6 # Replace with your determined K
+
+# Run k-means
+set.seed(123) # For reproducibility
+kmeans_result <- kmeans(geno_matrix, centers = optimal_k)
+
+# Identify constant columns
+constant_cols <- apply(geno_matrix, 2, function(x) var(x, na.rm = TRUE) == 0)
+
+# Remove constant columns
+geno_matrix_filtered <- geno_matrix[, !constant_cols]
+
+# Run PCA on the filtered matrix
+pca_result <- prcomp(geno_matrix_filtered, scale = TRUE)
+
+# Extract PCA coordinates
+pca_coords <- as.data.frame(pca_result$x[, 1:2]) # First two principal components
+
+# Add cluster assignments
+pca_coords$STRUCTURE_cluster <- apply(qmatrix_k6, 1, which.max)  # Max probability per row
+# Assuming `STRUCTURE_cluster` contains cluster labels as integers from 2 to 7
+pca_coords$STRUCTURE_cluster <- as.factor(pca_coords$STRUCTURE_cluster - 1)
+
+pca_coords$KMeans_cluster <- kmeans_result$cluster
+
+
+# Plot STRUCTURE assignments
+p1 <- ggplot(pca_coords, aes(x = PC1, y = PC2, color = as.factor(STRUCTURE_cluster))) +
+  geom_point(size = 3, alpha = 0.7) +
+  scale_color_brewer(palette = "Set1") +
+  labs(title = "STRUCTURE Clustering", color = "Cluster") +
+  theme_minimal()
+
+# Plot k-means assignments
+p2 <- ggplot(pca_coords, aes(x = PC1, y = PC2, color = as.factor(KMeans_cluster))) +
+  geom_point(size = 3, alpha = 0.7) +
+  scale_color_brewer(palette = "Set2") +
+  labs(title = "k-means Clustering", color = "Cluster") +
+  theme_minimal()
+
+# Arrange plots side by side
+grid.arrange(p1, p2, ncol = 2)
+
+# Compute Adjusted Rand Index
+ari_score <- adjustedRandIndex(pca_coords$STRUCTURE_cluster, pca_coords$KMeans_cluster)
+print(paste("Adjusted Rand Index between STRUCTURE and k-means:", ari_score))
+
 ```
 
 ```{r how many clusters}
@@ -98,7 +160,6 @@ grp.3pca <- find.clusters(myData_genind_allMarkersOnly, n.pca=3, n.clust=6)
 grp.5pca <- find.clusters(myData_genind_allMarkersOnly, n.pca=5, n.clust=6)
 grp.21pca <- find.clusters(myData_genind_allMarkersOnly, n.pca=21, n.clust=6)
 
-grp$size
 options(max.print=4000)
 grp.1pca_df <- as_tibble(data.frame(grp.1pca$grp), rownames="Sample")
 grp.3pca_df <- as_tibble(data.frame(grp.3pca$grp), rownames="Sample")
@@ -110,7 +171,7 @@ compare_clusters <- left_join(compare_clusters,grp.5pca_df,by=c("Code"="Sample")
 compare_clusters <- left_join(compare_clusters,grp.1pca_df,by=c("Code"="Sample"))
 compare_clusters <- left_join(compare_clusters,grp.21pca_df,by=c("Code"="Sample"))
 compare_clusters
-write.csv(compare_clusters,file="compare_clusters.csv")
+#write.csv(compare_clusters,file="compare_clusters.csv")
 
 #if I compare clusters from k-means and from STRUCTURE, they don't seem very similar and consistent
 ```
@@ -154,7 +215,7 @@ ggplot(myDataclusters_long, aes(factor(ind), prob, fill = factor(cluster))) +
   )
 
 compoplot(myData_dapc1, col = funky, xlab = "individuals")
-````
+```
 
 ```{r FST with clusters}
 setPop(myData_genind_withClusters) <- ~cluster
