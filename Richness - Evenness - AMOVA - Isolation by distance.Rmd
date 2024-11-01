@@ -64,6 +64,99 @@ myData_genind_withClusters <- read.genalex("DatenGenalex_withMLGs_withClusters_a
 splitStrata(myData_genind_withClusters) <- ~Pop/Month/SamplingYear/TruffleYear/cluster
 ```
 
+
+```{r comparing datareduction}
+
+# Assuming `genind_original` and `genind_reduced` are your two genind objects
+datasets <- list(Original = myData_genind, Reduced = myData_genind_allMarkersOnly)
+
+#function to calculate metrics
+calculate_metrics <- function(genind_obj) {
+  # Number of individuals
+  num_individuals <- nInd(genind_obj)
+  
+  # Number of loci
+  num_loci <- nLoc(genind_obj)
+  
+  #Number of alleles
+  # Calculate alleles per locus
+  alleles_per_locus <- apply(tab(genind_obj), 2, function(x) length(unique(x[!is.na(x)])))
+  total_num_alleles <-  sum(alleles_per_locus, na.rm = TRUE)
+  
+  # Calculate allelic richness manually
+  alleles_per_locus <- apply(tab(genind_obj), 2, function(x) length(unique(x[!is.na(x)])))
+  allelic_richness <- mean(alleles_per_locus, na.rm = TRUE)
+  
+  # Genetic diversity (Nei's diversity)
+  nei_diversity <- mean(Hs(genind_obj), na.rm = TRUE)
+  
+  # Missing data proportion
+  missing_data_prop <- sum(is.na(tab(genind_obj))) / length(tab(genind_obj))
+  
+  
+  # Extract the genotype data from the genind object
+  genotypes <- as.data.frame(genind_obj@tab)
+
+  # Create a unique identifier for each MLG by combining allele information across all loci
+  # You may need to adjust the indices based on your specific data structure
+  genotypes$MLG <- apply(genotypes, 1, function(x) paste(na.omit(x), collapse = "_"))
+
+  # Count the number of unique MLGs
+  num_distinct_MLGs <- length(unique(genotypes$MLG))
+
+  return(data.frame(
+    "Number_of_Individuals" = num_individuals,
+    "Number_of_Loci" = num_loci,
+    "Number_of_Alleles" = total_num_alleles,
+    "Allelic_Richness" = allelic_richness,
+    "Number_of_distinct_MLGs" = num_distinct_MLGs,
+    "Nei_Diversity" = nei_diversity,
+    "Missing_Data_Proportion" = missing_data_prop
+  ))
+}
+
+# Apply the function to both datasets and combine results
+metrics_df <- do.call(rbind, lapply(datasets, calculate_metrics))
+metrics_df <- cbind(Dataset = rownames(metrics_df), metrics_df)
+rownames(metrics_df) <- NULL
+
+# Display the metrics
+print(metrics_df)
+
+# Reshape metrics_df to long format and define the order of metrics
+metrics_long <- metrics_df %>%
+  pivot_longer(cols = -Dataset, names_to = "Metric", values_to = "Value") %>%
+  mutate(Metric = factor(Metric, levels = c(
+    "Number_of_Individuals",
+    "Number_of_Loci",
+    "Number_of_Alleles",
+    "Allelic_Richness",
+    "Number_of_distinct_MLGs",
+    "Nei_Diversity",
+    "Missing_Data_Proportion"
+  )))
+metrics_long
+
+# Plot with improved visibility and specified metric order
+ggplot(metrics_long, aes(x = Metric, y = Value, fill = Dataset)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.7), color = "black") +
+  geom_text(aes(label = round(Value, 2)), 
+            position = position_dodge(width = 0.7), 
+            vjust = -0.5, 
+            size = 4.5) +  # Adjust text size
+  scale_fill_manual(values = c("Original" = "skyblue", "Reduced" = "salmon")) +
+  labs(title = "Comparison of Original and Reduced Datasets",
+       y = "",
+       x = "") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+  theme_minimal(base_size = 14) +  # Increase base font size
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for better visibility
+
+
+```
+
+
 ```{r crosspop mlgs}
 mlg_data <- data.frame(
   mlg = mlg.vector(myData_genind_allMarkersOnly),
@@ -83,7 +176,45 @@ Cannot be determined for haploids.
 The number of observed MLGs is equivalent to genotypic richness. We expect that the BB population would have a higher genotypic richness than the FR population. However, looking at the raw number of MLGs for each symptom type, it shows us the opposite: there are 94 MLGs for BB and 191 MLGs for FR. This discrepancy has to do with the sample size differences, namely N=113 for BB and N=581 for FR. A more appropriate comparison is the eMLG value, which is an approximation of the number of genotypes that would be expected at the largest, shared sample size (N=113) based on rarefaction. For BB (N=113) the eMLG=94 and for FR (where N is set to 113) the eMLG = 66.6. Thus, genotypic richness is indeed higher in the BB populations than the FR population when considering equal sample sizes.
 
 ```{r richness}
+
 setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
+# Calculating minimal necessary sample size
+# Step 1: Extract population information
+
+# Step 1: Extract population information
+populations <- pop(myData_genind_allMarkersOnly)
+
+# Step 2: Calculate sample sizes per population
+population_counts <- table(populations)
+
+# Step 3: Calculate number of alleles per locus
+allele_counts <- nAll(myData_genind_allMarkersOnly)
+
+# Step 4: Create a data frame to hold alleles and populations
+# Repeat population assignments for each locus
+pop_assignments <- rep(populations, each = length(allele_counts))
+
+# Combine the population assignments and allele counts into a data frame
+allele_data <- data.frame(Population = pop_assignments,
+                           Locus = rep(1:length(allele_counts), times = length(populations)),
+                           AlleleCount = rep(allele_counts, each = length(populations)))
+
+# Step 5: Calculate average number of alleles per population
+average_alleles <- aggregate(AlleleCount ~ Population, data = allele_data, FUN = mean)
+
+# Combine sample sizes and average alleles into one data frame
+sample_summary <- data.frame(Population = names(population_counts),
+                             SampleSize = as.integer(population_counts),
+                             AverageAlleles = average_alleles$AlleleCount)
+
+# Step 6: Plot Sample Size vs. Average Number of Alleles
+ggplot(sample_summary, aes(x = SampleSize, y = AverageAlleles)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Sample Size vs. Average Number of Alleles (Stratum SamplingYear)",
+       x = "Sample Size",
+       y = "Average Number of Alleles") +
+  theme_minimal()
 
 #Minimal sample size Sum is 1 so this can not give any relevant output. I will plot the same for higher sample sizes only
 #only calculate Richness for populations > 100 samples (N)
@@ -92,7 +223,66 @@ summary(myData_genind_allMarkersOnly_above100N)
 H.year <- mlg.table(myData_genind_allMarkersOnly_above100N, plot = FALSE)
 rarecurve(H.year, ylab="Number of expected MLGs", sample=min(rowSums(H.year)),
           border = NA, fill = NA, font = 2, cex = 1, col = "blue")
-title("Rarecurve of Sampling Years")
+title("Rarecurve of Sampling Years (min. sample size = 100 per year)")
+
+
+
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+# Calculating minimal necessary sample size
+# Step 1: Extract population information
+
+# Step 1: Extract population information
+populations <- pop(myData_genind_allMarkersOnly)
+
+# Step 2: Calculate sample sizes per population
+population_counts <- table(populations)
+
+# Step 3: Calculate number of alleles per locus
+allele_counts <- nAll(myData_genind_allMarkersOnly)
+
+# Step 4: Create a data frame to hold alleles and populations
+# Repeat population assignments for each locus
+pop_assignments <- rep(populations, each = length(allele_counts))
+
+# Combine the population assignments and allele counts into a data frame
+allele_data <- data.frame(Population = pop_assignments,
+                           Locus = rep(1:length(allele_counts), times = length(populations)),
+                           AlleleCount = rep(allele_counts, each = length(populations)))
+
+# Step 5: Calculate average number of alleles per population
+average_alleles <- aggregate(AlleleCount ~ Population, data = allele_data, FUN = mean)
+
+# Combine sample sizes and average alleles into one data frame
+sample_summary <- data.frame(Population = names(population_counts),
+                             SampleSize = as.integer(population_counts),
+                             AverageAlleles = average_alleles$AlleleCount)
+
+# Step 6: Plot Sample Size vs. Average Number of Alleles
+ggplot(sample_summary, aes(x = SampleSize, y = AverageAlleles)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Sample Size vs. Average Number of Alleles (Stratum Pop)",
+       x = "Sample Size",
+       y = "Average Number of Alleles") +
+  theme_minimal()
+
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+myData_genind_allMarkersOnly_above5N <- selPopSize(myData_genind_allMarkersOnly,pop=NULL,nMin=5)
+poppr(myData_genind_allMarkersOnly_above5N)
+H.year <- mlg.table(myData_genind_allMarkersOnly_above5N, plot = FALSE)
+rarecurve(H.year, ylab="Number of expected MLGs", sample=min(rowSums(H.year)),
+          border = NA, fill = NA, font = 2, cex = 1, col = "blue")
+title("Rarecurve of Pop (min. Sample size = 5 per Pop)")
+
+#rescale to see anything except for BOB
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+myData_genind_allMarkersOnly_above5N_withoutBOB <- popsub(myData_genind_allMarkersOnly_above5N,exclude="BOB")
+poppr(myData_genind_allMarkersOnly_above5N_withoutBOB)
+H.year_withoutBOB <- mlg.table(myData_genind_allMarkersOnly_above5N_withoutBOB, plot = FALSE)
+rarecurve(H.year_withoutBOB, ylab="Number of expected MLGs", sample=min(rowSums(H.year_withoutBOB)),
+font = 2, cex = 1, col = "blue")
+title("Rarecurve of Pop  (min. Sample size = 5 per Pop; without BOB)")
+
 
 setPop(myData_genind_allMarkersOnly) <- ~TruffleYear
 myData_genind_allMarkersOnly_above100N <- selPopSize(myData_genind_allMarkersOnly,pop=NULL,nMin=100)
@@ -111,22 +301,7 @@ rarecurve(H.year, ylab="Number of expected MLGs", sample=min(rowSums(H.year)),
           border = NA, fill = NA, font = 2, cex = 1, col = "blue")
 title("Rarecurve of Month")
 
-setPop(myData_genind_allMarkersOnly) <- ~Pop
-myData_genind_allMarkersOnly_above5N <- selPopSize(myData_genind_allMarkersOnly,pop=NULL,nMin=5)
-poppr(myData_genind_allMarkersOnly_above5N)
-H.year <- mlg.table(myData_genind_allMarkersOnly_above5N, plot = FALSE)
-rarecurve(H.year, ylab="Number of expected MLGs", sample=min(rowSums(H.year)),
-          border = NA, fill = NA, font = 2, cex = 1, col = "blue")
-title("Rarecurve of Pop")
 
-#rescale to see anything except for BOB
-setPop(myData_genind_allMarkersOnly) <- ~Pop
-myData_genind_allMarkersOnly_above5N_withoutBOB <- popsub(myData_genind_allMarkersOnly_above5N,exclude="BOB")
-poppr(myData_genind_allMarkersOnly_above5N_withoutBOB)
-H.year_withoutBOB <- mlg.table(myData_genind_allMarkersOnly_above5N_withoutBOB, plot = FALSE)
-rarecurve(H.year_withoutBOB, ylab="Number of expected MLGs", sample=min(rowSums(H.year_withoutBOB)),
-font = 2, cex = 1, col = "blue")
-title("Rarecurve of Pop")
 
 #Genotypic richness rises, the later the ascocarps were collected --> more different individuals produced fruiting bodies
 ```

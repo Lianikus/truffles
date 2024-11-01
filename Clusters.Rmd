@@ -44,27 +44,210 @@ myData_genind_allMarkersOnly <- myData_genind %>%
   missingno("geno", cutoff = 0)
 splitStrata(myData_genind) <- ~Pop/Month/SamplingYear/TruffleYear
 splitStrata(myData_genind_allMarkersOnly) <- ~Pop/Month/SamplingYear/TruffleYear
-cc_myData_genind_allMarkersOnly_SY <- clonecorrect(myData_genind_allMarkersOnly,
-                                                   strata=~Pop/SamplingYear)
+
+# Assuming `genotype_data` is your genind object
+original_order <- indNames(myData_genind_allMarkersOnly)
+
+# Clone-correct by population, keeping only one representative per MLG
+cc_myData_genind_allMarkersOnly <- clonecorrect(myData_genind_allMarkersOnly, strata = ~Pop)
+
+# Reorder clone-corrected data to match the original order
+cc_myData_genind_allMarkersOnly <- cc_myData_genind_allMarkersOnly[order(match(indNames(cc_myData_genind_allMarkersOnly), original_order))]
+
+#cluster assignment k=5
+clustersk5 <- read_excel("STRUCTURE Results MLGs k5.xlsx")
+clustersk5$`clusterssign(q>0.5)` <- factor(clustersk5$`clusterssign(q>0.5)`)
+cc_FullTable_Tuaest_allMarkersOnly <- read.csv("C:/Users/liaba/OneDrive - Eidg. Forschungsanstalt WSL/R/truffles/cc_TUAEST_ALLMARKERSONLY_HWE.csv")
+cc_distinctMLGs_allMarkersOnly <- cc_FullTable_Tuaest_allMarkersOnly[!duplicated(cc_FullTable_Tuaest_allMarkersOnly$MLG), ]
+T_all <- separate_wider_delim(T_all,Code_Analyses2, delim="_", names = c("Code","Yr"))
+T_all_withMLGs_allMarkersOnly <- inner_join(T_all,cc_FullTable_Tuaest_allMarkersOnly,by=c("Code"="Sample")) %>%
+  select(Code, MLG, Site_1_abrev, truffle_year, Sampling_year,Sampling_date)
+T_all_withMLGs_withClusters_k5_allMarkersOnly <- left_join(T_all_withMLGs_allMarkersOnly,clustersk5,by=c("MLG"="MLG_ID")) %>% distinct(Code, .keep_all=TRUE) %>%select(-"IndID2")
+
+#write.csv(T_all_withMLGs_withClusters_k5_allMarkersOnly,file="T_all_withMLGs_withClusters_k5_allMarkersOnly.csv", sep=";")
+myData_genind_withClusters_k5 <- read.genalex("DatenGenalex_withClusters_k5_aMO.csv",genclone=FALSE,ploidy=1)
+myData_genind_aMO_k5 <- myData_genind_withClusters_k5 %>%
+  missingno("geno", cutoff = 0)
+splitStrata(myData_genind_aMO_k5) <- ~Pop/Month/SamplingYear/TruffleYear/cluster
+
+#cluster assignment k=6
 clusters <- read_excel("STRUCTURE Results MLGs.xlsx")
 clusters$`clusterssign(q>0.5)` <- factor(clusters$`clusterssign(q>0.5)`)
 cc_FullTable_Tuaest_allMarkersOnly <- read.csv("C:/Users/liaba/OneDrive - Eidg. Forschungsanstalt WSL/R/truffles/cc_TUAEST_ALLMARKERSONLY_HWE.csv")
 cc_distinctMLGs_allMarkersOnly <- cc_FullTable_Tuaest_allMarkersOnly[!duplicated(cc_FullTable_Tuaest_allMarkersOnly$MLG), ]
-T_all <- separate_wider_delim(T_all,Code_Analyses2, delim="_", names = c("Code","Yr"))
+#T_all <- separate_wider_delim(T_all,Code_Analyses2, delim="_", names = c("Code","Yr"))
 T_all_withMLGs_allMarkersOnly <- inner_join(T_all,cc_FullTable_Tuaest_allMarkersOnly,by=c("Code"="Sample")) %>%
   select(Code, MLG, Site_1_abrev, truffle_year, Sampling_year,Sampling_date)
 T_all_withMLGs_withClusters_allMarkersOnly <- left_join(T_all_withMLGs_allMarkersOnly,clusters,by=c("MLG"="MLG_ID")) %>% select(-"IndID2") %>% distinct(.)
 
 #write.csv(T_all_withMLGs_withClusters_allMarkersOnly,file="T_all_withMLGs_withClusters_allMarkersOnly.csv", sep=";")
 myData_genind_withClusters <- read.genalex("DatenGenalex_withMLGs_withClusters_allMarkersOnly.csv",genclone=FALSE,ploidy=1)
-splitStrata(myData_genind_withClusters) <- ~Pop/Month/SamplingYear/TruffleYear/cluster
+myData_genind_aMO_k6 <- myData_genind_withClusters %>%
+  missingno("geno", cutoff = 0)
+splitStrata(myData_genind_aMO_k6) <- ~Pop/Month/SamplingYear/TruffleYear/cluster
 
+qmatrix_k6_ind <- read_excel("qmatrix_structure_k6_code.xlsx")
+qmatrix_k5_ind <- read_excel("qmatrix_k5_code.xlsx")
 qmatrix_k6 <- read_excel("qmatrix_k6_mlg.xlsx")
-qmatrix_k6 <- left_join(T_all_withMLGs_allMarkersOnly,qmatrix_k6,by=c("MLG"="MLG_ID"), keep=FALSE, multiple="first") %>%
+qmatrix_k6_allMarkersOnly <- left_join(T_all_withMLGs_allMarkersOnly,qmatrix_k6,by=c("MLG"="MLG_ID"), keep=FALSE, multiple="first") %>%
   select("Code","1","2","3","4","5","6")
+
+# Define a color palette
+color_palette_k5 <- c("1" = "#377EB8",
+                   "2" = "#FF7F00",
+                   "3" = "#E41A1C",
+                   "4" = "mediumvioletred",
+                   "5" = "#4DAF4A",
+                   "mixed" = "black")
+
+color_palette_k6 <- c("1" = "#377EB8",
+                   "2" = "#FF7F00",
+                   "3" = "#E41A1C",
+                   "4" = "mediumvioletred",
+                   "5" = "#4DAF4A",
+                   "6" = "orchid1",
+                   "mixed" = "black")
+
 ```
 
-```{r compare structure with k-means, message=FALSE, warning=FALSE}
+```{r compute PCA with 5 clusters}
+setPop(myData_genind_aMO_k5) <- ~cluster
+pca_result_k5 <- dudi.pca(tab(myData_genind_aMO_k5), center = TRUE, scale = TRUE, scannf = FALSE, nf = 2)
+
+# Extract scores for plotting
+pca_scores5 <- as.data.frame(pca_result_k5$li)
+pca_scores5$Group <- pop(myData_genind_aMO_k5)  # Add population or strata information for coloring
+
+setPop(myData_genind_aMO_k5) <- ~Pop
+population_vector5 <- pop(myData_genind_aMO_k5)  # Create a vector with population names
+# Convert pop5ulation vector to a data frame
+population_df5 <- data.frame(Pop = population_vector5)
+pca_scores5$Pop <- population_df5
+
+ggplot(pca_scores5, aes(x = Axis1, y = Axis2, color = Group)) +
+  geom_point(size = 3) +
+  theme_minimal() +
+  geom_text(aes(label = Pop$Pop), vjust = -0.5, hjust = 0.5, size = 3) + 
+  labs(title = "PCA mit 5 clusters",
+       x = "Principal Component 1",
+       y = "Principal Component 2") +
+  scale_color_manual(values = color_palette_k5, name = "Cluster")
+
+```
+
+```{r compute PCA with 6 clusters}
+setPop(myData_genind_aMO_k6) <- ~cluster
+pca_result_k6 <- dudi.pca(tab(myData_genind_aMO_k6), center = TRUE, scale = TRUE, scannf = FALSE, nf = 2)
+
+# Extract scores for plotting
+pca_scores6 <- as.data.frame(pca_result_k6$li)
+pca_scores6$Group <- pop(myData_genind_aMO_k6)  # Add population or strata information for coloring
+
+setPop(myData_genind_aMO_k6) <- ~Pop
+population_vector6 <- pop(myData_genind_aMO_k6)  # Create a vector with population names
+# Convert population vector to a data frame
+population_df6 <- data.frame(Pop = population_vector6)
+pca_scores6$Pop <- population_df6
+
+ggplot(pca_scores6, aes(x = Axis1, y = Axis2, color = Group)) +
+  geom_point(size = 3) +
+  theme_minimal() +
+  geom_text(aes(label = Pop$Pop), vjust = -0.5, hjust = 0.5, size = 3) + 
+  labs(title = "PCA mit 6 clusters",
+       x = "Principal Component 1",
+       y = "Principal Component 2") +
+  scale_color_manual(values = color_palette_k6, name = "Cluster")
+
+```
+
+```{r pca k5 without cluster 3}
+setPop(myData_genind_aMO_k5) <- ~cluster
+myData_genind_aMO_k5_minus3 <- popsub(myData_genind_aMO_k5,exclude="3")
+pca_result_k5_minus3 <- dudi.pca(tab(myData_genind_aMO_k5_minus3), center = TRUE, scale = TRUE, scannf = FALSE, nf = 2)
+
+# Extract scores for plotting
+pca_scores5_minus3 <- as.data.frame(pca_result_k5_minus3$li)
+pca_scores5_minus3$Group <- pop(myData_genind_aMO_k5_minus3)  # Add population or strata information for coloring
+
+setPop(myData_genind_aMO_k5_minus3) <- ~Pop
+population_vector5_minus3 <- pop(myData_genind_aMO_k5_minus3)  # Create a vector with population names
+# Convert pop5ulation vector to a data frame
+population_df5_minus3 <- data.frame(Pop = population_vector5_minus3)
+pca_scores5_minus3$Pop <- population_df5_minus3
+
+ggplot(pca_scores5_minus3, aes(x = Axis1, y = Axis2, color = Group)) +
+  geom_point(size = 3) +
+  theme_minimal() +
+  geom_text(aes(label = Pop$Pop), vjust = -0.5, hjust = 0.5, size = 3) + 
+  labs(title = "PCA mit 4 clusters",
+       x = "Principal Component 1",
+       y = "Principal Component 2") +
+  scale_color_manual(values = color_palette_k5, name = "Group")
+```
+
+```{r pca k6 without cluster 3}
+setPop(myData_genind_aMO_k6) <- ~cluster
+myData_genind_aMO_k6_minus3 <- popsub(myData_genind_aMO_k6,exclude="3")
+pca_result_k6_minus3 <- dudi.pca(tab(myData_genind_aMO_k6_minus3), center = TRUE, scale = TRUE, scannf = FALSE, nf = 2)
+
+# Extract scores for plotting
+pca_scores6_minus3 <- as.data.frame(pca_result_k6_minus3$li)
+pca_scores6_minus3$Group <- pop(myData_genind_aMO_k6_minus3)  # Add population or strata information for coloring
+
+setPop(myData_genind_aMO_k6_minus3) <- ~Pop
+population_vector6_minus3 <- pop(myData_genind_aMO_k6_minus3)  # Create a vector with population names
+# Convert pop5ulation vector to a data frame
+population_df6_minus3 <- data.frame(Pop = population_vector6_minus3)
+pca_scores6_minus3$Pop <- population_df6_minus3
+
+ggplot(pca_scores6_minus3, aes(x = Axis1, y = Axis2, color = Group)) +
+  geom_point(size = 3) +
+  theme_minimal() +
+  geom_text(aes(label = Pop$Pop), vjust = -0.5, hjust = 0.5, size = 3) + 
+  labs(title = "PCA mit 5 clusters",
+       x = "Principal Component 1",
+       y = "Principal Component 2") +
+  scale_color_manual(values = color_palette_k6, name = "Cluster")
+```
+
+```{r pcoa 5 and 6 clusters, eval=FALSE, include=FALSE}
+nei_dist_matrixk5 <- nei.dist(myData_genind_aMO_k5)  # Calculate Nei's distance
+
+# Perform PCoA
+pcoa_result5 <- pcoa(nei_dist_matrixk5)
+
+# Convert PCoA results to a data frame
+pcoa_scores5 <- as.data.frame(pcoa_result5$vectors)
+pcoa_scores5$Group <- pop(myData_genind_aMO_k5)  # Add population or strata information for coloring
+
+ggplot(pcoa_scores5, aes(x = V1, y = V2, color = Group)) +
+  geom_point(size = 3) +
+  theme_minimal() +
+  labs(title = "PCoA of Genetic Data (Nei's Distance)",
+       x = "Principal Coordinate 1",
+       y = "Principal Coordinate 2") +
+  scale_color_discrete(name = "cluster")
+
+nei_dist_matrixk6 <- nei.dist(myData_genind_aMO_k6)  # Calculate Nei's distance
+
+# Perform PCoA
+pcoa_result6 <- pcoa(nei_dist_matrixk6)
+
+# Convert PCoA results to a data frame
+pcoa_scores6 <- as.data.frame(pcoa_result6$vectors)
+pcoa_scores6$Group <- pop(myData_genind_aMO_k6)  # Add population or strata information for coloring
+
+ggplot(pcoa_scores6, aes(x = V1, y = V2, color = Group)) +
+  geom_point(size = 3) +
+  theme_minimal() +
+  labs(title = "PCoA of Genetic Data (Nei's Distance)",
+       x = "Principal Coordinate 1",
+       y = "Principal Coordinate 2") +
+ scale_color_manual(values = color_palette, name = "Group") +
+
+```
+
+```{r compare structure with k-means allMarkersOnly, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 # Convert genind to a matrix if needed
 geno_matrix <- tab(myData_genind_allMarkersOnly, NA.method = "mean")
 
@@ -116,6 +299,184 @@ grid.arrange(p1, p2, ncol = 2)
 ari_score <- adjustedRandIndex(pca_coords$STRUCTURE_cluster, pca_coords$KMeans_cluster)
 print(paste("Adjusted Rand Index between STRUCTURE and k-means:", ari_score))
 
+#maybe this all makes not so much sense with the individuals - I will repeat it with MLGs
+```
+
+```{r compare structure with k-means clonecorrected, message=FALSE, warning=FALSE}
+# Assuming your other table is named `sample_info` and the column is named `sample_codes`
+sample_codes_to_keep <- qmatrix_k6_ind$IndID2
+# Find indices of the individuals in the genind object that match the sample codes
+indices_to_keep <- which(indNames(myData_genind_allMarkersOnly) %in% sample_codes_to_keep)
+# Subset the genind object by these indices
+filtered_genind <- myData_genind_allMarkersOnly[indices_to_keep, ]
+
+# Convert genind to a matrix
+cc_geno_matrix <- tab(filtered_genind, NA.method = "mean")
+
+# Set K to the same number as the optimal STRUCTURE K
+optimal_k <- 6 # Replace with your determined K
+
+# Run k-means
+set.seed(123) # For reproducibility
+kmeans_result <- kmeans(cc_geno_matrix, centers = optimal_k)
+
+# Identify constant columns
+constant_cols <- apply(cc_geno_matrix, 2, function(x) var(x, na.rm = TRUE) == 0)
+
+# Remove constant columns
+cc_geno_matrix_filtered <- cc_geno_matrix[, !constant_cols]
+
+# Run PCA on the filtered matrix
+cc_pca_result <- prcomp(cc_geno_matrix_filtered, scale = TRUE)
+
+# Extract PCA coordinates
+cc_pca_coords <- as.data.frame(cc_pca_result$x[, 1:2]) # First two principal components
+
+# Add cluster assignments
+cc_pca_coords$STRUCTURE_cluster <- apply(qmatrix_k6, 1, which.max)  # Max probability per row
+# Assuming `STRUCTURE_cluster` contains cluster labels as integers from 2 to 7
+cc_pca_coords$STRUCTURE_cluster <- as.factor(cc_pca_coords$STRUCTURE_cluster - 1)
+
+cc_pca_coords$KMeans_cluster <- kmeans_result$cluster
+
+
+# Plot STRUCTURE assignments
+p1 <- ggplot(cc_pca_coords, aes(x = PC1, y = PC2, color = as.factor(STRUCTURE_cluster))) +
+  geom_point(size = 3, alpha = 0.7) +
+  scale_color_brewer(palette = "Set1") +
+  labs(title = "STRUCTURE Clustering", color = "Cluster") +
+  theme_minimal()
+
+# Plot k-means assignments
+p2 <- ggplot(cc_pca_coords, aes(x = PC1, y = PC2, color = as.factor(KMeans_cluster))) +
+  geom_point(size = 3, alpha = 0.7) +
+  scale_color_brewer(palette = "Set2") +
+  labs(title = "k-means Clustering", color = "Cluster") +
+  theme_minimal()
+
+# Arrange plots side by side
+grid.arrange(p1, p2, ncol = 2)
+
+# Compute Adjusted Rand Index
+ari_score <- adjustedRandIndex(cc_pca_coords$STRUCTURE_cluster, cc_pca_coords$KMeans_cluster)
+print(paste("Adjusted Rand Index between STRUCTURE and k-means:", ari_score))
+```
+
+```{r compare structure with k-means clonecorrected k 5 locPrior, message=FALSE, warning=FALSE}
+# Assuming your other table is named `sample_info` and the column is named `sample_codes`
+sample_codes_to_keep <- qmatrix_k5_ind$IndID2
+# Find indices of the individuals in the genind object that match the sample codes
+indices_to_keep <- which(indNames(myData_genind_allMarkersOnly) %in% sample_codes_to_keep)
+# Subset the genind object by these indices
+filtered_genind <- myData_genind_allMarkersOnly[indices_to_keep, ]
+
+# Convert genind to a matrix
+cc_geno_matrix <- tab(filtered_genind, NA.method = "mean")
+
+# Set K to the same number as the optimal STRUCTURE K
+optimal_k <- 5 # Replace with your determined K
+
+# Run k-means
+set.seed(123) # For reproducibility
+kmeans_result <- kmeans(cc_geno_matrix, centers = optimal_k)
+
+# Identify constant columns
+constant_cols <- apply(cc_geno_matrix, 2, function(x) var(x, na.rm = TRUE) == 0)
+
+# Remove constant columns
+cc_geno_matrix_filtered <- cc_geno_matrix[, !constant_cols]
+
+# Run PCA on the filtered matrix
+cc_pca_result <- prcomp(cc_geno_matrix_filtered, scale = TRUE)
+
+# Extract PCA coordinates
+cc_pca_coords <- as.data.frame(cc_pca_result$x[, 1:2]) # First two principal components
+
+# Add cluster assignments
+cc_pca_coords$STRUCTURE_cluster <- apply(qmatrix_k5_ind, 1, which.max)  # Max probability per row
+
+cc_pca_coords$KMeans_cluster <- kmeans_result$cluster
+
+
+# Plot STRUCTURE assignments
+p1 <- ggplot(cc_pca_coords, aes(x = PC1, y = PC2, color = as.factor(STRUCTURE_cluster))) +
+  geom_point(size = 3, alpha = 0.7) +
+  scale_color_brewer(palette = "Set1") +
+  labs(title = "STRUCTURE Clustering", color = "Cluster") +
+  theme_minimal()
+
+# Plot k-means assignments
+p2 <- ggplot(cc_pca_coords, aes(x = PC1, y = PC2, color = as.factor(KMeans_cluster))) +
+  geom_point(size = 3, alpha = 0.7) +
+  scale_color_brewer(palette = "Set2") +
+  labs(title = "k-means Clustering", color = "Cluster") +
+  theme_minimal()
+
+# Arrange plots side by side
+grid.arrange(p1, p2, ncol = 2)
+
+# Compute Adjusted Rand Index
+ari_score <- adjustedRandIndex(cc_pca_coords$STRUCTURE_cluster, cc_pca_coords$KMeans_cluster)
+print(paste("Adjusted Rand Index between STRUCTURE and k-means:", ari_score))
+```
+
+```{r running k-means on cluster results}
+kmeans_on_q <- kmeans(cc_geno_matrix, centers = optimal_k)
+# Create STRUCTURE-based assignments from the Q-matrix
+structure_assignments <- apply(cc_geno_matrix, 1, which.max)  # STRUCTURE cluster assignment based on max probability
+
+# k-means assignments
+kmeans_assignments <- kmeans_on_q$cluster
+
+# Calculate ARI to compare STRUCTURE and k-means on Q-matrix
+ari_score <- adjustedRandIndex(structure_assignments, kmeans_assignments)
+print(paste("Adjusted Rand Index between STRUCTURE and k-means on Q-matrix:", ari_score))
+
+# Run PCA on Q-matrix
+pca_q <- prcomp(cc_geno_matrix_filtered, scale = TRUE)
+pca_coords <- as.data.frame(pca_q$x[, 1:2])  # Get the first two principal components
+
+# Add STRUCTURE and k-means assignments
+pca_coords$STRUCTURE_cluster <- as.factor(structure_assignments)
+pca_coords$KMeans_cluster <- as.factor(kmeans_assignments)
+
+# Plot STRUCTURE and k-means on Q-matrix side by side
+p1 <- ggplot(pca_coords, aes(x = PC1, y = PC2, color = STRUCTURE_cluster)) +
+  geom_point(size = 3, alpha = 0.7) +
+  labs(title = "STRUCTURE Clustering") +
+  theme_minimal()
+
+p2 <- ggplot(pca_coords, aes(x = PC1, y = PC2, color = KMeans_cluster)) +
+  geom_point(size = 3, alpha = 0.7) +
+  labs(title = "k-means on STRUCTURE Q-matrix") +
+  theme_minimal()
+
+grid.arrange(p1, p2, ncol = 2)
+```
+```{r test}
+# Assuming your other table is named `sample_info` and the column is named `sample_codes`
+sample_codes_to_keep <- qmatrix_k5_ind$IndID2
+# Find indices of the individuals in the genind object that match the sample codes
+indices_to_keep <- which(indNames(myData_genind_allMarkersOnly) %in% sample_codes_to_keep)
+# Subset the genind object by these indices
+filtered_genind <- myData_genind_allMarkersOnly[indices_to_keep, ]
+
+# Convert genind to a matrix
+cc_geno_matrix <- tab(filtered_genind, NA.method = "mean")
+# Compute distance matrix from the Q-matrix
+dist_matrix <- dist(qmatrix_k5_ind, method = "euclidean")
+
+# Perform hierarchical clustering
+hclust_result <- hclust(dist_matrix, method = "ward.D2")
+hierarchical_assignments <- cutree(hclust_result, k = 5)
+
+# Create STRUCTURE-based assignments from the Q-matrix
+structure_assignments <- apply(cc_geno_matrix, 1, which.max)  # STRUCTURE cluster assignment based on max probability
+
+# Calculate ARI between STRUCTURE and hierarchical clustering
+ari_score_hierarchical <- adjustedRandIndex(structure_assignments, hierarchical_assignments)
+print(paste("Adjusted Rand Index between STRUCTURE and hierarchical clustering:", ari_score_hierarchical))
+
 ```
 
 ```{r how many clusters}
@@ -137,7 +498,7 @@ ggplot(T_all_withMLGs_withClusters_allMarkersOnly, aes(x=Sampling_date, y= fct_r
   labs(title = "Overview of samples in truffle monitoring dataset", y = "Sampling site abbreviation", x ="Sampling date", colour="Genetic cluster")
 ```
 
-```{r how many per cluster}
+```{r how many per cluster, eval=FALSE, include=FALSE}
 setPop(myData_genind_withClusters) <- ~cluster
 myData_genind_allMarkersOnly_withoutCluster3_SY <- popsub(myData_genind_withClusters,sublist=c("1","2","4","5","6"))
 poppr(myData_genind_allMarkersOnly_withoutCluster3_SY)
@@ -218,17 +579,67 @@ compoplot(myData_dapc1, col = funky, xlab = "individuals")
 ```
 
 ```{r FST with clusters}
-setPop(myData_genind_withClusters) <- ~cluster
-(truffleClusters.matFst <- mat_pw_fst(myData_genind_withClusters))
+setPop(myData_genind_aMO_k5) <- ~cluster
+truffleClusters_k5.matFst <- mat_pw_fst(myData_genind_aMO_k5)
+truffleClusters_k5.matFst
 
-boxplot(truffleClusters.matFst, col=funky(nPop(myData_genind_withClusters)), las=3,
+boxplot(truffleClusters_k5.matFst, col=color_palette_k5, las=3,
 xlab="Cluster", ylab="Fst")
 
 
 #only clusters 1,2,4,5,6 allMarkersOnly
-setPop(myData_genind_allMarkersOnly_withoutCluster3_SY) <- ~cluster
-(myData_genind_allMarkersOnly_withoutCluster3_SY.matFst <- mat_pw_fst(myData_genind_allMarkersOnly_withoutCluster3_SY))
+setPop(myData_genind_aMO_k5_minus3) <- ~cluster
+(myData_genind_k5_minus3.matFst <- mat_pw_fst(myData_genind_aMO_k5_minus3))
 
-boxplot(myData_genind_allMarkersOnly_withoutCluster3_SY.matFst, col=funky(nPop(myData_genind_allMarkersOnly_withoutCluster3_SY)), las=3,
+boxplot(myData_genind_k5_minus3.matFst, col=color_palette_k5, las=3,
 xlab="Cluster", ylab="Fst")
+
+#colors are wrong
+# Calculate pairwise Fst values
+fst_values_k5 <- pairwise.neifst(myData_genind_aMO_k5)
+
+# Convert the Fst matrix to a data frame
+fst_k5_df <- as.data.frame(fst_values_k5)
+fst_k5_long <- melt(fst_k5_df, varnames = c("1","2","3","4","5","mixed"), value.name = "Fst")
+fst_long <- na.omit(fst_k5_long)
+
+ggplot(fst_k5_long, aes(x = variable, y = Fst, fill=variable)) +
+  geom_boxplot() +
+  scale_fill_manual(values = color_palette_k5) + 
+  theme_minimal() +
+  labs(title = "Comparison of Fst Values Across Clusters",
+       x = "Cluster",
+       y = "Fst Value") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+setPop(myData_genind_aMO_k5) <- ~cluster
+truffleClusters_k5.matFst <- mat_pw_fst(myData_genind_aMO_k5)
+truffleClusters_k5.matFst
+
+boxplot(truffleClusters_k5.matFst, col=color_palette_k5, las=3,
+xlab="Cluster", ylab="Fst")
+
+
+#same with k=6 now
+setPop(myData_genind_aMO_k6_minus3) <- ~cluster
+(myData_genind_k6_minus3.matFst <- mat_pw_fst(myData_genind_aMO_k6_minus3))
+
+# Calculate pairwise Fst values
+fst_values_k6 <- pairwise.neifst(myData_genind_aMO_k6)
+
+# Convert the Fst matrix to a data frame
+fst_k6_df <- as.data.frame(fst_values_k6)
+fst_k6_long <- melt(fst_k6_df, varnames = c("1","2","3","4","5","6","mixed"), value.name = "Fst")
+fst_k6_long <- na.omit(fst_k6_long)
+
+ggplot(fst_k6_long, aes(x = variable, y = Fst, fill=variable)) +
+  geom_boxplot() +
+  scale_fill_manual(values = color_palette_k6) + 
+  theme_minimal() +
+  labs(title = "Comparison of Fst Values Across Clusters",
+       x = "Cluster",
+       y = "Fst Value") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
 ```

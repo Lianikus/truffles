@@ -6,45 +6,158 @@ Lia Baumann
 # Cluster analysis
 
 ``` r
-# Convert genind to a matrix if needed
-geno_matrix <- tab(myData_genind_allMarkersOnly, NA.method = "mean")
+setPop(myData_genind_aMO_k5) <- ~cluster
+pca_result_k5 <- dudi.pca(tab(myData_genind_aMO_k5), center = TRUE, scale = TRUE, scannf = FALSE, nf = 2)
+
+# Extract scores for plotting
+pca_scores5 <- as.data.frame(pca_result_k5$li)
+pca_scores5$Group <- pop(myData_genind_aMO_k5)  # Add population or strata information for coloring
+
+setPop(myData_genind_aMO_k5) <- ~Pop
+population_vector5 <- pop(myData_genind_aMO_k5)  # Create a vector with population names
+# Convert pop5ulation vector to a data frame
+population_df5 <- data.frame(Pop = population_vector5)
+pca_scores5$Pop <- population_df5
+
+ggplot(pca_scores5, aes(x = Axis1, y = Axis2, color = Group)) +
+  geom_point(size = 3) +
+  theme_minimal() +
+  geom_text(aes(label = Pop$Pop), vjust = -0.5, hjust = 0.5, size = 3) + 
+  labs(title = "PCA mit 5 clusters",
+       x = "Principal Component 1",
+       y = "Principal Component 2") +
+  scale_color_manual(values = color_palette_k5, name = "Cluster")
+```
+
+![](Clusters_files/figure-gfm/compute%20PCA%20with%205%20clusters-1.png)<!-- -->
+
+``` r
+setPop(myData_genind_aMO_k6) <- ~cluster
+pca_result_k6 <- dudi.pca(tab(myData_genind_aMO_k6), center = TRUE, scale = TRUE, scannf = FALSE, nf = 2)
+
+# Extract scores for plotting
+pca_scores6 <- as.data.frame(pca_result_k6$li)
+pca_scores6$Group <- pop(myData_genind_aMO_k6)  # Add population or strata information for coloring
+
+setPop(myData_genind_aMO_k6) <- ~Pop
+population_vector6 <- pop(myData_genind_aMO_k6)  # Create a vector with population names
+# Convert population vector to a data frame
+population_df6 <- data.frame(Pop = population_vector6)
+pca_scores6$Pop <- population_df6
+
+ggplot(pca_scores6, aes(x = Axis1, y = Axis2, color = Group)) +
+  geom_point(size = 3) +
+  theme_minimal() +
+  geom_text(aes(label = Pop$Pop), vjust = -0.5, hjust = 0.5, size = 3) + 
+  labs(title = "PCA mit 6 clusters",
+       x = "Principal Component 1",
+       y = "Principal Component 2") +
+  scale_color_manual(values = color_palette_k6, name = "Cluster")
+```
+
+![](Clusters_files/figure-gfm/compute%20PCA%20with%206%20clusters-1.png)<!-- -->
+
+``` r
+setPop(myData_genind_aMO_k5) <- ~cluster
+myData_genind_aMO_k5_minus3 <- popsub(myData_genind_aMO_k5,exclude="3")
+pca_result_k5_minus3 <- dudi.pca(tab(myData_genind_aMO_k5_minus3), center = TRUE, scale = TRUE, scannf = FALSE, nf = 2)
+
+# Extract scores for plotting
+pca_scores5_minus3 <- as.data.frame(pca_result_k5_minus3$li)
+pca_scores5_minus3$Group <- pop(myData_genind_aMO_k5_minus3)  # Add population or strata information for coloring
+
+setPop(myData_genind_aMO_k5_minus3) <- ~Pop
+population_vector5_minus3 <- pop(myData_genind_aMO_k5_minus3)  # Create a vector with population names
+# Convert pop5ulation vector to a data frame
+population_df5_minus3 <- data.frame(Pop = population_vector5_minus3)
+pca_scores5_minus3$Pop <- population_df5_minus3
+
+ggplot(pca_scores5_minus3, aes(x = Axis1, y = Axis2, color = Group)) +
+  geom_point(size = 3) +
+  theme_minimal() +
+  geom_text(aes(label = Pop$Pop), vjust = -0.5, hjust = 0.5, size = 3) + 
+  labs(title = "PCA mit 4 clusters",
+       x = "Principal Component 1",
+       y = "Principal Component 2") +
+  scale_color_manual(values = color_palette_k5, name = "Group")
+```
+
+![](Clusters_files/figure-gfm/pca%20k5%20without%20cluster%203-1.png)<!-- -->
+
+``` r
+setPop(myData_genind_aMO_k6) <- ~cluster
+myData_genind_aMO_k6_minus3 <- popsub(myData_genind_aMO_k6,exclude="3")
+pca_result_k6_minus3 <- dudi.pca(tab(myData_genind_aMO_k6_minus3), center = TRUE, scale = TRUE, scannf = FALSE, nf = 2)
+
+# Extract scores for plotting
+pca_scores6_minus3 <- as.data.frame(pca_result_k6_minus3$li)
+pca_scores6_minus3$Group <- pop(myData_genind_aMO_k6_minus3)  # Add population or strata information for coloring
+
+setPop(myData_genind_aMO_k6_minus3) <- ~Pop
+population_vector6_minus3 <- pop(myData_genind_aMO_k6_minus3)  # Create a vector with population names
+# Convert pop5ulation vector to a data frame
+population_df6_minus3 <- data.frame(Pop = population_vector6_minus3)
+pca_scores6_minus3$Pop <- population_df6_minus3
+
+ggplot(pca_scores6_minus3, aes(x = Axis1, y = Axis2, color = Group)) +
+  geom_point(size = 3) +
+  theme_minimal() +
+  geom_text(aes(label = Pop$Pop), vjust = -0.5, hjust = 0.5, size = 3) + 
+  labs(title = "PCA mit 5 clusters",
+       x = "Principal Component 1",
+       y = "Principal Component 2") +
+  scale_color_manual(values = color_palette_k6, name = "Cluster")
+```
+
+![](Clusters_files/figure-gfm/pca%20k6%20without%20cluster%203-1.png)<!-- -->
+
+``` r
+# Assuming your other table is named `sample_info` and the column is named `sample_codes`
+sample_codes_to_keep <- qmatrix_k6_ind$IndID2
+# Find indices of the individuals in the genind object that match the sample codes
+indices_to_keep <- which(indNames(myData_genind_allMarkersOnly) %in% sample_codes_to_keep)
+# Subset the genind object by these indices
+filtered_genind <- myData_genind_allMarkersOnly[indices_to_keep, ]
+
+# Convert genind to a matrix
+cc_geno_matrix <- tab(filtered_genind, NA.method = "mean")
 
 # Set K to the same number as the optimal STRUCTURE K
 optimal_k <- 6 # Replace with your determined K
 
 # Run k-means
 set.seed(123) # For reproducibility
-kmeans_result <- kmeans(geno_matrix, centers = optimal_k)
+kmeans_result <- kmeans(cc_geno_matrix, centers = optimal_k)
 
 # Identify constant columns
-constant_cols <- apply(geno_matrix, 2, function(x) var(x, na.rm = TRUE) == 0)
+constant_cols <- apply(cc_geno_matrix, 2, function(x) var(x, na.rm = TRUE) == 0)
 
 # Remove constant columns
-geno_matrix_filtered <- geno_matrix[, !constant_cols]
+cc_geno_matrix_filtered <- cc_geno_matrix[, !constant_cols]
 
 # Run PCA on the filtered matrix
-pca_result <- prcomp(geno_matrix_filtered, scale = TRUE)
+cc_pca_result <- prcomp(cc_geno_matrix_filtered, scale = TRUE)
 
 # Extract PCA coordinates
-pca_coords <- as.data.frame(pca_result$x[, 1:2]) # First two principal components
+cc_pca_coords <- as.data.frame(cc_pca_result$x[, 1:2]) # First two principal components
 
 # Add cluster assignments
-pca_coords$STRUCTURE_cluster <- apply(qmatrix_k6, 1, which.max)  # Max probability per row
+cc_pca_coords$STRUCTURE_cluster <- apply(qmatrix_k6, 1, which.max)  # Max probability per row
 # Assuming `STRUCTURE_cluster` contains cluster labels as integers from 2 to 7
-pca_coords$STRUCTURE_cluster <- as.factor(pca_coords$STRUCTURE_cluster - 1)
+cc_pca_coords$STRUCTURE_cluster <- as.factor(cc_pca_coords$STRUCTURE_cluster - 1)
 
-pca_coords$KMeans_cluster <- kmeans_result$cluster
+cc_pca_coords$KMeans_cluster <- kmeans_result$cluster
 
 
 # Plot STRUCTURE assignments
-p1 <- ggplot(pca_coords, aes(x = PC1, y = PC2, color = as.factor(STRUCTURE_cluster))) +
+p1 <- ggplot(cc_pca_coords, aes(x = PC1, y = PC2, color = as.factor(STRUCTURE_cluster))) +
   geom_point(size = 3, alpha = 0.7) +
   scale_color_brewer(palette = "Set1") +
   labs(title = "STRUCTURE Clustering", color = "Cluster") +
   theme_minimal()
 
 # Plot k-means assignments
-p2 <- ggplot(pca_coords, aes(x = PC1, y = PC2, color = as.factor(KMeans_cluster))) +
+p2 <- ggplot(cc_pca_coords, aes(x = PC1, y = PC2, color = as.factor(KMeans_cluster))) +
   geom_point(size = 3, alpha = 0.7) +
   scale_color_brewer(palette = "Set2") +
   labs(title = "k-means Clustering", color = "Cluster") +
@@ -54,15 +167,151 @@ p2 <- ggplot(pca_coords, aes(x = PC1, y = PC2, color = as.factor(KMeans_cluster)
 grid.arrange(p1, p2, ncol = 2)
 ```
 
-![](Clusters_files/figure-gfm/compare%20structure%20with%20k-means-1.png)<!-- -->
+![](Clusters_files/figure-gfm/compare%20structure%20with%20k-means%20clonecorrected-1.png)<!-- -->
 
 ``` r
 # Compute Adjusted Rand Index
-ari_score <- adjustedRandIndex(pca_coords$STRUCTURE_cluster, pca_coords$KMeans_cluster)
+ari_score <- adjustedRandIndex(cc_pca_coords$STRUCTURE_cluster, cc_pca_coords$KMeans_cluster)
 print(paste("Adjusted Rand Index between STRUCTURE and k-means:", ari_score))
 ```
 
-    ## [1] "Adjusted Rand Index between STRUCTURE and k-means: 0.0941534752897646"
+    ## [1] "Adjusted Rand Index between STRUCTURE and k-means: 0.00501927925404147"
+
+``` r
+# Assuming your other table is named `sample_info` and the column is named `sample_codes`
+sample_codes_to_keep <- qmatrix_k5_ind$IndID2
+# Find indices of the individuals in the genind object that match the sample codes
+indices_to_keep <- which(indNames(myData_genind_allMarkersOnly) %in% sample_codes_to_keep)
+# Subset the genind object by these indices
+filtered_genind <- myData_genind_allMarkersOnly[indices_to_keep, ]
+
+# Convert genind to a matrix
+cc_geno_matrix <- tab(filtered_genind, NA.method = "mean")
+
+# Set K to the same number as the optimal STRUCTURE K
+optimal_k <- 5 # Replace with your determined K
+
+# Run k-means
+set.seed(123) # For reproducibility
+kmeans_result <- kmeans(cc_geno_matrix, centers = optimal_k)
+
+# Identify constant columns
+constant_cols <- apply(cc_geno_matrix, 2, function(x) var(x, na.rm = TRUE) == 0)
+
+# Remove constant columns
+cc_geno_matrix_filtered <- cc_geno_matrix[, !constant_cols]
+
+# Run PCA on the filtered matrix
+cc_pca_result <- prcomp(cc_geno_matrix_filtered, scale = TRUE)
+
+# Extract PCA coordinates
+cc_pca_coords <- as.data.frame(cc_pca_result$x[, 1:2]) # First two principal components
+
+# Add cluster assignments
+cc_pca_coords$STRUCTURE_cluster <- apply(qmatrix_k5_ind, 1, which.max)  # Max probability per row
+
+cc_pca_coords$KMeans_cluster <- kmeans_result$cluster
+
+
+# Plot STRUCTURE assignments
+p1 <- ggplot(cc_pca_coords, aes(x = PC1, y = PC2, color = as.factor(STRUCTURE_cluster))) +
+  geom_point(size = 3, alpha = 0.7) +
+  scale_color_brewer(palette = "Set1") +
+  labs(title = "STRUCTURE Clustering", color = "Cluster") +
+  theme_minimal()
+
+# Plot k-means assignments
+p2 <- ggplot(cc_pca_coords, aes(x = PC1, y = PC2, color = as.factor(KMeans_cluster))) +
+  geom_point(size = 3, alpha = 0.7) +
+  scale_color_brewer(palette = "Set2") +
+  labs(title = "k-means Clustering", color = "Cluster") +
+  theme_minimal()
+
+# Arrange plots side by side
+grid.arrange(p1, p2, ncol = 2)
+```
+
+![](Clusters_files/figure-gfm/compare%20structure%20with%20k-means%20clonecorrected%20k%205%20locPrior-1.png)<!-- -->
+
+``` r
+# Compute Adjusted Rand Index
+ari_score <- adjustedRandIndex(cc_pca_coords$STRUCTURE_cluster, cc_pca_coords$KMeans_cluster)
+print(paste("Adjusted Rand Index between STRUCTURE and k-means:", ari_score))
+```
+
+    ## [1] "Adjusted Rand Index between STRUCTURE and k-means: 0.00817191282176695"
+
+``` r
+kmeans_on_q <- kmeans(cc_geno_matrix, centers = optimal_k)
+# Create STRUCTURE-based assignments from the Q-matrix
+structure_assignments <- apply(cc_geno_matrix, 1, which.max)  # STRUCTURE cluster assignment based on max probability
+
+# k-means assignments
+kmeans_assignments <- kmeans_on_q$cluster
+
+# Calculate ARI to compare STRUCTURE and k-means on Q-matrix
+ari_score <- adjustedRandIndex(structure_assignments, kmeans_assignments)
+print(paste("Adjusted Rand Index between STRUCTURE and k-means on Q-matrix:", ari_score))
+```
+
+    ## [1] "Adjusted Rand Index between STRUCTURE and k-means on Q-matrix: 0.151471899835961"
+
+``` r
+# Run PCA on Q-matrix
+pca_q <- prcomp(cc_geno_matrix_filtered, scale = TRUE)
+pca_coords <- as.data.frame(pca_q$x[, 1:2])  # Get the first two principal components
+
+# Add STRUCTURE and k-means assignments
+pca_coords$STRUCTURE_cluster <- as.factor(structure_assignments)
+pca_coords$KMeans_cluster <- as.factor(kmeans_assignments)
+
+# Plot STRUCTURE and k-means on Q-matrix side by side
+p1 <- ggplot(pca_coords, aes(x = PC1, y = PC2, color = STRUCTURE_cluster)) +
+  geom_point(size = 3, alpha = 0.7) +
+  labs(title = "STRUCTURE Clustering") +
+  theme_minimal()
+
+p2 <- ggplot(pca_coords, aes(x = PC1, y = PC2, color = KMeans_cluster)) +
+  geom_point(size = 3, alpha = 0.7) +
+  labs(title = "k-means on STRUCTURE Q-matrix") +
+  theme_minimal()
+
+grid.arrange(p1, p2, ncol = 2)
+```
+
+![](Clusters_files/figure-gfm/running%20k-means%20on%20cluster%20results-1.png)<!-- -->
+
+``` r
+# Assuming your other table is named `sample_info` and the column is named `sample_codes`
+sample_codes_to_keep <- qmatrix_k5_ind$IndID2
+# Find indices of the individuals in the genind object that match the sample codes
+indices_to_keep <- which(indNames(myData_genind_allMarkersOnly) %in% sample_codes_to_keep)
+# Subset the genind object by these indices
+filtered_genind <- myData_genind_allMarkersOnly[indices_to_keep, ]
+
+# Convert genind to a matrix
+cc_geno_matrix <- tab(filtered_genind, NA.method = "mean")
+# Compute distance matrix from the Q-matrix
+dist_matrix <- dist(qmatrix_k5_ind, method = "euclidean")
+```
+
+    ## Warning in dist(qmatrix_k5_ind, method = "euclidean"): NAs introduced by
+    ## coercion
+
+``` r
+# Perform hierarchical clustering
+hclust_result <- hclust(dist_matrix, method = "ward.D2")
+hierarchical_assignments <- cutree(hclust_result, k = 5)
+
+# Create STRUCTURE-based assignments from the Q-matrix
+structure_assignments <- apply(cc_geno_matrix, 1, which.max)  # STRUCTURE cluster assignment based on max probability
+
+# Calculate ARI between STRUCTURE and hierarchical clustering
+ari_score_hierarchical <- adjustedRandIndex(structure_assignments, hierarchical_assignments)
+print(paste("Adjusted Rand Index between STRUCTURE and hierarchical clustering:", ari_score_hierarchical))
+```
+
+    ## [1] "Adjusted Rand Index between STRUCTURE and hierarchical clustering: 0.00703088974830359"
 
 ``` r
 n_per_cluster <- T_all_withMLGs_withClusters_allMarkersOnly %>%
@@ -143,71 +392,6 @@ ggplot(T_all_withMLGs_withClusters_allMarkersOnly, aes(x=Sampling_date, y= fct_r
 ![](Clusters_files/figure-gfm/how%20many%20clusters-1.png)<!-- -->
 
 ``` r
-setPop(myData_genind_withClusters) <- ~cluster
-myData_genind_allMarkersOnly_withoutCluster3_SY <- popsub(myData_genind_withClusters,sublist=c("1","2","4","5","6"))
-poppr(myData_genind_allMarkersOnly_withoutCluster3_SY)
-```
-
-    ##     Pop    N MLG eMLG   SE    H     G lambda   E.5  Hexp    Ia  rbarD
-    ## 1     5  233  47 40.7 2.06 2.92 10.28  0.903 0.530 0.264 1.510 0.1484
-    ## 2     6  849  94 37.5 3.54 2.87  7.28  0.863 0.378 0.408 1.745 0.1503
-    ## 3     2  253  73 55.0 3.08 3.16 11.05  0.909 0.446 0.340 1.374 0.1391
-    ## 4     4  174  81 81.0 0.00 3.98 33.42  0.970 0.618 0.361 0.440 0.0376
-    ## 5     1  408  94 51.9 3.88 3.25 11.64  0.914 0.431 0.291 1.807 0.1714
-    ## 6 Total 1917 389 79.9 5.29 4.53 29.34  0.966 0.310 0.494 0.779 0.0653
-    ##                                              File
-    ## 1 myData_genind_allMarkersOnly_withoutCluster3_SY
-    ## 2 myData_genind_allMarkersOnly_withoutCluster3_SY
-    ## 3 myData_genind_allMarkersOnly_withoutCluster3_SY
-    ## 4 myData_genind_allMarkersOnly_withoutCluster3_SY
-    ## 5 myData_genind_allMarkersOnly_withoutCluster3_SY
-    ## 6 myData_genind_allMarkersOnly_withoutCluster3_SY
-
-``` r
-setPop(myData_genind_allMarkersOnly_withoutCluster3_SY) <- ~Pop/SamplingYear
-n_samples_allMarkersOnly_withoutCluster3_SY <- poppr(myData_genind_allMarkersOnly_withoutCluster3_SY) %>%
-  separate(Pop, sep="_", into=c("Pop","SamplingYear"))
-```
-
-    ## Warning: Expected 2 pieces. Missing pieces filled with `NA` in 1 rows [106].
-
-``` r
-n_samples_allMarkersOnly_withoutCluster3_SY %>%
-  select(Pop,SamplingYear,N) %>%
-  pivot_wider(names_from=SamplingYear, values_from=N) %>%
-  select(.,-"NA") %>%
-  replace(is.na(.),0) %>%
-  kable()
-```
-
-| Pop   | 2011 | 2012 | 2013 | 2014 | 2015 | 2016 | 2017 | 2018 | 2019 | 2020 | 2021 | 2022 | 2023 |
-|:------|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|
-| ALD   |   24 |   12 |   15 |    7 |    3 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |
-| RIE   |   14 |    9 |   11 |   12 |    3 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |
-| TRO   |   16 |   10 |    8 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |
-| SCG   |    9 |    3 |    1 |    2 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |
-| BOH   |   11 |   13 |    6 |   10 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |
-| BOB   |    6 |   35 |   50 |   29 |   15 |   52 |  142 |   63 |   27 |    0 |    0 |    0 |    0 |
-| FRB   |    4 |    1 |    1 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |
-| UEB   |   27 |    6 |   54 |   36 |   27 |    0 |    0 |    0 |    3 |    0 |    0 |    0 |    0 |
-| FRE   |    0 |    1 |    2 |    0 |    0 |    0 |    2 |    0 |    0 |    0 |    0 |    0 |    0 |
-| SCL   |    0 |   51 |    7 |   24 |    1 |    9 |    5 |    0 |    0 |    0 |    0 |    0 |    0 |
-| SCD   |    0 |   23 |    4 |    6 |   15 |   43 |    3 |    0 |    0 |    0 |    0 |    0 |    0 |
-| WSL   |    0 |    1 |    0 |    0 |    0 |   58 |   61 |   14 |   72 |   72 |    3 |    0 |    0 |
-| BUR   |    0 |    0 |    2 |    2 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |
-| SCS   |    0 |    0 |    7 |   15 |    0 |   19 |    2 |    0 |    0 |    0 |    0 |    0 |    0 |
-| NEU   |    0 |    0 |    4 |    3 |    0 |   13 |    2 |    0 |    0 |    4 |    1 |    0 |    0 |
-| UST   |    0 |    0 |   23 |    8 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |
-| KON   |    0 |    0 |    3 |   12 |    2 |   25 |   17 |   41 |   26 |   25 |   27 |   11 |   23 |
-| FRI   |    0 |    0 |   14 |    4 |    0 |    8 |   36 |    1 |    0 |    0 |    0 |    0 |    0 |
-| BAR   |    0 |    0 |    0 |    1 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |
-| LIM   |    0 |    0 |    0 |    0 |    0 |   52 |   66 |   53 |    0 |    0 |    0 |    0 |    0 |
-| BRU   |    0 |    0 |    0 |    0 |    0 |    8 |    3 |   35 |    0 |    0 |    0 |    0 |    0 |
-| HAN   |    0 |    0 |    0 |    0 |    0 |    0 |   35 |   17 |    3 |    0 |    0 |    0 |    0 |
-| GEN   |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    1 |    0 |    3 |    1 |    5 |    0 |
-| Total |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |    0 |
-
-``` r
 grp.1pca <- find.clusters(myData_genind_allMarkersOnly, n.pca=1, n.clust=6)
 grp.3pca <- find.clusters(myData_genind_allMarkersOnly, n.pca=3, n.clust=6)
 # 3 PC axis retained and 6 clusters
@@ -251,31 +435,21 @@ compare_clusters
 ```
 
 ``` r
-setPop(myData_genind_withClusters) <- ~cluster
-(truffleClusters.matFst <- mat_pw_fst(myData_genind_withClusters))
+setPop(myData_genind_aMO_k5) <- ~cluster
+truffleClusters_k5.matFst <- mat_pw_fst(myData_genind_aMO_k5)
+truffleClusters_k5.matFst
 ```
 
-    ##                3          5          6      mixed          2           
-    ## 3     0.00000000 0.18852779 0.16042288 0.14556082 0.15681700 0.08580212
-    ## 5     0.18852779 0.00000000 0.06682615 0.05585950 0.10448772 0.08325061
-    ## 6     0.16042288 0.06682615 0.00000000 0.04422653 0.06141397 0.04752407
-    ## mixed 0.14556082 0.05585950 0.04422653 0.00000000 0.08439333 0.05846984
-    ## 2     0.15681700 0.10448772 0.06141397 0.08439333 0.00000000 0.02798734
-    ##       0.08580212 0.08325061 0.04752407 0.05846984 0.02798734 0.00000000
-    ## 4     0.14764463 0.07984067 0.07383716 0.04164793 0.07656007 0.06515767
-    ## 1     0.17925558 0.10568646 0.07142598 0.05915624 0.11459039 0.08143417
-    ##                4          1
-    ## 3     0.14764463 0.17925558
-    ## 5     0.07984067 0.10568646
-    ## 6     0.07383716 0.07142598
-    ## mixed 0.04164793 0.05915624
-    ## 2     0.07656007 0.11459039
-    ##       0.06515767 0.08143417
-    ## 4     0.00000000 0.07432676
-    ## 1     0.07432676 0.00000000
+    ##               3          2      mixed          4          1          5
+    ## 3     0.0000000 0.15651725 0.14552757 0.15140046 0.16905531 0.20140461
+    ## 2     0.1565172 0.00000000 0.04330260 0.04196748 0.09258745 0.10010754
+    ## mixed 0.1455276 0.04330260 0.00000000 0.03443488 0.04090685 0.06172819
+    ## 4     0.1514005 0.04196748 0.03443488 0.00000000 0.05783851 0.09922283
+    ## 1     0.1690553 0.09258745 0.04090685 0.05783851 0.00000000 0.09476120
+    ## 5     0.2014046 0.10010754 0.06172819 0.09922283 0.09476120 0.00000000
 
 ``` r
-boxplot(truffleClusters.matFst, col=funky(nPop(myData_genind_withClusters)), las=3,
+boxplot(truffleClusters_k5.matFst, col=color_palette_k5, las=3,
 xlab="Cluster", ylab="Fst")
 ```
 
@@ -283,20 +457,111 @@ xlab="Cluster", ylab="Fst")
 
 ``` r
 #only clusters 1,2,4,5,6 allMarkersOnly
-setPop(myData_genind_allMarkersOnly_withoutCluster3_SY) <- ~cluster
-(myData_genind_allMarkersOnly_withoutCluster3_SY.matFst <- mat_pw_fst(myData_genind_allMarkersOnly_withoutCluster3_SY))
+setPop(myData_genind_aMO_k5_minus3) <- ~cluster
+(myData_genind_k5_minus3.matFst <- mat_pw_fst(myData_genind_aMO_k5_minus3))
 ```
 
-    ##            5          6          2          4          1
-    ## 5 0.00000000 0.06682615 0.10448772 0.07984067 0.10568646
-    ## 6 0.06682615 0.00000000 0.06141397 0.07383716 0.07142598
-    ## 2 0.10448772 0.06141397 0.00000000 0.07656007 0.11459039
-    ## 4 0.07984067 0.07383716 0.07656007 0.00000000 0.07432676
-    ## 1 0.10568646 0.07142598 0.11459039 0.07432676 0.00000000
+    ##                2      mixed          4          1          5
+    ## 2     0.00000000 0.04330260 0.04196748 0.09258745 0.10010754
+    ## mixed 0.04330260 0.00000000 0.03443488 0.04090685 0.06172819
+    ## 4     0.04196748 0.03443488 0.00000000 0.05783851 0.09922283
+    ## 1     0.09258745 0.04090685 0.05783851 0.00000000 0.09476120
+    ## 5     0.10010754 0.06172819 0.09922283 0.09476120 0.00000000
 
 ``` r
-boxplot(myData_genind_allMarkersOnly_withoutCluster3_SY.matFst, col=funky(nPop(myData_genind_allMarkersOnly_withoutCluster3_SY)), las=3,
+boxplot(myData_genind_k5_minus3.matFst, col=color_palette_k5, las=3,
 xlab="Cluster", ylab="Fst")
 ```
 
 ![](Clusters_files/figure-gfm/FST%20with%20clusters-2.png)<!-- -->
+
+``` r
+#colors are wrong
+# Calculate pairwise Fst values
+fst_values_k5 <- pairwise.neifst(myData_genind_aMO_k5)
+
+# Convert the Fst matrix to a data frame
+fst_k5_df <- as.data.frame(fst_values_k5)
+fst_k5_long <- melt(fst_k5_df, varnames = c("1","2","3","4","5","mixed"), value.name = "Fst")
+```
+
+    ## No id variables; using all as measure variables
+
+``` r
+fst_long <- na.omit(fst_k5_long)
+
+ggplot(fst_k5_long, aes(x = variable, y = Fst, fill=variable)) +
+  geom_boxplot() +
+  scale_fill_manual(values = color_palette_k5) + 
+  theme_minimal() +
+  labs(title = "Comparison of Fst Values Across Clusters",
+       x = "Cluster",
+       y = "Fst Value") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+    ## Warning: Removed 6 rows containing non-finite outside the scale range
+    ## (`stat_boxplot()`).
+
+![](Clusters_files/figure-gfm/FST%20with%20clusters-3.png)<!-- -->
+
+``` r
+setPop(myData_genind_aMO_k5) <- ~cluster
+truffleClusters_k5.matFst <- mat_pw_fst(myData_genind_aMO_k5)
+truffleClusters_k5.matFst
+```
+
+    ##               3          2      mixed          4          1          5
+    ## 3     0.0000000 0.15651725 0.14552757 0.15140046 0.16905531 0.20140461
+    ## 2     0.1565172 0.00000000 0.04330260 0.04196748 0.09258745 0.10010754
+    ## mixed 0.1455276 0.04330260 0.00000000 0.03443488 0.04090685 0.06172819
+    ## 4     0.1514005 0.04196748 0.03443488 0.00000000 0.05783851 0.09922283
+    ## 1     0.1690553 0.09258745 0.04090685 0.05783851 0.00000000 0.09476120
+    ## 5     0.2014046 0.10010754 0.06172819 0.09922283 0.09476120 0.00000000
+
+``` r
+boxplot(truffleClusters_k5.matFst, col=color_palette_k5, las=3,
+xlab="Cluster", ylab="Fst")
+```
+
+![](Clusters_files/figure-gfm/FST%20with%20clusters-4.png)<!-- -->
+
+``` r
+#same with k=6 now
+setPop(myData_genind_aMO_k6_minus3) <- ~cluster
+(myData_genind_k6_minus3.matFst <- mat_pw_fst(myData_genind_aMO_k6_minus3))
+```
+
+    ##                5          6      mixed          2          4          1
+    ## 5     0.00000000 0.06682615 0.05585950 0.10448772 0.07984067 0.10568646
+    ## 6     0.06682615 0.00000000 0.04422653 0.06141397 0.07383716 0.07142598
+    ## mixed 0.05585950 0.04422653 0.00000000 0.08439333 0.04164793 0.05915624
+    ## 2     0.10448772 0.06141397 0.08439333 0.00000000 0.07656007 0.11459039
+    ## 4     0.07984067 0.07383716 0.04164793 0.07656007 0.00000000 0.07432676
+    ## 1     0.10568646 0.07142598 0.05915624 0.11459039 0.07432676 0.00000000
+
+``` r
+# Calculate pairwise Fst values
+fst_values_k6 <- pairwise.neifst(myData_genind_aMO_k6)
+
+# Convert the Fst matrix to a data frame
+fst_k6_df <- as.data.frame(fst_values_k6)
+fst_k6_long <- melt(fst_k6_df, varnames = c("1","2","3","4","5","6","mixed"), value.name = "Fst")
+```
+
+    ## No id variables; using all as measure variables
+
+``` r
+fst_k6_long <- na.omit(fst_k6_long)
+
+ggplot(fst_k6_long, aes(x = variable, y = Fst, fill=variable)) +
+  geom_boxplot() +
+  scale_fill_manual(values = color_palette_k6) + 
+  theme_minimal() +
+  labs(title = "Comparison of Fst Values Across Clusters",
+       x = "Cluster",
+       y = "Fst Value") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+![](Clusters_files/figure-gfm/FST%20with%20clusters-5.png)<!-- -->

@@ -40,6 +40,8 @@ library(adegenet)
 library(devtools)
 library(hierfstat)
 library(mmod)
+library(ggrepel)
+
 T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_Mai2024.xlsx")
 coord <- read_excel("Koordinaten_2024.xlsx")
 myData <- read.genalex("Daten_Genalex.csv",genclone=TRUE, ploidy=1)
@@ -60,17 +62,26 @@ europe <- ne_countries(scale="medium",returnclass="sf",continent="europe")
 europe_points <- st_centroid(europe)
 europe_points <- cbind(europe,st_coordinates(st_centroid(europe$geometry)))
 
-ggplot(data=europe) + geom_sf() +
-  geom_text(data=europe_points,aes(x=X,y=Y,label = name),
-            color = "darkmagenta", fontface = "bold", check_overlap = FALSE) +
+ggplot(data = europe) +
+  geom_sf(fill = "lightgrey", color = "black") +
+  geom_text(data = europe_points, aes(x = X, y = Y, label = name),
+            color = "darkmagenta", fontface = "bold", size = 2.5, check_overlap = FALSE) +
   annotation_scale(location = "bl", width_hint = 0.5) +
-  #annotation_north_arrow(location = "bl",which_north = "true",
-  #                       pad_x = unit(0.5,"in"),pad_y=unit(0.5,"in"),
-  #                       style=north_arrow_fancy_orienteering) +
-  coord_sf(xlim = c(5.5,10.5), ylim = c(45.5,48.5), expand = FALSE) +
-  geom_point(data=coord,
-             aes(x=LON, y=LAT),shape=20,color="darkcyan", fill = "darkcyan",
-             pch = 5, size = 3)
+  coord_sf(xlim = c(5, 11), ylim = c(45.5, 49), expand = FALSE) +
+  geom_point(data = coord, aes(x = LON, y = LAT),
+             shape = 21, color = "darkcyan", fill = "darkcyan", size = 1.5) +
+  geom_text_repel(data = coord, aes(x = LON, y = LAT, label = Site_1_abrev),
+                   color = "black",
+                   size = 2.5,
+                   box.padding = 0.2,
+                   point.padding = 0.4,
+                   segment.color = 'grey50',
+                   max.overlaps = Inf) +
+  labs(title = "Map of monitoring sites",
+       x = "",
+       y = "") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
 ```
 
 The dataset was already corrected in the following way:
@@ -155,6 +166,30 @@ barplot(myData_genind$loc.n.all,table(locNames(myData_genind)),col=funky(17),las
 temp$Hexp
 #plot(temp$Hexp, temp$Hobs, pch=20, cex=3, xlim=c(.4,1), ylim=c(.4,1))
 #abline(0,1,lty=2)
+
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+barplot(table(pop(myData_genind_allMarkersOnly)), col=funky(17), las=3,
+xlab="Population", ylab="Sample size")
+
+temp <- summary(myData_genind_allMarkersOnly)
+temp
+barplot(myData_genind_allMarkersOnly$loc.n.all,table(locNames(myData_genind_allMarkersOnly)),col=funky(17),las=3,xlab="",ylab="Number of alleles")
+temp$Hexp
+
+# Get the number of alleles for each locus
+num_alleles <- myData_genind_allMarkersOnly$loc.n.all
+locus_names <- locNames(myData_genind_allMarkersOnly)
+
+# Create a data frame for the number of alleles and locus names
+allele_table <- data.frame(Locus = locus_names, Number_of_Alleles = num_alleles)
+
+# Print the table
+kable(allele_table)
+
+# Create a barplot
+barplot(num_alleles, names.arg = locus_names, col = funky(17), las = 3,
+        xlab = "", ylab = "Number of Alleles", main = "Number of Alleles by Locus")
+kable(locus_table(myData_genclone_allMarkersOnly))
 ```
 
 ##Clone correction

@@ -46,6 +46,15 @@ cc_distinctMLGs_allMarkersOnly <- cc_FullTable_Tuaest_allMarkersOnly[!duplicated
 T_all <- separate_wider_delim(T_all,Code_Analyses2, delim="_", names = c("Code","Yr"))
 T_all_withMLGs_allMarkersOnly <- inner_join(T_all,cc_FullTable_Tuaest_allMarkersOnly,by=c("Code"="Sample")) %>%
   select(Code, MLG, Site_1_abrev, truffle_year, Sampling_year,Sampling_date)
+
+clusters <- read_excel("STRUCTURE Results MLGs.xlsx")
+clusters$`clusterssign(q>0.5)` <- factor(clusters$`clusterssign(q>0.5)`)
+cc_FullTable_Tuaest_allMarkersOnly <- read.csv("C:/Users/liaba/OneDrive - Eidg. Forschungsanstalt WSL/R/truffles/cc_TUAEST_ALLMARKERSONLY_HWE.csv")
+cc_distinctMLGs_allMarkersOnly <- cc_FullTable_Tuaest_allMarkersOnly[!duplicated(cc_FullTable_Tuaest_allMarkersOnly$MLG), ]
+#T_all <- separate_wider_delim(T_all,Code_Analyses2, delim="_", names = c("Code","Yr"))
+T_all_withMLGs_allMarkersOnly <- inner_join(T_all,cc_FullTable_Tuaest_allMarkersOnly,by=c("Code"="Sample")) %>%
+  select(Code, MLG, Site_1_abrev, truffle_year, Sampling_year,Sampling_date)
+T_all_withMLGs_withClusters_allMarkersOnly <- left_join(T_all_withMLGs_allMarkersOnly,clusters,by=c("MLG"="MLG_ID")) %>% select(-"IndID2") %>% distinct(.)
 ```
 
 ## Genetic information
@@ -58,7 +67,7 @@ Aus myData werden danach alle missing (NA) gefiltert:
 
 Tuaest_allMarkersOnly \<- myData %\>% missingno("geno", cutoff = 0)
 
-```{r poppr with Tuaest_allMarkersOnly}
+```{r poppr with Tuaest_allMarkersOnly, eval=FALSE, include=FALSE}
 setPop(Tuaest_allMarkersOnly) <- ~Pop
 poppr_withoutNA <- poppr(Tuaest_allMarkersOnly)
 poppr_withoutNA_genind <- poppr(myData_genind_allMarkersOnly)
@@ -80,7 +89,7 @@ of association
 –
 
 Hier nochmals die gleiche Tabelle, jedoch ohne Populationen mit kleiner Sample Size (n<20):
-```{r poppr with Tuaest_allMarkersOnly only sites with 20+ samples}
+```{r poppr with Tuaest_allMarkersOnly only sites with 20+ samples, eval=FALSE, include=FALSE}
 setPop(Tuaest_allMarkersOnly) <- ~Pop
 poppr_withoutNA_min20samples <- poppr(popsub(Tuaest_allMarkersOnly, exclude=c("SCG","FRB","BAR","GEN","SCHIF")))
 kable(select(poppr_withoutNA_min20samples,Pop,N,MLG,eMLG,SE,H,G,lambda,E.5,Hexp,Ia,rbarD))
@@ -124,11 +133,46 @@ Sampling_year,Sampling_date)
 --\> bei LIM und BRU kommen die MLGs doppelt vor bzw. an beiden Orten...
 sollte man diese vielleicht zusammen nehmen?
 
+```{r some persistence stats}
+# Count the number of unique years each individual was found
+year_count_k6 <- T_all_withMLGs_withClusters_allMarkersOnly %>%
+  group_by(MLG) %>%
+  summarize(years_found = n_distinct(Sampling_year))
+
+proportion <- year_count_k6 %>%
+  mutate(found_once = ifelse(years_found == 1, "Once", "Multiple")) %>%
+  count(found_once) %>%
+  mutate(proportion = n / sum(n))
+proportion
+
+# Join back to the original data to classify each sample as "Once" or "Multiple"
+MLGcount_with_classification <- T_all_withMLGs_withClusters_allMarkersOnly %>%
+  left_join(year_count_k6, by = "MLG") %>%
+  mutate(found_once = ifelse(years_found == 1, "Once", "Multiple")) %>%
+  count(found_once) %>%
+  mutate(proportion = n / sum(n))
+MLGcount_with_classification #over all samples
+
+# Count the number of samples for each individual
+sample_count <- T_all_withMLGs_withClusters_allMarkersOnly %>%
+  group_by(MLG) %>%
+  summarize(total_samples = n())
+sample_count
+
+# Count how many individuals produced each sample count
+individuals_per_sample_count <- sample_count %>%
+  count(total_samples, name = "number_of_individuals") %>%
+  mutate(total_samples_contributed = total_samples * number_of_individuals,
+         proportion_of_total_samples = total_samples_contributed / sum(total_samples_contributed)*100)
+individuals_per_sample_count
+```
+
 ```{r MLGs per year per surface}
 persistence_bob <- ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "BOB"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
   labs(title ="distribution of MLGs in BOB (Bohlingen Buche) over the years") + scale_x_continuous(breaks=2010:2023)
 persistence_bob
-
+```
+```{r emf, eval=FALSE, include=FALSE}
 emf(file="persistence_bob.emf")
 persistence_bob
 dev.off()
