@@ -128,6 +128,7 @@ Show missing data:
 
 ```{r missing data, fig.height=10, fig.width=15}
 setPop(myData) <- ~Pop
+pop(myData)
 (microsats_lt <- locus_table(myData))
 info_table(myData, type = "missing", plot = TRUE)
 #for more stuff (removal of individuals or loci etc.): grunwaldlab.github.io/population_genetics_in_r/locus_stats.html
@@ -138,7 +139,7 @@ missing[missing=="Total"] <- "X-Total"
 ggplot(missing,aes(x=Locus, y= fct_rev(Population))) +
   geom_tile(aes(fill=Missing)) +
   geom_text(aes(label=round(Missing, 1))) +
-  theme_publish(base_family = "Times") +
+  theme_publish() +
   labs(title = "Missing data", y = "Population", x ="Locus") +
   theme(axis.text.x = element_text(angle=45, size=17), axis.text.y=element_text(size=17)) +
   scale_fill_gradient(low="white",high="red")

@@ -152,7 +152,10 @@ MLGcount_with_classification #over all samples
 sample_count <- T_all_withMLGs_withClusters_allMarkersOnly %>%
   group_by(MLG) %>%
   summarize(total_samples = n())
-sample_count
+#write.csv(sample_count, "powerful_mlgs.csv")
+
+sample_count <- sample_count %>%
+  mutate(proportion = total_samples / sum(total_samples))
 
 # Count how many individuals produced each sample count
 individuals_per_sample_count <- sample_count %>%
@@ -160,6 +163,32 @@ individuals_per_sample_count <- sample_count %>%
   mutate(total_samples_contributed = total_samples * number_of_individuals,
          proportion_of_total_samples = total_samples_contributed / sum(total_samples_contributed)*100)
 individuals_per_sample_count
+
+#plot pie chart
+top_samples <- sample_count %>%
+  arrange(desc(total_samples)) %>%
+  mutate(MLG = ifelse(row_number() <= 10, as.character(MLG), "Other")) %>%
+  group_by(MLG) %>%
+  summarize(total_samples = sum(total_samples))
+
+# Calculate the proportions
+top_samples <- top_samples %>%
+  mutate(proportion = total_samples / sum(total_samples))
+
+# Generate a color palette with RColorBrewer
+num_colors <- n_distinct(top_samples$MLG)  # Count of unique individuals
+colors <- colorspace::sequential_hcl(num_colors)  # Choose a palette (e.g., "Blues")
+
+# Create a pie chart
+ggplot(top_samples, aes(x = "", y = proportion, fill = MLG)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  labs(title = "Proportion of Samples by MLG (Top 10 + Others)",
+       fill = "MLG") +
+  scale_fill_manual(values = colors) +
+  theme_void() +
+  theme(legend.title = element_text(size = 10),
+        legend.text = element_text(size = 8))
 ```
 
 ```{r MLGs per year per surface}

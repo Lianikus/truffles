@@ -4,6 +4,128 @@ Lia Baumann
 2024-09-03
 
 ``` r
+# Assuming `genind_original` and `genind_reduced` are your two genind objects
+datasets <- list(Original = myData_genind, Reduced = myData_genind_allMarkersOnly)
+
+#function to calculate metrics
+calculate_metrics <- function(genind_obj) {
+  # Number of individuals
+  num_individuals <- nInd(genind_obj)
+  
+  # Number of loci
+  num_loci <- nLoc(genind_obj)
+  
+  #Number of alleles
+  # Calculate alleles per locus
+  alleles_per_locus <- apply(tab(genind_obj), 2, function(x) length(unique(x[!is.na(x)])))
+  total_num_alleles <-  sum(alleles_per_locus, na.rm = TRUE)
+  
+  # Calculate allelic richness manually
+  alleles_per_locus <- apply(tab(genind_obj), 2, function(x) length(unique(x[!is.na(x)])))
+  allelic_richness <- mean(alleles_per_locus, na.rm = TRUE)
+  
+  # Genetic diversity (Nei's diversity)
+  nei_diversity <- mean(Hs(genind_obj), na.rm = TRUE)
+  
+  # Missing data proportion
+  missing_data_prop <- sum(is.na(tab(genind_obj))) / length(tab(genind_obj))
+  
+  
+  # Extract the genotype data from the genind object
+  genotypes <- as.data.frame(genind_obj@tab)
+
+  # Create a unique identifier for each MLG by combining allele information across all loci
+  # You may need to adjust the indices based on your specific data structure
+  genotypes$MLG <- apply(genotypes, 1, function(x) paste(na.omit(x), collapse = "_"))
+
+  # Count the number of unique MLGs
+  num_distinct_MLGs <- length(unique(genotypes$MLG))
+
+  return(data.frame(
+    "Number_of_Individuals" = num_individuals,
+    "Number_of_Loci" = num_loci,
+    "Number_of_Alleles" = total_num_alleles,
+    "Allelic_Richness" = allelic_richness,
+    "Number_of_distinct_MLGs" = num_distinct_MLGs,
+    "Nei_Diversity" = nei_diversity,
+    "Missing_Data_Proportion" = missing_data_prop
+  ))
+}
+
+# Apply the function to both datasets and combine results
+metrics_df <- do.call(rbind, lapply(datasets, calculate_metrics))
+metrics_df <- cbind(Dataset = rownames(metrics_df), metrics_df)
+rownames(metrics_df) <- NULL
+
+# Display the metrics
+print(metrics_df)
+```
+
+    ##    Dataset Number_of_Individuals Number_of_Loci Number_of_Alleles
+    ## 1 Original                  3291             14               244
+    ## 2  Reduced                  2639             14               231
+    ##   Allelic_Richness Number_of_distinct_MLGs Nei_Diversity
+    ## 1         2.000000                     724     0.5522483
+    ## 2         1.893443                     449     0.5519406
+    ##   Missing_Data_Proportion
+    ## 1              0.03078939
+    ## 2              0.00000000
+
+``` r
+# Reshape metrics_df to long format and define the order of metrics
+metrics_long <- metrics_df %>%
+  pivot_longer(cols = -Dataset, names_to = "Metric", values_to = "Value") %>%
+  mutate(Metric = factor(Metric, levels = c(
+    "Number_of_Individuals",
+    "Number_of_Loci",
+    "Number_of_Alleles",
+    "Allelic_Richness",
+    "Number_of_distinct_MLGs",
+    "Nei_Diversity",
+    "Missing_Data_Proportion"
+  )))
+metrics_long
+```
+
+    ## # A tibble: 14 × 3
+    ##    Dataset  Metric                      Value
+    ##    <chr>    <fct>                       <dbl>
+    ##  1 Original Number_of_Individuals   3291     
+    ##  2 Original Number_of_Loci            14     
+    ##  3 Original Number_of_Alleles        244     
+    ##  4 Original Allelic_Richness           2     
+    ##  5 Original Number_of_distinct_MLGs  724     
+    ##  6 Original Nei_Diversity              0.552 
+    ##  7 Original Missing_Data_Proportion    0.0308
+    ##  8 Reduced  Number_of_Individuals   2639     
+    ##  9 Reduced  Number_of_Loci            14     
+    ## 10 Reduced  Number_of_Alleles        231     
+    ## 11 Reduced  Allelic_Richness           1.89  
+    ## 12 Reduced  Number_of_distinct_MLGs  449     
+    ## 13 Reduced  Nei_Diversity              0.552 
+    ## 14 Reduced  Missing_Data_Proportion    0
+
+``` r
+# Plot with improved visibility and specified metric order
+ggplot(metrics_long, aes(x = Metric, y = Value, fill = Dataset)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.7), color = "black") +
+  geom_text(aes(label = round(Value, 2)), 
+            position = position_dodge(width = 0.7), 
+            vjust = -0.5, 
+            size = 4.5) +  # Adjust text size
+  scale_fill_manual(values = c("Original" = "skyblue", "Reduced" = "salmon")) +
+  labs(title = "Comparison of Original and Reduced Datasets",
+       y = "",
+       x = "") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
+  theme_minimal(base_size = 14) +  # Increase base font size
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for better visibility
+```
+
+![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/comparing%20datareduction-1.png)<!-- -->
+
+``` r
 mlg_data <- data.frame(
   mlg = mlg.vector(myData_genind_allMarkersOnly),
   pop = pop(myData_genind_allMarkersOnly)
@@ -51,7 +173,48 @@ considering equal sample sizes.
 
 ``` r
 setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
+# Calculating minimal necessary sample size
+# Step 1: Extract population information
 
+# Step 1: Extract population information
+populations <- pop(myData_genind_allMarkersOnly)
+
+# Step 2: Calculate sample sizes per population
+population_counts <- table(populations)
+
+# Step 3: Calculate number of alleles per locus
+allele_counts <- nAll(myData_genind_allMarkersOnly)
+
+# Step 4: Create a data frame to hold alleles and populations
+# Repeat population assignments for each locus
+pop_assignments <- rep(populations, each = length(allele_counts))
+
+# Combine the population assignments and allele counts into a data frame
+allele_data <- data.frame(Population = pop_assignments,
+                           Locus = rep(1:length(allele_counts), times = length(populations)),
+                           AlleleCount = rep(allele_counts, each = length(populations)))
+
+# Step 5: Calculate average number of alleles per population
+average_alleles <- aggregate(AlleleCount ~ Population, data = allele_data, FUN = mean)
+
+# Combine sample sizes and average alleles into one data frame
+sample_summary <- data.frame(Population = names(population_counts),
+                             SampleSize = as.integer(population_counts),
+                             AverageAlleles = average_alleles$AlleleCount)
+
+# Step 6: Plot Sample Size vs. Average Number of Alleles
+ggplot(sample_summary, aes(x = SampleSize, y = AverageAlleles)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Sample Size vs. Average Number of Alleles (Stratum SamplingYear)",
+       x = "Sample Size",
+       y = "Average Number of Alleles") +
+  theme_minimal()
+```
+
+![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/richness-1.png)<!-- -->
+
+``` r
 #Minimal sample size Sum is 1 so this can not give any relevant output. I will plot the same for higher sample sizes only
 #only calculate Richness for populations > 100 samples (N)
 myData_genind_allMarkersOnly_above100N <- selPopSize(myData_genind_allMarkersOnly,pop=NULL,nMin=100)
@@ -70,82 +233,50 @@ summary(myData_genind_allMarkersOnly_above100N)
 H.year <- mlg.table(myData_genind_allMarkersOnly_above100N, plot = FALSE)
 rarecurve(H.year, ylab="Number of expected MLGs", sample=min(rowSums(H.year)),
           border = NA, fill = NA, font = 2, cex = 1, col = "blue")
-title("Rarecurve of Sampling Years")
-```
-
-![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/richness-1.png)<!-- -->
-
-``` r
-setPop(myData_genind_allMarkersOnly) <- ~TruffleYear
-myData_genind_allMarkersOnly_above100N <- selPopSize(myData_genind_allMarkersOnly,pop=NULL,nMin=100)
-summary(myData_genind_allMarkersOnly_above100N)
-```
-
-    ## 
-    ## // Number of individuals: 2454
-    ## // Group sizes: 145 195 328 187 488 539 272 138 162
-    ## // Number of alleles per locus: 7 6 3 10 21 7 7 7 7 5 7 5 9 7
-    ## // Number of alleles per group: 57 67 76 75 80 75 70 56 48
-    ## // Percentage of missing data: 0 %
-    ## // Observed heterozygosity: 0
-
-``` r
-H.year <- mlg.table(myData_genind_allMarkersOnly_above100N, plot = FALSE)
-rarecurve(H.year, ylab="Number of expected MLGs", sample=min(rowSums(H.year)),
-          border = NA, fill = NA, font = 2, cex = 1, col = "blue")
-title("Rarecurve of Truffle Years")
+title("Rarecurve of Sampling Years (min. sample size = 100 per year)")
 ```
 
 ![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/richness-2.png)<!-- -->
 
 ``` r
-setPop(myData_genind_allMarkersOnly) <- ~Month
-myData_genind_allMarkersOnly_above40N <- selPopSize(myData_genind_allMarkersOnly,pop=NULL,nMin=40)
-summary(myData_genind_allMarkersOnly_above40N)
-```
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+# Calculating minimal necessary sample size
+# Step 1: Extract population information
 
-    ## 
-    ## // Number of individuals: 2585
-    ## // Group sizes: 75 80 81 332 299 488 669 351 160 50
-    ## // Number of alleles per locus: 7 6 3 11 21 7 7 7 7 5 7 5 9 7
-    ## // Number of alleles per group: 68 73 67 76 81 84 83 83 82 67
-    ## // Percentage of missing data: 0 %
-    ## // Observed heterozygosity: 0
+# Step 1: Extract population information
+populations <- pop(myData_genind_allMarkersOnly)
 
-``` r
-poppr(myData_genind_allMarkersOnly_above40N)
-```
+# Step 2: Calculate sample sizes per population
+population_counts <- table(populations)
 
-    ##      Pop    N MLG eMLG   SE    H    G lambda   E.5  Hexp   Ia rbarD
-    ## 1      1   75  51 37.5 1.90 3.77 35.4  0.972 0.813 0.585 1.69 0.131
-    ## 2      3   80  45 31.2 2.12 3.44 20.5  0.951 0.648 0.650 3.71 0.288
-    ## 3      6   81  28 22.1 1.71 2.88 11.3  0.911 0.614 0.582 3.77 0.292
-    ## 4      7  332  60 20.9 2.52 3.04 10.4  0.904 0.473 0.667 5.14 0.397
-    ## 5      8  299  91 28.0 2.83 3.68 19.2  0.948 0.470 0.645 3.45 0.267
-    ## 6      9  488 132 29.0 2.87 3.88 21.9  0.954 0.439 0.621 3.26 0.252
-    ## 7     10  669 148 30.6 2.86 4.06 32.1  0.969 0.544 0.645 3.18 0.246
-    ## 8     11  351 146 36.5 2.79 4.43 48.2  0.979 0.572 0.598 2.09 0.162
-    ## 9     12  160  85 36.7 2.56 4.12 42.7  0.977 0.686 0.649 2.63 0.204
-    ## 10     2   50  34 34.0 0.00 3.30 19.8  0.950 0.724 0.587 2.44 0.189
-    ## 11 Total 2585 441 33.0 2.98 4.54 34.6  0.971 0.363 0.645 3.01 0.233
-    ##                                     File
-    ## 1  myData_genind_allMarkersOnly_above40N
-    ## 2  myData_genind_allMarkersOnly_above40N
-    ## 3  myData_genind_allMarkersOnly_above40N
-    ## 4  myData_genind_allMarkersOnly_above40N
-    ## 5  myData_genind_allMarkersOnly_above40N
-    ## 6  myData_genind_allMarkersOnly_above40N
-    ## 7  myData_genind_allMarkersOnly_above40N
-    ## 8  myData_genind_allMarkersOnly_above40N
-    ## 9  myData_genind_allMarkersOnly_above40N
-    ## 10 myData_genind_allMarkersOnly_above40N
-    ## 11 myData_genind_allMarkersOnly_above40N
+# Step 3: Calculate number of alleles per locus
+allele_counts <- nAll(myData_genind_allMarkersOnly)
 
-``` r
-H.year <- mlg.table(myData_genind_allMarkersOnly_above40N, plot = FALSE)
-rarecurve(H.year, ylab="Number of expected MLGs", sample=min(rowSums(H.year)),
-          border = NA, fill = NA, font = 2, cex = 1, col = "blue")
-title("Rarecurve of Month")
+# Step 4: Create a data frame to hold alleles and populations
+# Repeat population assignments for each locus
+pop_assignments <- rep(populations, each = length(allele_counts))
+
+# Combine the population assignments and allele counts into a data frame
+allele_data <- data.frame(Population = pop_assignments,
+                           Locus = rep(1:length(allele_counts), times = length(populations)),
+                           AlleleCount = rep(allele_counts, each = length(populations)))
+
+# Step 5: Calculate average number of alleles per population
+average_alleles <- aggregate(AlleleCount ~ Population, data = allele_data, FUN = mean)
+
+# Combine sample sizes and average alleles into one data frame
+sample_summary <- data.frame(Population = names(population_counts),
+                             SampleSize = as.integer(population_counts),
+                             AverageAlleles = average_alleles$AlleleCount)
+
+# Step 6: Plot Sample Size vs. Average Number of Alleles
+ggplot(sample_summary, aes(x = SampleSize, y = AverageAlleles)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Sample Size vs. Average Number of Alleles (Stratum Pop)",
+       x = "Sample Size",
+       y = "Average Number of Alleles") +
+  theme_minimal()
 ```
 
 ![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/richness-3.png)<!-- -->
@@ -209,7 +340,7 @@ poppr(myData_genind_allMarkersOnly_above5N)
 H.year <- mlg.table(myData_genind_allMarkersOnly_above5N, plot = FALSE)
 rarecurve(H.year, ylab="Number of expected MLGs", sample=min(rowSums(H.year)),
           border = NA, fill = NA, font = 2, cex = 1, col = "blue")
-title("Rarecurve of Pop")
+title("Rarecurve of Pop (min. Sample size = 5 per Pop)")
 ```
 
 ![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/richness-4.png)<!-- -->
@@ -272,10 +403,85 @@ poppr(myData_genind_allMarkersOnly_above5N_withoutBOB)
 H.year_withoutBOB <- mlg.table(myData_genind_allMarkersOnly_above5N_withoutBOB, plot = FALSE)
 rarecurve(H.year_withoutBOB, ylab="Number of expected MLGs", sample=min(rowSums(H.year_withoutBOB)),
 font = 2, cex = 1, col = "blue")
-title("Rarecurve of Pop")
+title("Rarecurve of Pop  (min. Sample size = 5 per Pop; without BOB)")
 ```
 
 ![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/richness-5.png)<!-- -->
+
+``` r
+setPop(myData_genind_allMarkersOnly) <- ~TruffleYear
+myData_genind_allMarkersOnly_above100N <- selPopSize(myData_genind_allMarkersOnly,pop=NULL,nMin=100)
+summary(myData_genind_allMarkersOnly_above100N)
+```
+
+    ## 
+    ## // Number of individuals: 2454
+    ## // Group sizes: 145 195 328 187 488 539 272 138 162
+    ## // Number of alleles per locus: 7 6 3 10 21 7 7 7 7 5 7 5 9 7
+    ## // Number of alleles per group: 57 67 76 75 80 75 70 56 48
+    ## // Percentage of missing data: 0 %
+    ## // Observed heterozygosity: 0
+
+``` r
+H.year <- mlg.table(myData_genind_allMarkersOnly_above100N, plot = FALSE)
+rarecurve(H.year, ylab="Number of expected MLGs", sample=min(rowSums(H.year)),
+          border = NA, fill = NA, font = 2, cex = 1, col = "blue")
+title("Rarecurve of Truffle Years")
+```
+
+![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/richness-6.png)<!-- -->
+
+``` r
+setPop(myData_genind_allMarkersOnly) <- ~Month
+myData_genind_allMarkersOnly_above40N <- selPopSize(myData_genind_allMarkersOnly,pop=NULL,nMin=40)
+summary(myData_genind_allMarkersOnly_above40N)
+```
+
+    ## 
+    ## // Number of individuals: 2585
+    ## // Group sizes: 75 80 81 332 299 488 669 351 160 50
+    ## // Number of alleles per locus: 7 6 3 11 21 7 7 7 7 5 7 5 9 7
+    ## // Number of alleles per group: 68 73 67 76 81 84 83 83 82 67
+    ## // Percentage of missing data: 0 %
+    ## // Observed heterozygosity: 0
+
+``` r
+poppr(myData_genind_allMarkersOnly_above40N)
+```
+
+    ##      Pop    N MLG eMLG   SE    H    G lambda   E.5  Hexp   Ia rbarD
+    ## 1      1   75  51 37.5 1.90 3.77 35.4  0.972 0.813 0.585 1.69 0.131
+    ## 2      3   80  45 31.2 2.12 3.44 20.5  0.951 0.648 0.650 3.71 0.288
+    ## 3      6   81  28 22.1 1.71 2.88 11.3  0.911 0.614 0.582 3.77 0.292
+    ## 4      7  332  60 20.9 2.52 3.04 10.4  0.904 0.473 0.667 5.14 0.397
+    ## 5      8  299  91 28.0 2.83 3.68 19.2  0.948 0.470 0.645 3.45 0.267
+    ## 6      9  488 132 29.0 2.87 3.88 21.9  0.954 0.439 0.621 3.26 0.252
+    ## 7     10  669 148 30.6 2.86 4.06 32.1  0.969 0.544 0.645 3.18 0.246
+    ## 8     11  351 146 36.5 2.79 4.43 48.2  0.979 0.572 0.598 2.09 0.162
+    ## 9     12  160  85 36.7 2.56 4.12 42.7  0.977 0.686 0.649 2.63 0.204
+    ## 10     2   50  34 34.0 0.00 3.30 19.8  0.950 0.724 0.587 2.44 0.189
+    ## 11 Total 2585 441 33.0 2.98 4.54 34.6  0.971 0.363 0.645 3.01 0.233
+    ##                                     File
+    ## 1  myData_genind_allMarkersOnly_above40N
+    ## 2  myData_genind_allMarkersOnly_above40N
+    ## 3  myData_genind_allMarkersOnly_above40N
+    ## 4  myData_genind_allMarkersOnly_above40N
+    ## 5  myData_genind_allMarkersOnly_above40N
+    ## 6  myData_genind_allMarkersOnly_above40N
+    ## 7  myData_genind_allMarkersOnly_above40N
+    ## 8  myData_genind_allMarkersOnly_above40N
+    ## 9  myData_genind_allMarkersOnly_above40N
+    ## 10 myData_genind_allMarkersOnly_above40N
+    ## 11 myData_genind_allMarkersOnly_above40N
+
+``` r
+H.year <- mlg.table(myData_genind_allMarkersOnly_above40N, plot = FALSE)
+rarecurve(H.year, ylab="Number of expected MLGs", sample=min(rowSums(H.year)),
+          border = NA, fill = NA, font = 2, cex = 1, col = "blue")
+title("Rarecurve of Month")
+```
+
+![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/richness-7.png)<!-- -->
 
 ``` r
 #Genotypic richness rises, the later the ascocarps were collected --> more different individuals produced fruiting bodies
@@ -288,102 +494,48 @@ truffles.matFst <- mat_pw_fst(myData_genind_allMarkersOnly)
 truffles.matFst
 ```
 
-    ##           FRE        ALD        RIE        TRO        SCG        BOH        BOB
-    ## FRE 0.0000000 0.31089151 0.25655612 0.31425929 0.27467106 0.27907483 0.25890972
-    ## ALD 0.3108915 0.00000000 0.08053263 0.18037184 0.17458466 0.13006144 0.09151596
-    ## RIE 0.2565561 0.08053263 0.00000000 0.10523195 0.10653923 0.07545320 0.05656484
-    ## TRO 0.3142593 0.18037184 0.10523195 0.00000000 0.14520561 0.12139806 0.10955991
-    ## SCG 0.2746711 0.17458466 0.10653923 0.14520561 0.00000000 0.12851590 0.11074762
-    ## BOH 0.2790748 0.13006144 0.07545320 0.12139806 0.12851590 0.00000000 0.04429967
-    ## BOB 0.2589097 0.09151596 0.05656484 0.10955991 0.11074762 0.04429967 0.00000000
-    ## FRB 0.1431022 0.18117960 0.11660137 0.17863878 0.11218507 0.13447858 0.12455630
-    ## UEB 0.3191754 0.12920558 0.12151549 0.15808763 0.15049739 0.12799774 0.11559472
-    ## SCL 0.2904711 0.19256256 0.11473862 0.17267620 0.04641046 0.14658265 0.15659933
-    ## SCD 0.2741623 0.13554346 0.08066294 0.15636158 0.07066012 0.09524931 0.10201591
-    ## WSL 0.3440820 0.15218171 0.13988329 0.20426987 0.19301655 0.16725577 0.17102259
-    ## BUR 0.2675843 0.27570365 0.22689543 0.24273891 0.20839601 0.23232128 0.22489462
-    ## SCS 0.3364321 0.18076727 0.14379586 0.18067167 0.12391060 0.12998316 0.11356810
-    ## NEU 0.3155759 0.15070647 0.08081997 0.08158340 0.15676582 0.08588566 0.09913044
-    ## UST 0.2781426 0.08486830 0.05758509 0.10449463 0.09837744 0.05331330 0.05503614
-    ## KON 0.2791685 0.14465093 0.08959800 0.13216199 0.13765304 0.07862211 0.10020521
-    ## FRI 0.2768451 0.11861747 0.08595812 0.14909503 0.12723005 0.06433009 0.07575040
-    ## BAR 0.2862634 0.17369173 0.06351276 0.20497449 0.07909141 0.10606796 0.10856665
-    ## BRU 0.2246713 0.20331218 0.15483665 0.19787913 0.17059657 0.17262417 0.16639083
-    ## LIM 0.2626909 0.10316715 0.05877707 0.09739707 0.08824349 0.03147000 0.05469300
-    ## HAN 0.2974334 0.13710350 0.07940465 0.15004811 0.14431426 0.07076415 0.09851221
-    ## GEN 0.3330245 0.12521797 0.10076247 0.18289710 0.11145155 0.14151834 0.12741798
-    ##            FRB        UEB        SCL        SCD        WSL       BUR        SCS
-    ## FRE 0.14310221 0.31917539 0.29047110 0.27416227 0.34408196 0.2675843 0.33643206
-    ## ALD 0.18117960 0.12920558 0.19256256 0.13554346 0.15218171 0.2757037 0.18076727
-    ## RIE 0.11660137 0.12151549 0.11473862 0.08066294 0.13988329 0.2268954 0.14379586
-    ## TRO 0.17863878 0.15808763 0.17267620 0.15636158 0.20426987 0.2427389 0.18067167
-    ## SCG 0.11218507 0.15049739 0.04641046 0.07066012 0.19301655 0.2083960 0.12391060
-    ## BOH 0.13447858 0.12799774 0.14658265 0.09524931 0.16725577 0.2323213 0.12998316
-    ## BOB 0.12455630 0.11559472 0.15659933 0.10201591 0.17102259 0.2248946 0.11356810
-    ## FRB 0.00000000 0.19601350 0.15996723 0.13658725 0.21589177 0.1876568 0.19648749
-    ## UEB 0.19601350 0.00000000 0.16170819 0.12583771 0.13717792 0.2658447 0.17121104
-    ## SCL 0.15996723 0.16170819 0.00000000 0.07089933 0.17403283 0.2411886 0.17821878
-    ## SCD 0.13658725 0.12583771 0.07089933 0.00000000 0.13513764 0.2222707 0.15396622
-    ## WSL 0.21589177 0.13717792 0.17403283 0.13513764 0.00000000 0.2614629 0.19082479
-    ## BUR 0.18765685 0.26584471 0.24118859 0.22227070 0.26146293 0.0000000 0.26104582
-    ## SCS 0.19648749 0.17121104 0.17821878 0.15396622 0.19082479 0.2610458 0.00000000
-    ## NEU 0.19311777 0.15208677 0.12071402 0.12691870 0.16006022 0.2569035 0.20876906
-    ## UST 0.12559990 0.08182145 0.12548223 0.08337721 0.16017559 0.2301953 0.11983945
-    ## KON 0.15895663 0.16257084 0.15496904 0.13581952 0.17389545 0.2297745 0.11635207
-    ## FRI 0.13108748 0.11062216 0.16456567 0.09136254 0.09739709 0.2171302 0.10737509
-    ## BAR 0.07262383 0.13374671 0.10640365 0.06997353 0.21689101 0.2337104 0.24159664
-    ## BRU 0.10529681 0.18977972 0.19424485 0.17875850 0.22877190 0.1887462 0.20411833
-    ## LIM 0.11888205 0.11585925 0.10209861 0.07765458 0.11651431 0.2010742 0.08136605
-    ## HAN 0.16130525 0.11470737 0.12302066 0.08307456 0.11243807 0.2481210 0.14864214
-    ## GEN 0.19508160 0.09564265 0.12786714 0.11478098 0.17014577 0.2643856 0.14688256
-    ##            NEU        UST        KON        FRI        BAR       BRU        LIM
-    ## FRE 0.31557594 0.27814261 0.27916852 0.27684507 0.28626340 0.2246713 0.26269095
-    ## ALD 0.15070647 0.08486830 0.14465093 0.11861747 0.17369173 0.2033122 0.10316715
-    ## RIE 0.08081997 0.05758509 0.08959800 0.08595812 0.06351276 0.1548367 0.05877707
-    ## TRO 0.08158340 0.10449463 0.13216199 0.14909503 0.20497449 0.1978791 0.09739707
-    ## SCG 0.15676582 0.09837744 0.13765304 0.12723005 0.07909141 0.1705966 0.08824349
-    ## BOH 0.08588566 0.05331330 0.07862211 0.06433009 0.10606796 0.1726242 0.03147000
-    ## BOB 0.09913044 0.05503614 0.10020521 0.07575040 0.10856665 0.1663908 0.05469300
-    ## FRB 0.19311777 0.12559990 0.15895663 0.13108748 0.07262383 0.1052968 0.11888205
-    ## UEB 0.15208677 0.08182145 0.16257084 0.11062216 0.13374671 0.1897797 0.11585925
-    ## SCL 0.12071402 0.12548223 0.15496904 0.16456567 0.10640365 0.1942449 0.10209861
-    ## SCD 0.12691870 0.08337721 0.13581952 0.09136254 0.06997353 0.1787585 0.07765458
-    ## WSL 0.16006022 0.16017559 0.17389545 0.09739709 0.21689101 0.2287719 0.11651431
-    ## BUR 0.25690352 0.23019526 0.22977447 0.21713023 0.23371040 0.1887462 0.20107417
-    ## SCS 0.20876906 0.11983945 0.11635207 0.10737509 0.24159664 0.2041183 0.08136605
-    ## NEU 0.00000000 0.10249545 0.11367829 0.14438196 0.18916218 0.2024363 0.07725473
-    ## UST 0.10249545 0.00000000 0.08444786 0.07813694 0.07541717 0.1515895 0.04372114
-    ## KON 0.11367829 0.08444786 0.00000000 0.11799345 0.17484463 0.1931473 0.06332438
-    ## FRI 0.14438196 0.07813694 0.11799345 0.00000000 0.11907318 0.1621497 0.05512286
-    ## BAR 0.18916218 0.07541717 0.17484463 0.11907318 0.00000000 0.1559215 0.06607097
-    ## BRU 0.20243633 0.15158952 0.19314728 0.16214973 0.15592153 0.0000000 0.15451676
-    ## LIM 0.07725473 0.04372114 0.06332438 0.05512286 0.06607097 0.1545168 0.00000000
-    ## HAN 0.10143693 0.07722693 0.11026437 0.09597566 0.12390881 0.1784850 0.05873626
-    ## GEN 0.17423311 0.08633737 0.12685578 0.12196770 0.16809117 0.1846908 0.09037220
-    ##            HAN        GEN
-    ## FRE 0.29743342 0.33302451
-    ## ALD 0.13710350 0.12521797
-    ## RIE 0.07940465 0.10076247
-    ## TRO 0.15004811 0.18289710
-    ## SCG 0.14431426 0.11145155
-    ## BOH 0.07076415 0.14151834
-    ## BOB 0.09851221 0.12741798
-    ## FRB 0.16130525 0.19508160
-    ## UEB 0.11470737 0.09564265
-    ## SCL 0.12302066 0.12786714
-    ## SCD 0.08307456 0.11478098
-    ## WSL 0.11243807 0.17014577
-    ## BUR 0.24812105 0.26438560
-    ## SCS 0.14864214 0.14688256
-    ## NEU 0.10143693 0.17423311
-    ## UST 0.07722693 0.08633737
-    ## KON 0.11026437 0.12685578
-    ## FRI 0.09597566 0.12196770
-    ## BAR 0.12390881 0.16809117
-    ## BRU 0.17848499 0.18469080
-    ## LIM 0.05873626 0.09037220
-    ## HAN 0.00000000 0.12261743
-    ## GEN 0.12261743 0.00000000
+    ##               1            3            4             5            6          7
+    ## 1   0.000000000 0.0027676203  0.007511949  0.0040036157  0.009122149 0.01892017
+    ## 3   0.002767620 0.0000000000  0.012143296  0.0043341806  0.009553700 0.01506242
+    ## 4   0.007511949 0.0121432957  0.000000000  0.0070476359  0.005959129 0.01280927
+    ## 5   0.004003616 0.0043341806  0.007047636  0.0000000000  0.004899709 0.00741179
+    ## 6   0.009122149 0.0095536998  0.005959129  0.0048997089  0.000000000 0.01663331
+    ## 7   0.018920170 0.0150624200  0.012809268  0.0074117895  0.016633312 0.00000000
+    ## 8   0.008679152 0.0080184639  0.010420867  0.0031369193  0.006936678 0.01483469
+    ## 9   0.006705879 0.0086530515  0.006338210  0.0001435758  0.006432143 0.01043730
+    ## 10  0.006608714 0.0071463715  0.009273377  0.0009645421  0.008123561 0.01141658
+    ## 11  0.003049558 0.0076234929  0.007543517  0.0027820472  0.008462656 0.01600189
+    ## 12  0.002772684 0.0047486182  0.010175156  0.0050375633  0.012458195 0.01373021
+    ## 2  -0.001048776 0.0013368431  0.008849114  0.0063345078  0.010473270 0.02075741
+    ## 0  -0.004467570 0.0008356709 -0.007884439 -0.0015750374 -0.015111642 0.01236025
+    ##                8             9            10           11            12
+    ## 1   0.0086791517  0.0067058788  0.0066087143  0.003049558  0.0027726842
+    ## 3   0.0080184639  0.0086530515  0.0071463715  0.007623493  0.0047486182
+    ## 4   0.0104208668  0.0063382096  0.0092733766  0.007543517  0.0101751558
+    ## 5   0.0031369193  0.0001435758  0.0009645421  0.002782047  0.0050375633
+    ## 6   0.0069366782  0.0064321431  0.0081235607  0.008462656  0.0124581952
+    ## 7   0.0148346894  0.0104373031  0.0114165844  0.016001894  0.0137302056
+    ## 8   0.0000000000  0.0017174832  0.0009499061  0.003298673  0.0043353915
+    ## 9   0.0017174832  0.0000000000  0.0006941518  0.001499861  0.0037486747
+    ## 10  0.0009499061  0.0006941518  0.0000000000  0.001969022  0.0029124743
+    ## 11  0.0032986732  0.0014998605  0.0019690216  0.000000000  0.0014977462
+    ## 12  0.0043353915  0.0037486747  0.0029124743  0.001497746  0.0000000000
+    ## 2   0.0118600449  0.0106030328  0.0104045638  0.007805194  0.0057022157
+    ## 0  -0.0030583107 -0.0037272402 -0.0017454577 -0.001792220 -0.0006487363
+    ##               2             0
+    ## 1  -0.001048776 -0.0044675701
+    ## 3   0.001336843  0.0008356709
+    ## 4   0.008849114 -0.0078844386
+    ## 5   0.006334508 -0.0015750374
+    ## 6   0.010473270 -0.0151116418
+    ## 7   0.020757414  0.0123602462
+    ## 8   0.011860045 -0.0030583107
+    ## 9   0.010603033 -0.0037272402
+    ## 10  0.010404564 -0.0017454577
+    ## 11  0.007805194 -0.0017922200
+    ## 12  0.005702216 -0.0006487363
+    ## 2   0.000000000 -0.0028249859
+    ## 0  -0.002824986  0.0000000000
 
 ``` r
 truffles.tree <- nj(truffles.matFst)
@@ -420,27 +572,27 @@ kable(Gst_Hedrick(myData_genind_allMarkersOnly))
 
 |          |         x |
 |:---------|----------:|
-| aest06_1 | 0.7973858 |
-| aest07_1 | 0.7911718 |
-| aest15_1 | 0.8515118 |
-| aest26_1 | 0.8774886 |
-| aest28_1 | 0.9040267 |
-| aest35_1 | 0.8660864 |
-| aest36_1 | 0.7570243 |
-| aest01_1 | 0.9067071 |
-| aest10_1 | 0.9002358 |
-| aest18_1 | 0.8432250 |
-| aest24_1 | 0.8122032 |
-| aest25_1 | 0.8035752 |
-| aest29_1 | 0.8456895 |
-| aest31_1 | 0.7772581 |
+| aest06_1 | 0.1025806 |
+| aest07_1 | 0.0477186 |
+| aest15_1 | 0.0501921 |
+| aest26_1 | 0.1399328 |
+| aest28_1 | 0.2065323 |
+| aest35_1 | 0.0962261 |
+| aest36_1 | 0.1216121 |
+| aest01_1 | 0.2572069 |
+| aest10_1 | 0.1350087 |
+| aest18_1 | 0.1521773 |
+| aest24_1 | 0.0736116 |
+| aest25_1 | 0.0384932 |
+| aest29_1 | 0.0819715 |
+| aest31_1 | 0.1456290 |
 
 </td>
 <td>
 
 |         x |
 |----------:|
-| 0.8241113 |
+| 0.1059934 |
 
 </td>
 </tr>
@@ -2018,6 +2170,212 @@ allMarkers_cluster_amova
     ## Phi-samples-total 0.373895
 
 ``` r
+# Function to calculate PhiPT manually
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+
+
+calculate_phi_pt_genalex <- function(genind_obj) {
+  # Step 1: Get allele frequencies and population sizes
+  allele_freq <- tab(genind_obj, freq = TRUE)
+  populations <- pop(genind_obj)
+  population_names <- unique(populations)
+  n_pop <- length(population_names)
+
+  # Population sizes
+  pop_sizes <- table(populations)
+  
+  # Initialize PhiPT matrix
+  phi_pt_matrix <- matrix(0, nrow = n_pop, ncol = n_pop)
+  rownames(phi_pt_matrix) <- population_names
+  colnames(phi_pt_matrix) <- population_names
+
+  # Calculate mean allele frequencies weighted by population size
+  pop_freqs <- sapply(population_names, function(pop_name) {
+    pop_rows <- which(populations == pop_name)
+    colMeans(allele_freq[pop_rows, , drop = FALSE])
+  })
+  
+  # Total allele frequency, weighted by population size
+  total_freq <- rowSums(t(pop_freqs) * as.numeric(pop_sizes)) / sum(pop_sizes)
+
+  # Loop over pairs of populations to calculate PhiPT
+  for (i in 1:(n_pop - 1)) {
+    for (j in (i + 1):n_pop) {
+      # Frequencies for populations i and j
+      freq_i <- pop_freqs[, i]
+      freq_j <- pop_freqs[, j]
+
+      # Calculate AMOVA-like components
+      MS_between <- mean((freq_i - freq_j)^2)
+      MS_within <- (mean((freq_i - total_freq)^2) + mean((freq_j - total_freq)^2)) / 2
+
+      # Calculate PhiPT
+      phi_pt <- MS_between / (MS_between + MS_within)
+      
+      # Symmetric assignment and setting negative values to zero
+      phi_pt <- max(phi_pt, 0)
+      phi_pt_matrix[i, j] <- phi_pt
+      phi_pt_matrix[j, i] <- phi_pt
+    }
+  }
+  
+  return(phi_pt_matrix)
+}
+
+# Run the function on your genind object
+phi_pt_genalex_results <- calculate_phi_pt_genalex(myData_genind_allMarkersOnly)
+
+# View results
+print("GenAlEx-approximated PhiPT matrix:")
+```
+
+    ## [1] "GenAlEx-approximated PhiPT matrix:"
+
+``` r
+print(phi_pt_genalex_results)
+```
+
+    ##            FRE        ALD        RIE        TRO        SCG        BOH
+    ## FRE 0.00000000 0.21597495 0.17492502 0.22051393 0.18824671 0.19111576
+    ## ALD 0.21597495 0.00000000 0.06659534 0.14147924 0.14155430 0.10378704
+    ## RIE 0.17492502 0.06659534 0.00000000 0.09027868 0.09836994 0.06648208
+    ## TRO 0.22051393 0.14147924 0.09027868 0.00000000 0.12025152 0.09929197
+    ## SCG 0.18824671 0.14155430 0.09836994 0.12025152 0.00000000 0.11171603
+    ## BOH 0.19111576 0.10378704 0.06648208 0.09929197 0.11171603 0.00000000
+    ## BOB 0.18532275 0.07576506 0.04839850 0.09275982 0.09797921 0.03826240
+    ## FRB 0.07984262 0.14661188 0.10742864 0.14954845 0.10581388 0.11770792
+    ## UEB 0.22384915 0.09839356 0.09716362 0.12270275 0.12019734 0.10033383
+    ## SCL 0.20164062 0.15254852 0.09523862 0.13815086 0.03930961 0.11902314
+    ## SCD 0.18924071 0.10920222 0.06895014 0.12904683 0.06194166 0.07968673
+    ## WSL 0.23834923 0.10993506 0.10446244 0.15087302 0.14465427 0.12368347
+    ## BUR 0.20114134 0.21458747 0.17772786 0.18725815 0.16124134 0.17986090
+    ## SCS 0.24015624 0.13922155 0.12008789 0.14007945 0.09811139 0.10327531
+    ## NEU 0.21955446 0.11566448 0.06871979 0.06279097 0.12684065 0.06904615
+    ## UST 0.19519339 0.06956846 0.05324751 0.08871443 0.09088470 0.04778119
+    ## KON 0.20956606 0.11217474 0.06957561 0.10361738 0.11270933 0.05912025
+    ## FRI 0.19257520 0.09548287 0.07311360 0.12325290 0.10999399 0.05406477
+    ## BAR 0.19921637 0.15042944 0.11658741 0.17866739 0.10951046 0.12472689
+    ## BRU 0.15260511 0.17534500 0.13834771 0.17456946 0.15700382 0.15347220
+    ## LIM 0.19092036 0.08904273 0.05321349 0.08655362 0.08349523 0.02939213
+    ## HAN 0.20891931 0.10998904 0.06868752 0.12350645 0.12491506 0.05969816
+    ## GEN 0.23893872 0.09864750 0.09322148 0.14691525 0.09611240 0.12024958
+    ##            BOB        FRB        UEB        SCL        SCD        WSL       BUR
+    ## FRE 0.18532275 0.07984262 0.22384915 0.20164062 0.18924071 0.23834923 0.2011413
+    ## ALD 0.07576506 0.14661188 0.09839356 0.15254852 0.10920222 0.10993506 0.2145875
+    ## RIE 0.04839850 0.10742864 0.09716362 0.09523862 0.06895014 0.10446244 0.1777279
+    ## TRO 0.09275982 0.14954845 0.12270275 0.13815086 0.12904683 0.15087302 0.1872582
+    ## SCG 0.09797921 0.10581388 0.12019734 0.03930961 0.06194166 0.14465427 0.1612413
+    ## BOH 0.03826240 0.11770792 0.10033383 0.11902314 0.07968673 0.12368347 0.1798609
+    ## BOB 0.00000000 0.10828204 0.09393538 0.13142931 0.08600074 0.13478800 0.1777452
+    ## FRB 0.10828204 0.00000000 0.15576082 0.13123797 0.11668894 0.16024038 0.1432947
+    ## UEB 0.09393538 0.15576082 0.00000000 0.12602923 0.09929481 0.09911571 0.2030242
+    ## SCL 0.13142931 0.13123797 0.12602923 0.00000000 0.05729142 0.12895222 0.1850452
+    ## SCD 0.08600074 0.11668894 0.09929481 0.05729142 0.00000000 0.10055715 0.1707081
+    ## WSL 0.13478800 0.16024038 0.09911571 0.12895222 0.10055715 0.00000000 0.1901345
+    ## BUR 0.17774523 0.14329467 0.20302423 0.18504517 0.17070809 0.19013447 0.0000000
+    ## SCS 0.09532132 0.15786141 0.13190389 0.14071652 0.12491343 0.13965972 0.2022713
+    ## NEU 0.08324029 0.15844961 0.11655556 0.09445324 0.10312458 0.11535226 0.1983321
+    ## UST 0.04834379 0.11639556 0.06513953 0.10407721 0.07172873 0.12004140 0.1830654
+    ## KON 0.07899592 0.13112458 0.12528770 0.12203404 0.10755054 0.12823612 0.1921292
+    ## FRI 0.06319002 0.11233096 0.08692401 0.13462308 0.07562717 0.07167544 0.1657071
+    ## BAR 0.13602982 0.14298062 0.12022676 0.10757358 0.09577815 0.15886394 0.2031560
+    ## BRU 0.14394592 0.09717679 0.15866548 0.16770913 0.15660684 0.18221296 0.1458968
+    ## LIM 0.04732661 0.10960792 0.09697344 0.08824923 0.06827105 0.09184583 0.1593996
+    ## HAN 0.08314278 0.13925367 0.08980894 0.09961303 0.06908635 0.08222602 0.1939567
+    ## GEN 0.11248001 0.17398117 0.07523645 0.10392603 0.09823334 0.12461370 0.2106882
+    ##            SCS        NEU        UST        KON        FRI        BAR
+    ## FRE 0.24015624 0.21955446 0.19519339 0.20956606 0.19257520 0.19921637
+    ## ALD 0.13922155 0.11566448 0.06956846 0.11217474 0.09548287 0.15042944
+    ## RIE 0.12008789 0.06871979 0.05324751 0.06957561 0.07311360 0.11658741
+    ## TRO 0.14007945 0.06279097 0.08871443 0.10361738 0.12325290 0.17866739
+    ## SCG 0.09811139 0.12684065 0.09088470 0.11270933 0.10999399 0.10951046
+    ## BOH 0.10327531 0.06904615 0.04778119 0.05912025 0.05406477 0.12472689
+    ## BOB 0.09532132 0.08324029 0.04834379 0.07899592 0.06319002 0.13602982
+    ## FRB 0.15786141 0.15844961 0.11639556 0.13112458 0.11233096 0.14298062
+    ## UEB 0.13190389 0.11655556 0.06513953 0.12528770 0.08692401 0.12022676
+    ## SCL 0.14071652 0.09445324 0.10407721 0.12203404 0.13462308 0.10757358
+    ## SCD 0.12491343 0.10312458 0.07172873 0.10755054 0.07562717 0.09577815
+    ## WSL 0.13965972 0.11535226 0.12004140 0.12823612 0.07167544 0.15886394
+    ## BUR 0.20227130 0.19833215 0.18306544 0.19212915 0.16570714 0.20315595
+    ## SCS 0.00000000 0.16018630 0.09817729 0.08903975 0.08693492 0.18995515
+    ## NEU 0.16018630 0.00000000 0.08551947 0.08699845 0.11797138 0.15612615
+    ## UST 0.09817729 0.08551947 0.00000000 0.06692752 0.06722676 0.12018596
+    ## KON 0.08903975 0.08699845 0.06692752 0.00000000 0.09190933 0.17074502
+    ## FRI 0.08693492 0.11797138 0.06722676 0.09190933 0.00000000 0.13644023
+    ## BAR 0.18995515 0.15612615 0.12018596 0.17074502 0.13644023 0.00000000
+    ## BRU 0.17795527 0.17708309 0.13754048 0.16308372 0.14074912 0.18866528
+    ## LIM 0.07134287 0.06831787 0.04119429 0.04836409 0.04811985 0.11843764
+    ## HAN 0.11963435 0.08204018 0.06721155 0.08551280 0.07968667 0.13922958
+    ## GEN 0.11235459 0.13590950 0.07947584 0.10283970 0.10489822 0.13951288
+    ##            BRU        LIM        HAN        GEN
+    ## FRE 0.15260511 0.19092036 0.20891931 0.23893872
+    ## ALD 0.17534500 0.08904273 0.10998904 0.09864750
+    ## RIE 0.13834771 0.05321349 0.06868752 0.09322148
+    ## TRO 0.17456946 0.08655362 0.12350645 0.14691525
+    ## SCG 0.15700382 0.08349523 0.12491506 0.09611240
+    ## BOH 0.15347220 0.02939213 0.05969816 0.12024958
+    ## BOB 0.14394592 0.04732661 0.08314278 0.11248001
+    ## FRB 0.09717679 0.10960792 0.13925367 0.17398117
+    ## UEB 0.15866548 0.09697344 0.08980894 0.07523645
+    ## SCL 0.16770913 0.08824923 0.09961303 0.10392603
+    ## SCD 0.15660684 0.06827105 0.06908635 0.09823334
+    ## WSL 0.18221296 0.09184583 0.08222602 0.12461370
+    ## BUR 0.14589681 0.15939955 0.19395670 0.21068824
+    ## SCS 0.17795527 0.07134287 0.11963435 0.11235459
+    ## NEU 0.17708309 0.06831787 0.08204018 0.13590950
+    ## UST 0.13754048 0.04119429 0.06721155 0.07947584
+    ## KON 0.16308372 0.04836409 0.08551280 0.10283970
+    ## FRI 0.14074912 0.04811985 0.07968667 0.10489822
+    ## BAR 0.18866528 0.11843764 0.13922958 0.13951288
+    ## BRU 0.00000000 0.13942132 0.15715558 0.16925269
+    ## LIM 0.13942132 0.00000000 0.05221972 0.08616566
+    ## HAN 0.15715558 0.05221972 0.00000000 0.10504779
+    ## GEN 0.16925269 0.08616566 0.10504779 0.00000000
+
+``` r
+#compare clone-corrected to genalex output
+str(cc_myData_genind_allMarkersOnly)
+```
+
+    ## Formal class 'genind' [package "adegenet"] with 11 slots
+    ##   ..@ tab      : int [1:466, 1:122] 1 0 0 0 1 0 0 0 0 0 ...
+    ##   .. ..- attr(*, "dimnames")=List of 2
+    ##   .. .. ..$ : chr [1:466] "FREI1" "FREI10" "FREI28" "FREI54" ...
+    ##   .. .. ..$ : chr [1:122] "aest06_1.230" "aest06_1.234" "aest06_1.218" "aest06_1.236" ...
+    ##   ..@ loc.fac  : Factor w/ 14 levels "aest06_1","aest07_1",..: 1 1 1 1 1 1 1 2 2 2 ...
+    ##   ..@ loc.n.all: Named int [1:14] 7 7 6 12 23 7 8 8 8 5 ...
+    ##   .. ..- attr(*, "names")= chr [1:14] "aest06_1" "aest07_1" "aest15_1" "aest26_1" ...
+    ##   ..@ all.names:List of 14
+    ##   .. ..$ aest06_1: chr [1:7] "230" "234" "218" "236" ...
+    ##   .. ..$ aest07_1: chr [1:7] "266" "261" "256" "251" ...
+    ##   .. ..$ aest15_1: chr [1:6] "317" "312" "307" "322" ...
+    ##   .. ..$ aest26_1: chr [1:12] "157" "145" "178" "142" ...
+    ##   .. ..$ aest28_1: chr [1:23] "401" "356" "359" "353" ...
+    ##   .. ..$ aest35_1: chr [1:7] "152" "148" "140" "128" ...
+    ##   .. ..$ aest36_1: chr [1:8] "326" "322" "314" "318" ...
+    ##   .. ..$ aest01_1: chr [1:8] "254" "242" "236" "248" ...
+    ##   .. ..$ aest10_1: chr [1:8] "294" "295" "290" "280" ...
+    ##   .. ..$ aest18_1: chr [1:5] "136" "140" "144" "164" ...
+    ##   .. ..$ aest24_1: chr [1:9] "304" "298" "292" "295" ...
+    ##   .. ..$ aest25_1: chr [1:5] "137" "128" "122" "140" ...
+    ##   .. ..$ aest29_1: chr [1:9] "204" "211" "216" "241" ...
+    ##   .. ..$ aest31_1: chr [1:8] "313" "308" "318" "300" ...
+    ##   ..@ ploidy   : int [1:466] 1 1 1 1 1 1 1 1 1 1 ...
+    ##   ..@ type     : chr "codom"
+    ##   ..@ other    : list()
+    ##   ..@ call     : language clonecorrect(pop = myData_genind_allMarkersOnly, strata = ~Pop)
+    ##   ..@ pop      : Factor w/ 23 levels "FRE","ALD","RIE",..: 1 1 1 1 1 1 2 2 2 2 ...
+    ##   ..@ strata   :'data.frame':    466 obs. of  4 variables:
+    ##   .. ..$ Pop         : Factor w/ 23 levels "FRE","ALD","RIE",..: 1 1 1 1 1 1 2 2 2 2 ...
+    ##   .. ..$ Month       : Factor w/ 13 levels "1","3","4","5",..: 1 5 1 8 10 8 2 6 7 7 ...
+    ##   .. ..$ SamplingYear: Factor w/ 13 levels "2011","2012",..: 1 1 2 3 3 7 1 1 1 1 ...
+    ##   .. ..$ TruffleYear : Factor w/ 14 levels "2010","2011",..: 1 2 2 4 4 8 1 2 2 2 ...
+    ##   ..@ hierarchy: NULL
+
+``` r
+cc_phi_pt_genalex_results <- calculate_phi_pt_genalex(cc_myData_genind_allMarkersOnly)
+#write.csv(cc_phi_pt_genalex_results,"PhiPT_cc.csv")
+
 #Keines davon ergibt das gleiche Resultat wie im Genalex --> Check datasets!
 
 #significance testing
@@ -2795,7 +3153,3 @@ ggplot(df_28,aes(x=SamplingYear,y=`Allele frequencies`)) +
 ![](Richness---Evenness---AMOVA---Isolation-by-distance_files/figure-gfm/find%20private%20alleles-7.png)<!-- -->
 
 \#Isolation by distance (Mantel test)
-
-``` r
-# aus https://bookdown.org/hhwagner1/LandGenCourse_book/WE_5.html
-```

@@ -50,6 +50,69 @@ basic.stats(myData_genind)
 basic.stats(myData_genind_allMarkersOnly)
 ```
 
+```{r locus allele frequencies}
+allele_freq <- tab(myData_genind_allMarkersOnly, freq = TRUE)
+locus_freq <- colMeans(allele_freq)
+locus_freq
+
+# Convert to data frame for easier manipulation
+allele_freq_df <- as.data.frame(locus_freq)
+allele_freq_df <- rownames_to_column(allele_freq_df, var = "Allele")
+
+# Separate locus and allele parts into two columns
+allele_freq_df <- allele_freq_df %>%
+  separate(Allele, into = c("Locus", "Allele"), sep = "\\.") %>%
+  rename("Mean_Frequency" = "locus_freq")
+allele_freq_df
+
+# Calculate mean frequency per locus
+overall_mean_per_locus <- allele_freq_df %>%
+  group_by(Locus) %>%
+  summarize(Overall_Mean_Frequency = mean(Mean_Frequency))
+
+# Combine individual allele frequencies with overall mean per locus
+final_table <- allele_freq_df %>%
+  left_join(overall_mean_per_locus, by = "Locus")
+final_table
+
+ggplot(final_table, aes(x = Allele, y = Mean_Frequency, color = Locus)) +
+  geom_point(size = 3) +
+  geom_hline(aes(yintercept = Overall_Mean_Frequency), 
+             data = overall_mean_per_locus, 
+             color = "black", linetype = "dashed") +
+  facet_wrap(~ Locus, scales = "free_x", ncol = 3) +
+  labs(title = "Mean Allele Frequencies by Locus",
+       x = "Allele",
+       y = "Mean Frequency") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+# Separate the genind object by populations
+#setPop(myData_genind_allMarkersOnly) <- ~Pop
+#populations <- seppop(myData_genind_allMarkersOnly)
+
+# Initialize a list to store allele frequencies for each population
+#allele_freq_by_pop <- list()
+
+# Loop over each population and calculate allele frequencies
+#for (pop_name in names(populations)) {
+  # Calculate allele frequencies for the current population
+#  allele_freq <- tab(populations[[pop_name]], freq = TRUE)
+  
+  # Remove alleles with zero frequency across all individuals in this population
+#  allele_freq <- allele_freq[, colSums(allele_freq) > 0]
+  
+  # Store the filtered allele frequencies in the list
+#  allele_freq_by_pop[[pop_name]] <- allele_freq
+#}
+
+# Display allele frequencies for each population
+#for (pop_name in names(allele_freq_by_pop)) {
+#  cat("\nFiltered Allele Frequencies for Population:", pop_name, "\n")
+#  print(allele_freq_by_pop[[pop_name]])
+#}
+```
+
 Basic stats with poppr
 
 ```{r basic stats with poppr, message=FALSE, warning=FALSE}
