@@ -49,8 +49,8 @@ color_palette_k6 <- c("1" = "#377EB8",
                    "3" = "#E41A1C",
                    "4" = "mediumvioletred",
                    "5" = "#4DAF4A",
-                   "6" = "orchid1",
-                   "mixed" = "black")
+                   "6" = "orchid1")
+                   #"mixed" = "black")
 ```
 
 ```{r calculate Piechart}
