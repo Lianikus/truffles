@@ -133,6 +133,17 @@ sollte man diese vielleicht zusammen nehmen?
 year_count_k6 <- T_all_withMLGs_withClusters_allMarkersOnly %>%
   group_by(MLG) %>%
   summarize(years_found = n_distinct(Sampling_year))
+year_count_k6
+
+year_mean_k6 <- year_count_k6 %>%
+  summarize(mean = mean(years_found))
+year_mean_k6
+
+# Find the maximum number of years any MLG has been found
+max_years <- max(year_count_k6$years_found)
+# Filter the data to include only MLGs found for the maximum number of years
+mlgs_longest_found <- subset(year_count_k6, years_found == max_years)
+mlgs_longest_found
 
 proportion <- year_count_k6 %>%
   mutate(found_once = ifelse(years_found == 1, "Once", "Multiple")) %>%
@@ -189,6 +200,45 @@ ggplot(top_samples, aes(x = "", y = proportion, fill = MLG)) +
   theme_void() +
   theme(legend.title = element_text(size = 10),
         legend.text = element_text(size = 8))
+
+mlg_data <- data.frame(
+  MLG = c("MLG1", "MLG2", "MLG3", "MLG4", "MLG5", "MLG6"),
+  YearsFound = c(3, 5, 5, 2, 4, 3),
+  Cluster = c("Cluster1", "Cluster1", "Cluster2", "Cluster2", "Cluster3", "Cluster3")
+)
+
+mlg_cluster_test <- year_count_k6 %>%
+  inner_join(T_all_withMLGs_withClusters_allMarkersOnly,by="MLG")
+
+#mlg_cluster_test_glm <- mlg_cluster_test %>%
+#  rename(Cluster='clusterssign(q>0.5)') %>%
+#  select(MLG,years_found,Cluster)
+#mlg_cluster_test_glm1 <- mlg_cluster_test_glm %>%
+#  group_by(MLG) %>%
+#  summarize(SampleSize=n())%>%
+ # ungroup()
+#glm <- left_join(mlg_cluster_test_glm1,mlg_cluster_test_glm,by="MLG") %>%
+#  group_by(MLG) %>%
+#  distinct(MLG) %>%
+#  ungroup()
+
+# Summarize data by Cluster
+# Calculate mean perenniality and sample size per cluster
+cluster_summary <- mlg_cluster_test %>%
+  group_by(Cluster=`clusterssign(q>0.5)`) %>%
+  summarize(
+    MeanYearsFound = mean(years_found),
+    SampleSize = n()
+  )
+cluster_summary
+
+
+# Fit a GLM to check if there's a significant difference in perenniality across clusters
+# Correct for sample size by including SampleSize as a covariate
+glm_model <- glm(MeanYearsFound ~ Cluster + SampleSize, data=glm, family = poisson(link="log"))
+
+# Summary of the model to assess significance of Cluster effect
+summary(glm_model)
 ```
 
 ```{r MLGs per year per surface}
@@ -250,7 +300,7 @@ ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "GEN"),aes(Sampli
   labs(title ="Distribution of MLGs in GEN over the years") + scale_x_continuous(breaks=2010:2023)
 ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "HAN"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
   labs(title ="Distribution of MLGs in HAN over the years") + scale_x_continuous(breaks=2010:2023)
-ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "KON"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+persistence_kon <- ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "KON"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
   labs(title ="Distribution of MLGs in KON over the years") + scale_x_continuous(breaks=2010:2024)
 
 persistence_lim <- ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "LIM"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
@@ -280,4 +330,8 @@ ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "UST"),aes(Sampli
   labs(title ="Distribution of MLGs in UST over the years") + scale_x_continuous(breaks=2010:2023)
 ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "WSL"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
   labs(title ="Distribution of MLGs in WSL over the years") + scale_x_continuous(breaks=2010:2023)
+
+#emf(file="persistence_kon.emf")
+#persistence_kon
+#dev.off()
 ```

@@ -124,7 +124,13 @@ kable(poppr(myData_genind))
 ```{r basic stats with poppr, reduced dataset (no NAs), message=FALSE, warning=FALSE}
 setPop(myData_genind_allMarkersOnly) <- ~Pop
 kable(locus_table(myData_genind_allMarkersOnly))
-kable(poppr(myData_genind_allMarkersOnly))
+poppr_aMO <- as.tibble(poppr(myData_genind_allMarkersOnly))
+
+#comparison with Virginie
+setPop(myData_genind_allMarkersOnly) <- ~Pop/SamplingYear
+subVir <- myData_genind_allMarkersOnly %>%
+  popsub(sublist=c("BOH_2013","BOB_2011","UEB_2011","UEB_2013"))
+poppr(subVir)
 ```
 
 ```{r rarefaction curve}

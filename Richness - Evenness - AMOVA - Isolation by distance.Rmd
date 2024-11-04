@@ -305,9 +305,19 @@ title("Rarecurve of Month")
 ```
 # Population structure using Fst
 
-```{r Fst values}
+```{r Fst and PhiPT values}
 truffles.matFst <- mat_pw_fst(myData_genind_allMarkersOnly)
 truffles.matFst
+
+compute_phiPT_from_FST <- function(FST_matrix) {
+  # Calculate PhiPT using the formula
+  PhiPT_matrix <- FST_matrix / (1 - FST_matrix)
+  diag(PhiPT_matrix) <- 0  # Set diagonal to 0, as they represent the same populations
+  return(PhiPT_matrix)
+}
+truffles.matPhiPT <- compute_phiPT_from_FST(truffles.matFst)
+#write.csv(truffles.matPhiPT,"truffles.matPhiPT.csv")
+  
 truffles.tree <- nj(truffles.matFst)
 plot(truffles.tree, type="unr", tip.col=funky(nPop(myData_genind_allMarkersOnly)), font=2)
 annot <- round(truffles.tree$edge.length,2)
@@ -318,6 +328,13 @@ table.paint(truffles.matFst,col.labels=1:23)
 
 boxplot(truffles.matFst, col=funky(nPop(myData_genind_allMarkersOnly)), las=3,
 xlab="Population", ylab="Fst")
+
+#same clone corrected
+cc_truffles.matFst <- mat_pw_fst(cc_myData_genind_allMarkersOnly)
+#write.csv(cc_truffles.matFst, "cc_truffles.matFst.csv")
+
+cc_truffles.matPhiPT <- compute_phiPT_from_FST(cc_truffles.matFst)
+#write.csv(cc_truffles.matPhiPT,"cc_truffles.matPhiPT.csv")
 
 ```
 # Population structure using Gst
@@ -445,6 +462,13 @@ The distance matrix can be calculated using any distance as long as it is euclid
 #In panmictic populations, we would expect to see most of the variance arise from within samples. If we see that the most of the variance occurs among samples within populations or among populations, then there is evidence that we have some sort of population structure. In the case of clonal organisms, this would help support a hypothesis of clonal reproduction.
 allMarkers_amova <- poppr.amova(myData_genind_allMarkersOnly, ~Pop)
 allMarkers_amova
+summary(allMarkers_amova)
+
+dist_matrix <- dist.genpop(myData_genpop_allMarkersOnly)
+dist_matrix
+# Perform AMOVA on the distance matrix
+amova_results <- amova(dist_matrix ~ Population, data = myData_genpop_allMarkersOnly)
+
 allMarkers_amovacc <- poppr.amova(myData_genind_allMarkersOnly, ~Pop, clonecorrect = TRUE)
 allMarkers_amovacc
 allMarkers_cluster_amova <- poppr.amova(myData_genind_withClusters, ~cluster)
