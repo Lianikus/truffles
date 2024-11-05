@@ -112,11 +112,11 @@ color_palette_k6 <- c("1" = "#377EB8",
 
 ```{r compute PCA with 5 clusters}
 setPop(myData_genind_aMO_k5) <- ~cluster
-pca_result_k5 <- dudi.pca(tab(myData_genind_aMO_k5), center = TRUE, scale = TRUE, scannf = FALSE, nf = 2)
+pca_result_k5 <- dudi.pca(tab(myData_genind_aMO_k5), center = TRUE, scale = TRUE, scannf = FALSE, nf = 3)
 
 # Extract scores for plotting
 pca_scores5 <- as.data.frame(pca_result_k5$li)
-pca_scores5$Group <- pop(myData_genind_aMO_k5)  # Add population or strata information for coloring
+pca_scores5$Cluster <- pop(myData_genind_aMO_k5)  # Add population or strata information for coloring
 
 setPop(myData_genind_aMO_k5) <- ~Pop
 population_vector5 <- pop(myData_genind_aMO_k5)  # Create a vector with population names
@@ -597,6 +597,7 @@ xlab="Cluster", ylab="Fst")
 #colors are wrong
 # Calculate pairwise Fst values
 fst_values_k5 <- pairwise.neifst(myData_genind_aMO_k5)
+fst_values_k5
 
 # Convert the Fst matrix to a data frame
 fst_k5_df <- as.data.frame(fst_values_k5)

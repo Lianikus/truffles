@@ -31,6 +31,7 @@ Contents:
 ## 1. Nei's genetic diversity
 
 ```{r Tabellen laden, message=FALSE, warning=FALSE, include=FALSE}
+install.packages("xfun")
 library(readxl)
 library(knitr)
 library(tidyverse)
@@ -42,13 +43,14 @@ library(poppr)
 library(treemap)
 library(pegas)
 library(adegenet)
-library(devtools)
+#library(devtools)
 library(hierfstat)
 library(mmod)
 library(diveRsity)
 library(vegan)
 library(writexl)
 library(devEMF)
+
 T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_Mai2024.xlsx")
 myData <- read.genalex("Daten_Genalex.csv",genclone=TRUE, ploidy=1)
 myData_genind <- read.genalex("Daten_Genalex.csv",genclone=FALSE, ploidy=1)
@@ -83,9 +85,9 @@ locus_table_SY <- data.frame(t(
 
 # choose only the columns corresponding to Hexp values and rename them with their loci
 
-locus_table_SY_hexp <- 
-  select(locus_table_SY, X31:X45) %>%
-  rename(aest06_1=X31,aest07_1=X32, aest15_1=X33, aest26_1=X34,aest28_1=X35, aest35_1=X36, aest36_1=X37, aest01_1=X38, aest10_1=X39, aest18_1=X40, aest24_1=X41, aest25_1=X42, aest29_1=X43, aest31_1=X44, mean=X45) %>%
+locus_table_SY_hexp <- locus_table_SY %>%
+  select(X31:X45) %>%
+  dplyr::rename(aest06_1 = X31,aest07_1=X32, aest15_1=X33, aest26_1=X34,aest28_1=X35, aest35_1=X36, aest36_1=X37, aest01_1=X38, aest10_1=X39, aest18_1=X40, aest24_1=X41, aest25_1=X42, aest29_1=X43, aest31_1=X44, mean=X45) %>%
   tibble::rownames_to_column("Pop") %>%
   separate(.,Pop,sep="_", into=c("Pop","SamplingYear"))
                                       

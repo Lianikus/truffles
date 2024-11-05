@@ -1,0 +1,1359 @@
+---
+title: "Master Thesis"
+author: "Lia Baumann"
+date: "2024-11-05"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#---------------------------------------------------------------
+# load packages
+
+library(readxl)
+library(knitr)
+library(tidyverse)
+library(ggplot2)
+theme_set(theme_bw())
+#library(envalysis)
+#library(forcats)
+library(poppr)
+#library(treemap)
+library(pegas)
+library(adegenet)
+#library(devtools)
+library(hierfstat)
+#library(mmod)
+library(diveRsity)
+library(vegan)
+library(writexl)
+library(devEMF)
+library(RColorBrewer)
+library(patchwork)
+#library(FactoMineR)
+library(gghighlight)
+
+#---------------------------------------------------------------
+
+#read in genalex data, cleaning markers and creating clonecorrected dataset
+
+T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_Mai2024.xlsx")
+myData <- read.genalex("Daten_Genalex.csv",genclone=TRUE, ploidy=1)
+myData_genind <- read.genalex("Daten_Genalex.csv",genclone=FALSE, ploidy=1)
+myData_genind_allMarkersOnly <- myData_genind %>%
+  missingno("geno", cutoff = 0)
+splitStrata(myData) <- ~Pop/Month/SamplingYear/TruffleYear
+splitStrata(myData_genind) <- ~Pop/Month/SamplingYear/TruffleYear
+splitStrata(myData_genind_allMarkersOnly) <- ~Pop/Month/SamplingYear/TruffleYear
+cc_myData_genind_allMarkersOnly <-clonecorrect(myData_genind_allMarkersOnly,strata=~Pop)
+
+#-----------------------------------------------------------------
+
+# create specific factors
+
+order_sites_WtoE <- factor(c("BUR","GEN","NEU","SCS","KON","FRB","FRE","FRI","SCD","SCG","SCL","WSL","LIM","BRU","RIE","TRO","ALD","UST","BAR","UEB","BOB","BOH","HAN"))
+
+#------------------------------------------------------------------
+
+# cluster assignment k=5
+
+clustersk5 <- read_excel("STRUCTURE Results MLGs k5.xlsx")
+clustersk5$`clusterssign(q>0.5)` <- factor(clustersk5$`clusterssign(q>0.5)`)
+cc_FullTable_Tuaest_allMarkersOnly <- read.csv("C:/Users/liaba/OneDrive - Eidg. Forschungsanstalt WSL/R/truffles/cc_TUAEST_ALLMARKERSONLY_HWE.csv")
+cc_distinctMLGs_allMarkersOnly <- cc_FullTable_Tuaest_allMarkersOnly[!duplicated(cc_FullTable_Tuaest_allMarkersOnly$MLG), ]
+T_all <- separate_wider_delim(T_all,Code_Analyses2, delim="_", names = c("Code","Yr"))
+T_all_withMLGs_allMarkersOnly <- inner_join(T_all,cc_FullTable_Tuaest_allMarkersOnly,by=c("Code"="Sample")) %>%
+  select(Code, MLG, Site_1_abrev, truffle_year, Sampling_year,Sampling_date)
+T_all_withMLGs_withClusters_k5_allMarkersOnly <- left_join(T_all_withMLGs_allMarkersOnly,clustersk5,by=c("MLG"="MLG_ID")) %>% distinct(Code, .keep_all=TRUE) %>%select(-"IndID2")
+
+#write.csv(T_all_withMLGs_withClusters_k5_allMarkersOnly,file="T_all_withMLGs_withClusters_k5_allMarkersOnly.csv", sep=";")
+myData_genind_withClusters_k5 <- read.genalex("DatenGenalex_withClusters_k5_aMO.csv",genclone=FALSE,ploidy=1)
+myData_genind_aMO_k5 <- myData_genind_withClusters_k5 %>%
+  missingno("geno", cutoff = 0)
+splitStrata(myData_genind_aMO_k5) <- ~Pop/Month/SamplingYear/TruffleYear/cluster
+
+cc_myData_genind_aMO_k5 <- clonecorrect(myData_genind_aMO_k5,strata=~Pop)
+
+#------------------------------------------------------------------
+
+#cluster assignment k=6
+clusters <- read_excel("STRUCTURE Results MLGs.xlsx")
+clusters$`clusterssign(q>0.5)` <- factor(clusters$`clusterssign(q>0.5)`)
+cc_FullTable_Tuaest_allMarkersOnly <- read.csv("C:/Users/liaba/OneDrive - Eidg. Forschungsanstalt WSL/R/truffles/cc_TUAEST_ALLMARKERSONLY_HWE.csv")
+cc_distinctMLGs_allMarkersOnly <- cc_FullTable_Tuaest_allMarkersOnly[!duplicated(cc_FullTable_Tuaest_allMarkersOnly$MLG), ]
+#T_all <- separate_wider_delim(T_all,Code_Analyses2, delim="_", names = c("Code","Yr"))
+T_all_withMLGs_allMarkersOnly <- inner_join(T_all,cc_FullTable_Tuaest_allMarkersOnly,by=c("Code"="Sample")) %>%
+  select(Code, MLG, Site_1_abrev, truffle_year, Sampling_year,Sampling_date)
+T_all_withMLGs_withClusters_allMarkersOnly <- left_join(T_all_withMLGs_allMarkersOnly,clusters,by=c("MLG"="MLG_ID")) %>% select(-"IndID2") %>% distinct(.)
+
+#write.csv(T_all_withMLGs_withClusters_allMarkersOnly,file="T_all_withMLGs_withClusters_allMarkersOnly.csv", sep=";")
+myData_genind_withClusters <- read.genalex("DatenGenalex_withMLGs_withClusters_allMarkersOnly.csv",genclone=FALSE,ploidy=1)
+myData_genind_aMO_k6 <- myData_genind_withClusters %>%
+  missingno("geno", cutoff = 0)
+splitStrata(myData_genind_aMO_k6) <- ~Pop/Month/SamplingYear/TruffleYear/cluster
+
+cc_myData_genind_aMO_k6 <- clonecorrect(myData_genind_aMO_k6,strata=~Pop)
+
+#-----------------------------------------------------------------
+
+# Define color palette fitting the STRUCTURE outputs
+
+color_palette_k5 <- c("1" = "#377EB8",
+                   "2" = "#FF7F00",
+                   "3" = "#E41A1C",
+                   "4" = "mediumvioletred",
+                   "5" = "#4DAF4A",
+                   "mixed" = "black")
+
+color_palette_k6 <- c("1" = "#377EB8",
+                   "2" = "#FF7F00",
+                   "3" = "#E41A1C",
+                   "4" = "mediumvioletred",
+                   "5" = "#4DAF4A",
+                   "6" = "orchid1",
+                   "mixed" = "black")
+
+#------------------------------------------------------------------------
+
+#remove cluster 3 for analyses
+
+setPop(myData_genind_aMO_k5) <- ~cluster
+myData_genind_aMO_k5_minus3 <- popsub(myData_genind_aMO_k5,exclude="3")
+cc_myData_genind_aMO_k5_minus3 <- clonecorrect(myData_genind_aMO_k5_minus3)
+
+setPop(myData_genind_aMO_k6) <- ~cluster
+myData_genind_aMO_k6_minus3 <- popsub(myData_genind_aMO_k6,exclude="3")
+cc_myData_genind_aMO_k6_minus3 <- clonecorrect(myData_genind_aMO_k6_minus3)
+
+
+```
+
+## Locus based statistics
+
+```{r locus stats}
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+setPop(myData_genind_aMO_k6) <- ~Pop
+setPop(cc_myData_genind_allMarkersOnly) <- ~Pop
+kable(locus_table(myData_genind_allMarkersOnly))
+kable(locus_table(myData_genind_aMO_k6))
+kable(locus_table(cc_myData_genind_allMarkersOnly))
+
+
+locus_table <- data.frame(t(
+  sapply(seppop(myData_genind_allMarkersOnly),
+    function(ls) poppr::locus_table(ls,lev="allele"))))
+
+```
+
+## Allele frequencies
+
+```{r locus allele frequencies}
+allele_freq <- tab(myData_genind_allMarkersOnly, freq = TRUE)
+locus_freq <- colMeans(allele_freq)
+
+# Convert to data frame for easier manipulation
+allele_freq_df <- as.data.frame(locus_freq)
+allele_freq_df <- rownames_to_column(allele_freq_df, var = "Allele")
+
+# Separate locus and allele parts into two columns
+allele_freq_df <- allele_freq_df %>%
+  separate(Allele, into = c("Locus", "Allele"), sep = "\\.") %>%
+  rename("Mean_Frequency" = "locus_freq")
+
+# Calculate mean frequency per locus
+overall_mean_per_locus <- allele_freq_df %>%
+  group_by(Locus) %>%
+  summarize(Overall_Mean_Frequency = mean(Mean_Frequency))
+
+# Combine individual allele frequencies with overall mean per locus
+final_table <- allele_freq_df %>%
+  left_join(overall_mean_per_locus, by = "Locus")
+final_table
+
+ggplot(final_table, aes(x = Allele, y = Mean_Frequency, color = Locus)) +
+  geom_point(size = 3) +
+  geom_hline(aes(yintercept = Overall_Mean_Frequency), 
+             data = overall_mean_per_locus, 
+             color = "black", linetype = "dashed") +
+  facet_wrap(~ Locus, scales = "free_x", ncol = 3) +
+  labs(title = "Mean Allele Frequencies by Locus",
+       x = "Allele",
+       y = "Mean Frequency") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+## PCA
+
+```{r pca}
+#uncorrected PCA with allMarkersOnly dataset
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+x.pops_allMarkersOnly <- tab(myData_genind_allMarkersOnly,
+                             freq=TRUE, NA.method="mean")
+
+pca.pops.allMarkersOnly <- dudi.pca(x.pops_allMarkersOnly,center=TRUE,scale=TRUE, nf=3, scannf=FALSE)
+
+# Calculate explained variance for each PCA axis
+explained_variance <- pca.pops.allMarkersOnly$eig / sum(pca.pops.allMarkersOnly$eig) * 100
+barplot(explained_variance, main = "Explained Variance per PCA Axis", xlab = "Principal Component", ylab = "Variance Explained (%)")
+
+# Create a data frame for plotting
+pca_scores <- as.data.frame(pca.pops.allMarkersOnly$li)  # Scores of the PCA
+pca_scores$individual <- rownames(pca_scores)
+pca_scores$Pop <- pop(myData_genind_allMarkersOnly)
+pca_scores
+
+# Create the PCA plot
+
+pca_plot_1 <- ggplot(pca_scores, aes(x = Axis1, y = Axis2, color=Pop)) +
+  geom_point() +
+  xlab(paste("PC1 (", round(explained_variance[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(explained_variance[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, uncorrected") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+pca_plot_2 <- ggplot(pca_scores, aes(x = Axis2, y = Axis3, color=Pop)) +
+  geom_point() +
+  xlab(paste("PC2 (", round(explained_variance[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(explained_variance[3], 2), "%)", sep = "")) +
+  theme_minimal()
+
+# Display the plot
+print(pca_plot_1 + pca_plot_2)
+
+#show facet plots for more details per pop
+
+pca_plot_3 <- ggplot(pca_scores, aes(x = Axis1, y = Axis2, color=Pop)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Pop)) +
+  xlab(paste("PC1 (", round(explained_variance[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(explained_variance[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, uncorrected") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+pca_plot_4 <- ggplot(pca_scores, aes(x = Axis2, y = Axis3, color=Pop)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Pop)) +
+  xlab(paste("PC2 (", round(explained_variance[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(explained_variance[3], 2), "%)", sep = "")) +
+  theme_minimal() +
+  theme(legend.position = "none")
+print(pca_plot_3 + pca_plot_4)
+
+
+#-------------------------------------------------------------------------------
+#same clone-corrected
+
+setPop(cc_myData_genind_allMarkersOnly) <- ~Pop
+cc_x.pops_allMarkersOnly <- tab(cc_myData_genind_allMarkersOnly,
+                             freq=TRUE, NA.method="mean")
+
+cc_pca.pops.allMarkersOnly <- dudi.pca(cc_x.pops_allMarkersOnly,center=TRUE,scale=TRUE, nf=3, scannf=FALSE)
+
+# Calculate explained variance for each PCA axis
+cc_explained_variance <- cc_pca.pops.allMarkersOnly$eig / sum(cc_pca.pops.allMarkersOnly$eig) * 100
+barplot(cc_explained_variance, main = "Explained Variance per PCA Axis", xlab = "Principal Component", ylab = "Variance Explained (%)")
+
+# Create a data frame for plotting
+cc_pca_scores <- as.data.frame(cc_pca.pops.allMarkersOnly$li)  # Scores of the PCA
+cc_pca_scores$individual <- rownames(cc_pca_scores)
+cc_pca_scores$Pop <- pop(cc_myData_genind_allMarkersOnly)
+
+# Create the PCA plot
+
+cc_pca_plot_1 <- ggplot(cc_pca_scores, aes(x = Axis1, y = Axis2, color=Pop)) +
+  geom_point() +
+  xlab(paste("PC1 (", round(cc_explained_variance[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(cc_explained_variance[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, clone corrected") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+cc_pca_plot_2 <- ggplot(cc_pca_scores, aes(x = Axis2, y = Axis3, color=Pop)) +
+  geom_point() +
+  xlab(paste("PC2 (", round(cc_explained_variance[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(cc_explained_variance[3], 2), "%)", sep = "")) +
+  theme_minimal()
+
+# Display the plot
+print(cc_pca_plot_1 + cc_pca_plot_2)
+
+#show facet plots for more details per pop
+
+cc_pca_plot_3 <- ggplot(cc_pca_scores, aes(x = Axis1, y = Axis2, color=Pop)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Pop)) +
+  xlab(paste("PC1 (", round(cc_explained_variance[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(cc_explained_variance[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, clone corrected") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+cc_pca_plot_4 <- ggplot(cc_pca_scores, aes(x = Axis2, y = Axis3, color=Pop)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Pop)) +
+  xlab(paste("PC2 (", round(cc_explained_variance[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(cc_explained_variance[3], 2), "%)", sep = "")) +
+  theme_minimal() +
+  theme(legend.position = "none")
+print(cc_pca_plot_3 + cc_pca_plot_4)
+```
+
+```{r pca with 5 clusters}
+setPop(myData_genind_aMO_k5) <- ~cluster
+pca_result_k5 <- dudi.pca(tab(myData_genind_aMO_k5, freq=TRUE,NA.method="mean"), center = TRUE, scale = TRUE, scannf = FALSE, nf = 3)
+
+# Calculate explained variance for each PCA axis
+explained_variance_k5 <- pca_result_k5$eig / sum(pca_result_k5$eig) * 100
+barplot(explained_variance_k5, main = "Explained Variance per PCA Axis", xlab = "Principal Component", ylab = "Variance Explained (%)")
+
+# Extract scores for plotting
+pca_scores5 <- as.data.frame(pca_result_k5$li)
+pca_scores5$Cluster <- pop(myData_genind_aMO_k5)
+pca_scores5$individual <- rownames(pca_scores5)
+pca_scores5
+
+setPop(myData_genind_aMO_k5) <- ~Pop
+pca_scores5$Pop <- pop(myData_genind_aMO_k5)
+
+plot_k5_1 <- ggplot(pca_scores5, aes(x = Axis1, y = Axis2, color=Cluster)) +
+  geom_point() +
+  xlab(paste("PC1 (", round(explained_variance_k5[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(explained_variance_k5[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, uncorrected") +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k5, name = "Cluster") +
+  theme(legend.position = "none")
+
+plot_k5_2 <- ggplot(pca_scores5, aes(x = Axis2, y = Axis3, color=Cluster)) +
+  geom_point() +
+  xlab(paste("PC2 (", round(explained_variance_k5[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(explained_variance_k5[3], 2), "%)", sep = "")) +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k5, name = "Cluster")
+
+# Display the plot
+print(plot_k5_1 + plot_k5_2)
+
+
+plot_k5_3 <- ggplot(pca_scores5, aes(x = Axis1, y = Axis2, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Pop)) +
+  xlab(paste("PC1 (", round(explained_variance_k5[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(explained_variance_k5[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, uncorrected") +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k5, name = "Cluster") +
+  theme(legend.position = "none")
+
+plot_k5_4 <- ggplot(pca_scores5, aes(x = Axis2, y = Axis3, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Pop)) +
+  xlab(paste("PC2 (", round(explained_variance_k5[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(explained_variance_k5[3], 2), "%)", sep = "")) +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k5, name = "Cluster")
+
+print(plot_k5_3 + plot_k5_4)
+
+plot_k5_5 <- ggplot(pca_scores5, aes(x = Axis1, y = Axis2, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Cluster)) +
+  xlab(paste("PC1 (", round(explained_variance_k5[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(explained_variance_k5[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, uncorrected") +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k5, name = "Cluster") +
+  theme(legend.position = "none")
+
+plot_k5_6 <- ggplot(pca_scores5, aes(x = Axis2, y = Axis3, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Cluster)) +
+  xlab(paste("PC2 (", round(explained_variance_k5[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(explained_variance_k5[3], 2), "%)", sep = "")) +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k5, name = "Cluster")
+
+print(plot_k5_5 + plot_k5_6)
+
+#----------------------------------------------------------------------------
+# now everything with clone correction
+
+setPop(cc_myData_genind_aMO_k5) <- ~cluster
+cc_pca_result_k5 <- dudi.pca(tab(cc_myData_genind_aMO_k5, freq=TRUE,NA.method="mean"), center = TRUE, scale = TRUE, scannf = FALSE, nf = 3)
+
+# Calculate explained variance for each PCA axis
+cc_explained_variance_k5 <- cc_pca_result_k5$eig / sum(cc_pca_result_k5$eig) * 100
+barplot(cc_explained_variance_k5, main = "Explained Variance per PCA Axis", xlab = "Principal Component", ylab = "Variance Explained (%)")
+
+# Extract scores for plotting
+
+cc_pca_scores5 <- as.data.frame(cc_pca_result_k5$li)
+cc_pca_scores5$Cluster <- pop(cc_myData_genind_aMO_k5)
+cc_pca_scores5$individual <- rownames(cc_pca_scores5)
+cc_pca_scores5
+mlg_test <- left_join(cc_pca_scores5,T_all_withMLGs_withClusters_k5_allMarkersOnly,by=c("individual"="Code")) %>%
+  select(MLG)
+cc_pca_scores5$MLG <- mlg_test$MLG
+
+setPop(cc_myData_genind_aMO_k5) <- ~Pop
+cc_pca_scores5$Pop <- pop(cc_myData_genind_aMO_k5)
+
+cc_plot_k5_1 <- ggplot(cc_pca_scores5, aes(x = Axis1, y = Axis2, color=Cluster)) +
+  geom_point() +
+  geom_text(aes(label = MLG), vjust = -0.5, hjust = 0.5, size = 3) +
+  xlab(paste("PC1 (", round(cc_explained_variance_k5[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(cc_explained_variance_k5[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, clone corrected") +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k5, name = "Cluster") +
+  theme(legend.position = "none")
+
+cc_plot_k5_2 <- ggplot(cc_pca_scores5, aes(x = Axis2, y = Axis3, color=Cluster)) +
+  geom_point() +
+  geom_text(aes(label = MLG), vjust = -0.5, hjust = 0.5, size = 3) +
+  xlab(paste("PC2 (", round(cc_explained_variance_k5[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(cc_explained_variance_k5[3], 2), "%)", sep = "")) +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k5, name = "Cluster")
+
+# Display the plot
+print(cc_plot_k5_1 + cc_plot_k5_2)
+
+
+cc_plot_k5_3 <- ggplot(cc_pca_scores5, aes(x = Axis1, y = Axis2, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Pop)) +
+  xlab(paste("PC1 (", round(cc_explained_variance_k5[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(cc_explained_variance_k5[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, clone corrected") +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k5, name = "Cluster") +
+  theme(legend.position = "none")
+
+cc_plot_k5_4 <- ggplot(cc_pca_scores5, aes(x = Axis2, y = Axis3, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Pop)) +
+  xlab(paste("PC2 (", round(cc_explained_variance_k5[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(cc_explained_variance_k5[3], 2), "%)", sep = "")) +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k5, name = "Cluster")
+
+print(cc_plot_k5_3 + cc_plot_k5_4)
+
+cc_plot_k5_5 <- ggplot(pca_scores5, aes(x = Axis1, y = Axis2, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Cluster)) +
+  xlab(paste("PC1 (", round(cc_explained_variance_k5[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(cc_explained_variance_k5[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, clone corrected") +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k5, name = "Cluster") +
+  theme(legend.position = "none")
+
+cc_plot_k5_6 <- ggplot(cc_pca_scores5, aes(x = Axis2, y = Axis3, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Cluster)) +
+  xlab(paste("PC2 (", round(cc_explained_variance_k5[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(cc_explained_variance_k5[3], 2), "%)", sep = "")) +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k5, name = "Cluster")
+
+print(cc_plot_k5_5 + cc_plot_k5_6)
+```
+
+```{r pca with 5 clusters remove cluster 3}
+setPop(myData_genind_aMO_k5_minus3) <- ~cluster
+pca_result_k5_minus3 <- dudi.pca(tab(myData_genind_aMO_k5_minus3, freq=TRUE,NA.method="mean"), center = TRUE, scale = TRUE, scannf = FALSE, nf = 3)
+
+# Calculate explained variance for each PCA axis
+explained_variance_k5_minus3 <- pca_result_k5_minus3$eig / sum(pca_result_k5_minus3$eig) * 100
+barplot(explained_variance_k5_minus3, main = "Explained Variance per PCA Axis", xlab = "Principal Component", ylab = "Variance Explained (%)")
+
+# Extract scores for plotting
+pca_scores5_minus3 <- as.data.frame(pca_result_k5_minus3$li)
+pca_scores5_minus3$Cluster <- pop(myData_genind_aMO_k5_minus3)
+pca_scores5_minus3$individual <- rownames(pca_scores5_minus3)
+pca_scores5_minus3
+
+setPop(myData_genind_aMO_k5_minus3) <- ~Pop
+pca_scores5_minus3$Pop <- pop(myData_genind_aMO_k5_minus3)
+
+plot_k5_minus3_1 <- ggplot(pca_scores5_minus3, aes(x = Axis1, y = Axis2, color=Cluster)) +
+  geom_point() +
+  xlab(paste("PC1 (", round(explained_variance_k5_minus3[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(explained_variance_k5_minus3[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, uncorrected") +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k5, name = "Cluster") +
+  theme(legend.position = "none")
+
+plot_k5_minus3_2 <- ggplot(pca_scores5_minus3, aes(x = Axis2, y = Axis3, color=Cluster)) +
+  geom_point() +
+  xlab(paste("PC2 (", round(explained_variance_k5_minus3[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(explained_variance_k5_minus3[3], 2), "%)", sep = "")) +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k5, name = "Cluster")
+
+# Display the plot
+print(plot_k5_minus3_1 + plot_k5_minus3_2)
+
+
+plot_k5_minus3_3 <- ggplot(pca_scores5_minus3, aes(x = Axis1, y = Axis2, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Pop)) +
+  xlab(paste("PC1 (", round(explained_variance_k5_minus3[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(explained_variance_k5_minus3[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, uncorrected") +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k5, name = "Cluster") +
+  theme(legend.position = "none")
+
+plot_k5_minus3_4 <- ggplot(pca_scores5_minus3, aes(x = Axis2, y = Axis3, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Pop)) +
+  xlab(paste("PC2 (", round(explained_variance_k5_minus3[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(explained_variance_k5_minus3[3], 2), "%)", sep = "")) +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k5, name = "Cluster")
+
+print(plot_k5_minus3_3 + plot_k5_minus3_4)
+
+plot_k5_minus3_5 <- ggplot(pca_scores5_minus3, aes(x = Axis1, y = Axis2, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Cluster)) +
+  xlab(paste("PC1 (", round(explained_variance_k5_minus3[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(explained_variance_k5_minus3[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, uncorrected") +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k5, name = "Cluster") +
+  theme(legend.position = "none")
+
+plot_k5_minus3_6 <- ggplot(pca_scores5_minus3, aes(x = Axis2, y = Axis3, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Cluster)) +
+  xlab(paste("PC2 (", round(explained_variance_k5_minus3[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(explained_variance_k5_minus3[3], 2), "%)", sep = "")) +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k5, name = "Cluster")
+
+print(plot_k5_minus3_5 + plot_k5_minus3_6)
+
+#----------------------------------------------------------------------------
+# now everything with clone correction
+
+setPop(cc_myData_genind_aMO_k5_minus3) <- ~cluster
+cc_pca_result_k5_minus3 <- dudi.pca(tab(cc_myData_genind_aMO_k5_minus3, freq=TRUE,NA.method="mean"), center = TRUE, scale = TRUE, scannf = FALSE, nf = 3)
+
+# Calculate explained variance for each PCA axis
+cc_explained_variance_k5_minus3 <- cc_pca_result_k5_minus3$eig / sum(cc_pca_result_k5_minus3$eig) * 100
+barplot(cc_explained_variance_k5_minus3, main = "Explained Variance per PCA Axis", xlab = "Principal Component", ylab = "Variance Explained (%)")
+
+# Extract scores for plotting
+
+cc_pca_scores5_minus3 <- as.data.frame(cc_pca_result_k5_minus3$li)
+cc_pca_scores5_minus3$Cluster <- pop(cc_myData_genind_aMO_k5_minus3)
+cc_pca_scores5_minus3$individual <- rownames(cc_pca_scores5_minus3)
+cc_pca_scores5_minus3
+mlg_test <- left_join(cc_pca_scores5_minus3,T_all_withMLGs_withClusters_k5_allMarkersOnly,by=c("individual"="Code")) %>%
+  select(MLG)
+cc_pca_scores5_minus3$MLG <- mlg_test$MLG
+
+setPop(cc_myData_genind_aMO_k5_minus3) <- ~Pop
+cc_pca_scores5_minus3$Pop <- pop(cc_myData_genind_aMO_k5_minus3)
+
+cc_plot_k5_minus3_1 <- ggplot(cc_pca_scores5_minus3, aes(x = Axis1, y = Axis2, color=Cluster)) +
+  geom_point() +
+  geom_text(aes(label = MLG), vjust = -0.5, hjust = 0.5, size = 3) +
+  xlab(paste("PC1 (", round(cc_explained_variance_k5_minus3[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(cc_explained_variance_k5_minus3[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, clone corrected, Cluster 3 removed") +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k5, name = "Cluster") +
+  theme(legend.position = "none")
+
+cc_plot_k5_minus3_2 <- ggplot(cc_pca_scores5_minus3, aes(x = Axis2, y = Axis3, color=Cluster)) +
+  geom_point() +
+  geom_text(aes(label = MLG), vjust = -0.5, hjust = 0.5, size = 3) +
+  xlab(paste("PC2 (", round(cc_explained_variance_k5_minus3[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(cc_explained_variance_k5_minus3[3], 2), "%)", sep = "")) +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k5, name = "Cluster")
+
+# Display the plot
+print(cc_plot_k5_minus3_1 + cc_plot_k5_minus3_2)
+
+
+cc_plot_k5_minus3_3 <- ggplot(cc_pca_scores5_minus3, aes(x = Axis1, y = Axis2, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Pop)) +
+  xlab(paste("PC1 (", round(cc_explained_variance_k5_minus3[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(cc_explained_variance_k5_minus3[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, clone corrected") +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k5, name = "Cluster") +
+  theme(legend.position = "none")
+
+cc_plot_k5_minus3_4 <- ggplot(cc_pca_scores5_minus3, aes(x = Axis2, y = Axis3, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Pop)) +
+  xlab(paste("PC2 (", round(cc_explained_variance_k5_minus3[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(cc_explained_variance_k5_minus3[3], 2), "%)", sep = "")) +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k5, name = "Cluster")
+
+print(cc_plot_k5_minus3_3 + cc_plot_k5_minus3_4)
+
+cc_plot_k5_minus3_5 <- ggplot(pca_scores5_minus3, aes(x = Axis1, y = Axis2, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Cluster)) +
+  xlab(paste("PC1 (", round(cc_explained_variance_k5_minus3[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(cc_explained_variance_k5_minus3[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, clone corrected") +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k5, name = "Cluster") +
+  theme(legend.position = "none")
+
+cc_plot_k5_minus3_6 <- ggplot(cc_pca_scores5_minus3, aes(x = Axis2, y = Axis3, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Cluster)) +
+  xlab(paste("PC2 (", round(cc_explained_variance_k5_minus3[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(cc_explained_variance_k5_minus3[3], 2), "%)", sep = "")) +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k5, name = "Cluster")
+
+print(cc_plot_k5_minus3_5 + cc_plot_k5_minus3_6)
+```
+
+```{r pca with 6 clusters}
+setPop(myData_genind_aMO_k6) <- ~cluster
+pca_result_k6 <- dudi.pca(tab(myData_genind_aMO_k6, freq=TRUE,NA.method="mean"), center = TRUE, scale = TRUE, scannf = FALSE, nf = 3)
+
+# Calculate explained variance for each PCA axis
+explained_variance_k6 <- pca_result_k6$eig / sum(pca_result_k6$eig) * 100
+barplot(explained_variance_k6, main = "Explained Variance per PCA Axis", xlab = "Principal Component", ylab = "Variance Explained (%)")
+
+# Extract scores for plotting
+pca_scores6 <- as.data.frame(pca_result_k6$li)
+pca_scores6$Cluster <- pop(myData_genind_aMO_k6)
+pca_scores6$individual <- rownames(pca_scores6)
+pca_scores6
+
+setPop(myData_genind_aMO_k6) <- ~Pop
+pca_scores6$Pop <- pop(myData_genind_aMO_k6)
+
+plot_k6_1 <- ggplot(pca_scores6, aes(x = Axis1, y = Axis2, color=Cluster)) +
+  geom_point() +
+  xlab(paste("PC1 (", round(explained_variance_k6[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(explained_variance_k6[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, uncorrected") +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k6, name = "Cluster") +
+  theme(legend.position = "none")
+
+plot_k6_2 <- ggplot(pca_scores6, aes(x = Axis2, y = Axis3, color=Cluster)) +
+  geom_point() +
+  xlab(paste("PC2 (", round(explained_variance_k6[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(explained_variance_k6[3], 2), "%)", sep = "")) +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k6, name = "Cluster")
+
+# Display the plot
+print(plot_k6_1 + plot_k6_2)
+
+
+plot_k6_3 <- ggplot(pca_scores6, aes(x = Axis1, y = Axis2, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Pop)) +
+  xlab(paste("PC1 (", round(explained_variance_k6[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(explained_variance_k6[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, uncorrected") +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k6, name = "Cluster") +
+  theme(legend.position = "none")
+
+plot_k6_4 <- ggplot(pca_scores6, aes(x = Axis2, y = Axis3, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Pop)) +
+  xlab(paste("PC2 (", round(explained_variance_k6[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(explained_variance_k6[3], 2), "%)", sep = "")) +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k6, name = "Cluster")
+
+print(plot_k6_3 + plot_k6_4)
+
+plot_k6_5 <- ggplot(pca_scores5, aes(x = Axis1, y = Axis2, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Cluster)) +
+  xlab(paste("PC1 (", round(explained_variance_k5[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(explained_variance_k5[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, uncorrected") +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k6, name = "Cluster") +
+  theme(legend.position = "none")
+
+plot_k6_6 <- ggplot(pca_scores6, aes(x = Axis2, y = Axis3, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Cluster)) +
+  xlab(paste("PC2 (", round(explained_variance_k6[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(explained_variance_k6[3], 2), "%)", sep = "")) +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k6, name = "Cluster")
+
+print(plot_k6_5 + plot_k6_6)
+
+#----------------------------------------------------------------------------
+# now everything with clone correction
+
+setPop(cc_myData_genind_aMO_k6) <- ~cluster
+cc_pca_result_k6 <- dudi.pca(tab(cc_myData_genind_aMO_k6, freq=TRUE,NA.method="mean"), center = TRUE, scale = TRUE, scannf = FALSE, nf = 3)
+
+# Calculate explained variance for each PCA axis
+cc_explained_variance_k6 <- cc_pca_result_k6$eig / sum(cc_pca_result_k6$eig) * 100
+barplot(cc_explained_variance_k6, main = "Explained Variance per PCA Axis", xlab = "Principal Component", ylab = "Variance Explained (%)")
+
+# Extract scores for plotting
+
+cc_pca_scores6 <- as.data.frame(cc_pca_result_k6$li)
+cc_pca_scores6$Cluster <- pop(cc_myData_genind_aMO_k6)
+cc_pca_scores6$individual <- rownames(cc_pca_scores6)
+cc_pca_scores6
+mlg_test <- left_join(cc_pca_scores6,T_all_withMLGs_withClusters_allMarkersOnly,by=c("individual"="Code")) %>%
+  select(MLG)
+cc_pca_scores6$MLG <- mlg_test$MLG
+
+setPop(cc_myData_genind_aMO_k6) <- ~Pop
+cc_pca_scores6$Pop <- pop(cc_myData_genind_aMO_k6)
+
+cc_plot_k6_1 <- ggplot(cc_pca_scores6, aes(x = Axis1, y = Axis2, color=Cluster)) +
+  geom_point() +
+  geom_text(aes(label = MLG), vjust = -0.5, hjust = 0.5, size = 3) +
+  xlab(paste("PC1 (", round(cc_explained_variance_k6[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(cc_explained_variance_k6[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, clone corrected") +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k6, name = "Cluster") +
+  theme(legend.position = "none")
+
+cc_plot_k6_2 <- ggplot(cc_pca_scores6, aes(x = Axis2, y = Axis3, color=Cluster)) +
+  geom_point() +
+  geom_text(aes(label = MLG), vjust = -0.5, hjust = 0.5, size = 3) +
+  xlab(paste("PC2 (", round(cc_explained_variance_k6[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(cc_explained_variance_k6[3], 2), "%)", sep = "")) +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k6, name = "Cluster")
+
+# Display the plot
+print(cc_plot_k6_1 + cc_plot_k6_2)
+
+
+cc_plot_k6_3 <- ggplot(cc_pca_scores6, aes(x = Axis1, y = Axis2, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Pop)) +
+  xlab(paste("PC1 (", round(cc_explained_variance_k6[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(cc_explained_variance_k6[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, clone corrected") +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k6, name = "Cluster") +
+  theme(legend.position = "none")
+
+cc_plot_k6_4 <- ggplot(cc_pca_scores6, aes(x = Axis2, y = Axis3, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Pop)) +
+  xlab(paste("PC2 (", round(cc_explained_variance_k6[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(cc_explained_variance_k6[3], 2), "%)", sep = "")) +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k6, name = "Cluster")
+
+print(cc_plot_k6_3 + cc_plot_k6_4)
+
+cc_plot_k6_6 <- ggplot(pca_scores6, aes(x = Axis1, y = Axis2, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Cluster)) +
+  xlab(paste("PC1 (", round(cc_explained_variance_k6[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(cc_explained_variance_k6[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, clone corrected") +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k6, name = "Cluster") +
+  theme(legend.position = "none")
+
+cc_plot_k6_6 <- ggplot(cc_pca_scores6, aes(x = Axis2, y = Axis3, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Cluster)) +
+  xlab(paste("PC2 (", round(cc_explained_variance_k6[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(cc_explained_variance_k6[3], 2), "%)", sep = "")) +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k6, name = "Cluster")
+
+print(cc_plot_k6_6 + cc_plot_k6_6)
+```
+
+```{r pca with 6 clusters remove cluster 3}
+setPop(myData_genind_aMO_k6_minus3) <- ~cluster
+pca_result_k6_minus3 <- dudi.pca(tab(myData_genind_aMO_k6_minus3, freq=TRUE,NA.method="mean"), center = TRUE, scale = TRUE, scannf = FALSE, nf = 3)
+
+# Calculate explained variance for each PCA axis
+explained_variance_k6_minus3 <- pca_result_k6_minus3$eig / sum(pca_result_k6_minus3$eig) * 100
+barplot(explained_variance_k6_minus3, main = "Explained Variance per PCA Axis", xlab = "Principal Component", ylab = "Variance Explained (%)")
+
+# Extract scores for plotting
+pca_scores6_minus3 <- as.data.frame(pca_result_k6_minus3$li)
+pca_scores6_minus3$Cluster <- pop(myData_genind_aMO_k6_minus3)
+pca_scores6_minus3$individual <- rownames(pca_scores6_minus3)
+pca_scores6_minus3
+
+setPop(myData_genind_aMO_k6_minus3) <- ~Pop
+pca_scores6_minus3$Pop <- pop(myData_genind_aMO_k6_minus3)
+
+plot_k6_minus3_1 <- ggplot(pca_scores6_minus3, aes(x = Axis1, y = Axis2, color=Cluster)) +
+  geom_point() +
+  xlab(paste("PC1 (", round(explained_variance_k6_minus3[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(explained_variance_k6_minus3[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, uncorrected") +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k6, name = "Cluster") +
+  theme(legend.position = "none")
+
+plot_k6_minus3_2 <- ggplot(pca_scores6_minus3, aes(x = Axis2, y = Axis3, color=Cluster)) +
+  geom_point() +
+  xlab(paste("PC2 (", round(explained_variance_k6_minus3[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(explained_variance_k6_minus3[3], 2), "%)", sep = "")) +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k6, name = "Cluster")
+
+# Display the plot
+print(plot_k6_minus3_1 + plot_k6_minus3_2)
+
+
+plot_k6_minus3_3 <- ggplot(pca_scores6_minus3, aes(x = Axis1, y = Axis2, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Pop)) +
+  xlab(paste("PC1 (", round(explained_variance_k6_minus3[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(explained_variance_k6_minus3[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, uncorrected") +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k6, name = "Cluster") +
+  theme(legend.position = "none")
+
+plot_k6_minus3_4 <- ggplot(pca_scores6_minus3, aes(x = Axis2, y = Axis3, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Pop)) +
+  xlab(paste("PC2 (", round(explained_variance_k6_minus3[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(explained_variance_k6_minus3[3], 2), "%)", sep = "")) +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k6, name = "Cluster")
+
+print(plot_k6_minus3_3 + plot_k6_minus3_4)
+
+plot_k6_minus3_5 <- ggplot(pca_scores6_minus3, aes(x = Axis1, y = Axis2, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Cluster)) +
+  xlab(paste("PC1 (", round(explained_variance_k6_minus3[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(explained_variance_k6_minus3[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, uncorrected") +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k6, name = "Cluster") +
+  theme(legend.position = "none")
+
+plot_k6_minus3_6 <- ggplot(pca_scores6_minus3, aes(x = Axis2, y = Axis3, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Cluster)) +
+  xlab(paste("PC2 (", round(explained_variance_k6_minus3[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(explained_variance_k6_minus3[3], 2), "%)", sep = "")) +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k6, name = "Cluster")
+
+print(plot_k6_minus3_5 + plot_k6_minus3_6)
+
+#----------------------------------------------------------------------------
+# now everything with clone correction
+
+setPop(cc_myData_genind_aMO_k6_minus3) <- ~cluster
+cc_pca_result_k6_minus3 <- dudi.pca(tab(cc_myData_genind_aMO_k6_minus3, freq=TRUE,NA.method="mean"), center = TRUE, scale = TRUE, scannf = FALSE, nf = 3)
+
+# Calculate explained variance for each PCA axis
+cc_explained_variance_k6_minus3 <- cc_pca_result_k6_minus3$eig / sum(cc_pca_result_k6_minus3$eig) * 100
+barplot(cc_explained_variance_k6_minus3, main = "Explained Variance per PCA Axis", xlab = "Principal Component", ylab = "Variance Explained (%)")
+
+# Extract scores for plotting
+
+cc_pca_scores6_minus3 <- as.data.frame(cc_pca_result_k6_minus3$li)
+cc_pca_scores6_minus3$Cluster <- pop(cc_myData_genind_aMO_k6_minus3)
+cc_pca_scores6_minus3$individual <- rownames(cc_pca_scores6_minus3)
+cc_pca_scores6_minus3
+mlg_test <- left_join(cc_pca_scores6_minus3,T_all_withMLGs_withClusters_allMarkersOnly,by=c("individual"="Code")) %>%
+  select(MLG)
+cc_pca_scores6_minus3$MLG <- mlg_test$MLG
+
+setPop(cc_myData_genind_aMO_k6_minus3) <- ~Pop
+cc_pca_scores6_minus3$Pop <- pop(cc_myData_genind_aMO_k6_minus3)
+
+cc_plot_k6_minus3_1 <- ggplot(cc_pca_scores6_minus3, aes(x = Axis1, y = Axis2, color=Cluster)) +
+  geom_point() +
+  geom_text(aes(label = MLG), vjust = -0.5, hjust = 0.5, size = 3) +
+  xlab(paste("PC1 (", round(cc_explained_variance_k6_minus3[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(cc_explained_variance_k6_minus3[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, clone corrected, Cluster 3 removed") +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k6, name = "Cluster") +
+  theme(legend.position = "none")
+
+cc_plot_k6_minus3_2 <- ggplot(cc_pca_scores6_minus3, aes(x = Axis2, y = Axis3, color=Cluster)) +
+  geom_point() +
+  geom_text(aes(label = MLG), vjust = -0.5, hjust = 0.5, size = 3) +
+  xlab(paste("PC2 (", round(cc_explained_variance_k6_minus3[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(cc_explained_variance_k6_minus3[3], 2), "%)", sep = "")) +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k6, name = "Cluster")
+
+# Display the plot
+print(cc_plot_k6_minus3_1 + cc_plot_k6_minus3_2)
+
+
+cc_plot_k6_minus3_3 <- ggplot(cc_pca_scores6_minus3, aes(x = Axis1, y = Axis2, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Pop)) +
+  xlab(paste("PC1 (", round(cc_explained_variance_k6_minus3[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(cc_explained_variance_k6_minus3[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, clone corrected") +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k6, name = "Cluster") +
+  theme(legend.position = "none")
+
+
+cc_plot_k6_minus3_4 <- ggplot(cc_pca_scores6_minus3, aes(x = Axis2, y = Axis3, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Pop)) +
+  xlab(paste("PC2 (", round(cc_explained_variance_k6_minus3[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(cc_explained_variance_k6_minus3[3], 2), "%)", sep = "")) +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k6, name = "Cluster")
+
+print(cc_plot_k6_minus3_3 + cc_plot_k6_minus3_4)
+
+cc_plot_k6_minus3_5 <- ggplot(pca_scores6_minus3, aes(x = Axis1, y = Axis2, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Cluster)) +
+  xlab(paste("PC1 (", round(cc_explained_variance_k6_minus3[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(cc_explained_variance_k6_minus3[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, clone corrected") +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k6, name = "Cluster") +
+  theme(legend.position = "none")
+
+cc_plot_k6_minus3_6 <- ggplot(cc_pca_scores6_minus3, aes(x = Axis2, y = Axis3, color = Cluster)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Cluster)) +
+  xlab(paste("PC2 (", round(cc_explained_variance_k6_minus3[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(cc_explained_variance_k6_minus3[3], 2), "%)", sep = "")) +
+  theme_minimal() +
+  scale_color_manual(values = color_palette_k6, name = "Cluster")
+
+print(cc_plot_k6_minus3_5 + cc_plot_k6_minus3_6)
+```
+## Number of MLGS vs. Samples
+
+```{r mlg sample}
+
+setPop(myData_genind_allMarkersOnly) <- ~Pop/SamplingYear
+n_samples_allMarkersOnly <- poppr(myData_genind_allMarkersOnly) %>%
+  separate(Pop, sep="_", into=c("Pop","SamplingYear"))
+
+n_samples_allMarkersOnly <- n_samples_allMarkersOnly %>%
+  select(1:4) %>%
+  pivot_longer(cols=c("N","MLG"),names_to="Number",values_to="Count")
+  n_samples_allMarkersOnly
+
+n_samples_allMarkersOnly %>%
+ filter(Pop != "Total") %>%
+  ggplot(aes(x=as.numeric(SamplingYear), y=Count, fill=Number)) +
+  geom_col(stat="identity", position="dodge") +
+  facet_wrap(vars(Pop)) +
+  labs(y="", x="Sampling year", subtitle="Dataset: all markers, uncorrected") +
+  ggtitle("Number of samples vs. number of MLGs") +
+  theme(aspect.ratio=0.4,
+    strip.background = element_blank(),
+    strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
+    panel.grid = element_blank(),
+    panel.spacing=unit(0.1,"lines"))
+```
+
+## Rarecurves
+
+```{r rarecurves}
+setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
+H.year_all <- mlg.table(myData_genind_allMarkersOnly, plot = FALSE)
+rarecurve(H.year_all, ylab="Number of expected MLGs",
+          border = NA, fill = NA, font = 2, cex = 1, col = "blue")
+title("Rarecurve of Sampling Years")
+
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+
+H.year_allPop <- mlg.table(myData_genind_allMarkersOnly, plot = FALSE)
+rarecurve(H.year_allPop, ylab="Number of expected MLGs",
+          border = NA, fill = NA, font = 2, cex = 1, col = "blue")
+title("Rarecurve of Pop")
+
+H.year_withoutBOB <- mlg.table(myData_genind_aMO_withoutBOB, plot = FALSE)
+rarecurve(H.year_withoutBOB, ylab="Number of expected MLGs",
+font = 2, cex = 1, col = "blue")
+title("Rarecurve of Pop  (without BOB)")
+```
+
+## FST Values
+```{r fst values}
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+pairwise.neiFst_aMO <- pairwise.neifst(myData_genind_allMarkersOnly, diploid=FALSE)
+pairwise.neiFst_aMO
+
+#write.csv(pairwise.neiFst_aMO,"pairwise.neiFst_aMO.csv")
+
+#clone correction
+setPop(cc_myData_genind_allMarkersOnly) <- ~Pop
+cc_pairwise.neiFst_aMO <- pairwise.neifst(cc_myData_genind_allMarkersOnly, diploid=FALSE)
+cc_pairwise.neiFst_aMO
+#write.csv(cc_pairwise.neiFst_aMO,"cc_pairwise.neiFst_aMO.csv")
+
+truffles.matFst <- mat_pw_fst(myData_genind_allMarkersOnly)
+#write.csv(truffles.matFst,"truffles.matFst_amO.csv")
+cc_truffles.matFst <- mat_pw_fst(myData_genind_allMarkersOnly)
+#write.csv(cc_truffles.matFst,"cc_truffles.matFst_amO.csv")
+
+#k=5
+setPop(myData_genind_aMO_k5) <- ~cluster
+truffleClusters_k5.matFst <- mat_pw_fst(myData_genind_aMO_k5)
+
+fst_k5_df <- as.data.frame(truffleClusters_k5.matFst)
+fst_k5_long <- melt(fst_k5_df, varnames = c("1","2","3","4","5","mixed"), value.name = "Fst")
+fst_k5_long <- na.omit(fst_k5_long)
+
+ggplot(fst_k5_long, aes(x = variable, y = Fst, fill=variable)) +
+  geom_boxplot() +
+  scale_fill_manual(values = color_palette_k5) + 
+  theme_minimal() +
+  labs(title = "Comparison of Fst Values Across Clusters",
+       x = "Cluster",
+       y = "Fst Value") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+#k=6
+setPop(myData_genind_aMO_k6) <- ~cluster
+truffleClusters_k6.matFst <- mat_pw_fst(myData_genind_aMO_k6)
+
+fst_k6_df <- as.data.frame(truffleClusters_k6.matFst)
+fst_k6_long <- melt(fst_k6_df, varnames = c("1","2","3","4","5","6","mixed"), value.name = "Fst")
+fst_k6_long <- na.omit(fst_k6_long)
+
+ggplot(fst_k6_long, aes(x = variable, y = Fst, fill=variable)) +
+  geom_boxplot() +
+  scale_fill_manual(values = color_palette_k6) + 
+  theme_minimal() +
+  labs(title = "Comparison of Fst Values Across Clusters",
+       x = "Cluster",
+       y = "Fst Value") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+## AMOVA
+
+```{r amova}
+#In panmictic populations, we would expect to see most of the variance arise from within samples. If we see that the most of the variance occurs among samples within populations or among populations, then there is evidence that we have some sort of population structure. In the case of clonal organisms, this would help support a hypothesis of clonal reproduction.
+allMarkers_amova <- poppr.amova(myData_genind_allMarkersOnly, ~Pop)
+allMarkers_amova
+summary(allMarkers_amova)
+
+dist_matrix <- dist.genpop(myData_genpop_allMarkersOnly)
+dist_matrix
+# Perform AMOVA on the distance matrix
+amova_results <- amova(dist_matrix ~ Population, data = myData_genpop_allMarkersOnly)
+
+allMarkers_amovacc <- poppr.amova(myData_genind_allMarkersOnly, ~Pop, clonecorrect = TRUE)
+allMarkers_amovacc
+allMarkers_cluster_amova <- poppr.amova(myData_genind_withClusters, ~cluster)
+allMarkers_cluster_amova
+```
+
+## Isolation by distance
+
+```{r isolation by distance, eval=FALSE, include=FALSE}
+# https://adegenet.r-forge.r-project.org/files/tutorial-basics.pdf
+
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+myData_genpop_allMarkersOnly <- genind2genpop(myData_genind_allMarkersOnly)
+
+coords <- coord[, c("LON", "LAT")]
+
+coordsgeo_dist <- distm(coords, fun = distGeo) /1000
+coordsgeo_dist
+rownames(coordsgeo_dist) <- coord$Site_1_abrev
+colnames(coordsgeo_dist) <- coord$Site_1_abrev
+
+coordsgeo_dist[upper.tri(coordsgeo_dist)] <- t(coordsgeo_dist)[upper.tri(coordsgeo_dist)]
+
+# Calculate genetic distance using the genpop object
+genetic_dist <- dist.genpop(myData_genpop_allMarkersOnly, method = "euclidean")  # You can choose other methods if needed
+genetic_dist
+# try with Laura Schürz's call (euclidean distance and Nei's genetic distance)
+mantel(genetic_dist,coordsgeo_dist,method='pearson', permutations=9999)
+
+# Extract lower triangles of the distance matrices for comparison
+# Extract the lower triangles
+lower_triangle_geo <- coordsgeo_dist[lower.tri(coordsgeo_dist)]
+lower_triangle_genetic <- genetic_dist[lower.tri(genetic_dist)]
+
+# Combine into a data frame
+distances_df <- data.frame(
+  Geographic_Distance = lower_triangle_geo,
+  Genetic_Distance = log(lower_triangle_genetic)
+)
+
+# Plot the relationship
+ggplot(distances_df, aes(x = Geographic_Distance, y = Genetic_Distance)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", color = "blue") +
+  labs(title = "Isolation by Distance",
+       x = "log() Geographic Distance",
+       y = "Genetic Distance") +
+  theme_minimal()
+
+#--------------------------------------------------------------------------
+#without cluster 3
+
+setPop(myData_genind_aMO_k6_minus3) <- ~Pop
+myData_genpop_aMO_k6_minus3 <- genind2genpop(myData_genind_aMO_k6_minus3)
+
+# Calculate genetic distance using the genpop object
+genetic_dist_minus3 <- dist.genpop(myData_genpop_aMO_k6_minus3, method = "euclidean")  # You can choose other methods if needed
+genetic_dist_minus3
+# try with Laura Schürz's call (euclidean distance and Nei's genetic distance)
+mantel(genetic_dist,coordsgeo_dist,method='pearson', permutations=9999)
+
+# Extract lower triangles of the distance matrices for comparison
+# Extract the lower triangles
+lower_triangle_geo <- coordsgeo_dist[lower.tri(coordsgeo_dist)]
+lower_triangle_genetic_minus3 <- genetic_dist_minus3[lower.tri(genetic_dist_minus3)]
+
+# Combine into a data frame
+distances_df_minus3 <- data.frame(
+  Geographic_Distance = lower_triangle_geo,
+  Genetic_Distance = log(lower_triangle_genetic_minus3)
+)
+
+# Plot the relationship
+ggplot(distances_df_minus3, aes(x = Geographic_Distance, y = Genetic_Distance)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", color = "blue") +
+  labs(title = "Isolation by Distance",
+       x = "log() Geographic Distance",
+       y = "Genetic Distance") +
+  theme_minimal()
+
+```
+
+## Simpson's Diversity
+
+```{r diversity Simpson, echo=TRUE, message=FALSE, warning=FALSE}
+setPop(myData_genind_allMarkersOnly) <- ~Pop/SamplingYear
+popdata_all_pop_year <- poppr(myData_genind_allMarkersOnly) %>%
+  separate(Pop,c("Pop","SamplingYear"))
+
+popdata_all_pop_year_graph <- filter(popdata_all_pop_year,Pop!="Total") %>%
+ggplot(aes(as.numeric(SamplingYear),lambda)) +
+  geom_point(pch=20, size=0.9) +
+  facet_wrap(vars(Pop)) +
+  labs(y="Simpson's index", x="Sampling year") +
+  ggtitle("Simpson's index over the sampling years and all populations") +
+  theme(aspect.ratio=0.4,
+    strip.background = element_blank(),
+    strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
+    panel.grid = element_blank(),
+    panel.spacing=unit(0.1,"lines"))
+popdata_all_pop_year_graph
+
+#emf(file="simpson_all_SY.emf")
+#popdata_all_pop_year_graph
+#dev.off()
+
+#rarefied:
+N_all      <- popdata_all_pop_year$N      # number of samples
+lambda_all <- popdata_all_pop_year$lambda # Simpson's index
+popdata_all_pop_year$rarLambda_all <- (N_all/(N_all - 1)) * lambda_all             # Corrected Simpson's index
+
+rar_popdata_all_pop_year_graph <- filter(popdata_all_pop_year,Pop!="Total") %>%
+ggplot(aes(as.numeric(SamplingYear),rarLambda_all)) +
+  geom_point(pch=20, size=0.9) +
+  facet_wrap(vars(Pop)) +
+  labs(y="Rarefied Simpson's index", x="Sampling year") +
+  ggtitle("Rarefied Simpson's index over the sampling years and all populations") +
+  theme(aspect.ratio=0.4,
+    strip.background = element_blank(),
+    strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
+    panel.grid = element_blank(),
+    panel.spacing=unit(0.1,"lines"))
+rar_popdata_all_pop_year_graph
+
+#clone corrected, Sampling Year:
+
+setPop(cc_myData_genind_allMarkersOnly_SY) <- ~Pop/SamplingYear
+cc_popdata_all_pop_year <- poppr(cc_myData_genind_allMarkersOnly_SY) %>%
+  separate(Pop,c("Pop","SamplingYear"))
+
+cc_popdata_all_pop_year_graph <- filter(cc_popdata_all_pop_year,Pop!="Total") %>%
+ggplot(aes(as.numeric(SamplingYear),lambda)) +
+  geom_point(pch=20, size=0.9) +
+  facet_wrap(vars(Pop)) +
+  labs(y="Simpson's index", x="Sampling year") +
+  ggtitle("Simpson's index over the sampling years (clone-corrected)") +
+  theme(aspect.ratio=0.4,
+    strip.background = element_blank(),
+    strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
+    panel.grid = element_blank(),
+    panel.spacing=unit(0.1,"lines"))
+cc_popdata_all_pop_year_graph
+```
+
+## Nei's genetic diversity
+
+```{r Hexp table Pop SamplingYear, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+setPop(myData_genind_allMarkersOnly) <- ~Pop/SamplingYear
+
+# create a data frame and transpose the result;
+# use sapply to iterate over all populations calculated by seppop.
+# then use the locus_table function on the level Genotype
+
+locus_table_aMO_SY <- data.frame(t(
+  sapply(seppop(myData_genind_allMarkersOnly),
+    function(ls) poppr::locus_table(ls,lev="allele"))))
+
+# choose only the columns corresponding to Hexp values and rename them with their loci
+
+locus_table_aMO_hexp <- locus_table_aMO_SY %>%
+  select(X31:X45) %>%
+  dplyr::rename(aest06_1 = X31,aest07_1=X32, aest15_1=X33, aest26_1=X34,aest28_1=X35, aest35_1=X36, aest36_1=X37, aest01_1=X38, aest10_1=X39, aest18_1=X40, aest24_1=X41, aest25_1=X42, aest29_1=X43, aest31_1=X44, mean=X45) %>%
+  tibble::rownames_to_column("Pop") %>%
+  separate(.,Pop,sep="_", into=c("Pop","SamplingYear"))
+                                      
+#check with one population:
+#locus_table(myData_genind_AllMarkersOnly, lev="genotype",population="UEB_2015")
+#looks good
+
+kable(locus_table_aMO_hexp)
+locus_table_SY_hexp_pivot <- pivot_longer(locus_table_aMO_hexp,cols=3:16,names_to="locus",values_to="value")
+
+library(devEMF)
+#emf(file= "allMarkersOnly_Pop_SY_hexp.emf") # Opens a device
+ggplot(locus_table_SY_hexp_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
+  geom_point(pch=20, alpha=0.3, size=0.8) +
+  geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
+  facet_wrap(vars(Pop)) +
+  labs(y="Nei's genetic diversity Hexp", x="Sampling year") +
+  ggtitle("Nei's genetic diversity per locus, Sampling year and Population") +
+  theme(aspect.ratio=0.4,
+    strip.background = element_blank(),
+    strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
+    panel.grid = element_blank(),
+    panel.spacing=unit(0.1,"lines"))
+#dev.off()  # Close the device
+
+n_samples_allMarkersOnly_SY <- poppr(myData_genind_allMarkersOnly) %>%
+  separate(Pop, sep="_", into=c("Pop","SamplingYear"))
+
+n_samples_allMarkersOnly_SY %>%
+  select(Pop,SamplingYear,N) %>%
+  pivot_wider(names_from=SamplingYear, values_from=N) %>%
+  select(.,-"NA") %>%
+  replace(is.na(.),0) %>%
+  kable()
+
+
+#--------------------------------------------------------------------------
+
+#clone correction
+
+setPop(cc_myData_genind_allMarkersOnly) <- ~Pop/SamplingYear
+
+# create a data frame and transpose the result;
+# use sapply to iterate over all populations calculated by seppop.
+# then use the locus_table function on the level Genotype
+
+cc_locus_table_aMO_SY <- data.frame(t(
+  sapply(seppop(cc_myData_genind_allMarkersOnly),
+    function(ls) poppr::locus_table(ls,lev="allele"))))
+
+# choose only the columns corresponding to Hexp values and rename them with their loci
+
+cc_locus_table_aMO_hexp <- cc_locus_table_aMO_SY %>%
+  select(X31:X45) %>%
+  dplyr::rename(aest06_1 = X31,aest07_1=X32, aest15_1=X33, aest26_1=X34,aest28_1=X35, aest35_1=X36, aest36_1=X37, aest01_1=X38, aest10_1=X39, aest18_1=X40, aest24_1=X41, aest25_1=X42, aest29_1=X43, aest31_1=X44, mean=X45) %>%
+  tibble::rownames_to_column("Pop") %>%
+  separate(.,Pop,sep="_", into=c("Pop","SamplingYear"))
+
+cc_locus_table_SY_hexp_pivot <- pivot_longer(cc_locus_table_aMO_hexp,cols=3:16,names_to="locus",values_to="value")
+
+library(devEMF)
+#emf(file= "allMarkersOnly_Pop_SY_hexp.emf") # Opens a device
+ggplot(cc_locus_table_SY_hexp_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
+  geom_point(pch=20, alpha=0.3, size=0.8) +
+  geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
+  facet_wrap(vars(Pop)) +
+  labs(y="Nei's genetic diversity Hexp", x="Sampling year") +
+  ggtitle("Nei's genetic diversity per locus, Sampling year and Population, clone-corrected") +
+  theme(aspect.ratio=0.4,
+    strip.background = element_blank(),
+    strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
+    panel.grid = element_blank(),
+    panel.spacing=unit(0.1,"lines"))
+#dev.off()  # Close the device
+
+cc_n_samples_allMarkersOnly_SY <- poppr(cc_myData_genind_allMarkersOnly) %>%
+  separate(Pop, sep="_", into=c("Pop","SamplingYear"))
+
+cc_n_samples_allMarkersOnly_SY %>%
+  select(Pop,SamplingYear,N) %>%
+  pivot_wider(names_from=SamplingYear, values_from=N) %>%
+  select(.,-"NA") %>%
+  replace(is.na(.),0) %>%
+  kable()
+
+```
+
+## Perennial truffles

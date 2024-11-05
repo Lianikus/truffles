@@ -48,6 +48,7 @@ cc_myData_genind_allMarkersOnly_SY <- clonecorrect(myData_genind_allMarkersOnly,
                                                    strata=~Pop/SamplingYear)
 cc_myData_genind_allMarkersOnly_TY <- clonecorrect(myData_genind_allMarkersOnly,
                                                    strata=~Pop/TruffleYear)
+cc_myData_genind_allMarkersOnly <-clonecorrect(myData_genind_allMarkersOnly,strata=~Pop)
 order_sites_WtoE <- factor(c("BUR","GEN","NEU","SCS","KON","FRB","FRE","FRI","SCD","SCG","SCL","WSL","LIM","BRU","RIE","TRO","ALD","UST","BAR","UEB","BOB","BOH","HAN"))
 ```
 
@@ -108,15 +109,11 @@ x.pops_allMarkersOnly <- tab(myData_genind_allMarkersOnly,
                              freq=TRUE, NA.method="mean")
 
 pca.pops.allMarkersOnly <- dudi.pca(x.pops_allMarkersOnly,center=TRUE,scale=FALSE, nf=3, scannf=FALSE)
-s.label(pca.pops.allMarkersOnly$li)
+pca.pops.allMarkersOnly
 
 # Calculate explained variance for each PCA axis
 explained_variance <- pca.pops.allMarkersOnly$eig / sum(pca.pops.allMarkersOnly$eig) * 100
 barplot(explained_variance, main = "Explained Variance per PCA Axis", xlab = "Principal Component", ylab = "Variance Explained (%)")
-
-explained_variance
-
-add.scatter.eig(eigenvalues_aMO[1:2], 3, 1, 2, ratio = .17)
 
 #looking at first two axes:
 s.class(pca.pops.allMarkersOnly$li,fac=pop(myData_genind_allMarkersOnly),col=transp(funky(15),0.6),axesel=FALSE,cstar=0,cpoint=3)
@@ -138,27 +135,43 @@ xax=2, yax=3, col=transp(funky(15),.6),
 axesel=FALSE, cstar=0, cpoint=3)
 add.scatter.eig(pca.pops.allMarkersOnly$eig[1:50],3,2,3, ratio=.2)
 
-# Extract the eigenvalues
-eigenvalues_aMO <- pca.pops.allMarkersOnly$eig
-
-# Variance explained by each PC
-variance_explained_aMO <- eigenvalues_aMO / sum(eigenvalues_aMO) * 100  # Convert to percentage
-variance_explained_aMO
-
 # Create a data frame for plotting
-pca_data <- as.data.frame(pca.pops.allMarkersOnly$li)  # Scores of the PCA
-pca_data$individual <- rownames(pca_data)
+pca_scores <- as.data.frame(pca.pops.allMarkersOnly$li)  # Scores of the PCA
+pca_scores$individual <- rownames(pca_scores)
+pca_scores$Pop <- pop(myData_genind_allMarkersOnly)
+pca_scores
+
+install.packages("gghighlight")
+library(gghighlight)
 
 # Create the PCA plot
-pca_plot <- ggplot(pca_data, aes(x = Axis1, y = Axis2)) +
+
+pca_plot_1 <- ggplot(pca_scores, aes(x = Axis1, y = Axis2, color=Pop)) +
   geom_point() +
-  xlab(paste("PC1 (", round(variance_explained_aMO[1], 2), "%)", sep = "")) +
-  ylab(paste("PC2 (", round(variance_explained_aMO[2], 2), "%)", sep = "")) +
-  ggtitle("PCA of Genetic Data") +
+  xlab(paste("PC1 (", round(explained_variance[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(explained_variance[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, uncorrected") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+pca_plot_2 <- ggplot(pca_scores, aes(x = Axis2, y = Axis3, color=Pop)) +
+  geom_point() +
+  xlab(paste("PC2 (", round(explained_variance[2], 2), "%)", sep = "")) +
+  ylab(paste("PC3 (", round(explained_variance[3], 2), "%)", sep = "")) +
   theme_minimal()
 
 # Display the plot
-print(pca_plot)
+print(pca_plot_1 + pca_plot_2)
+
+pca_plot_3 <- ggplot(pca_scores, aes(x = Axis1, y = Axis2, color=Pop)) +
+  geom_point() +
+  gghighlight::gghighlight() + 
+  facet_wrap(vars(Pop)) +
+  xlab(paste("PC1 (", round(explained_variance[1], 2), "%)", sep = "")) +
+  ylab(paste("PC2 (", round(explained_variance[2], 2), "%)", sep = "")) +
+  ggtitle("PCA of dataset with 14 markers, uncorrected") +
+  theme_minimal() +
+  theme(legend.position = "none")
 
 #emf(file="pca.allMarkersOnly.emf")
 #s.class(pca.pops.allMarkersOnly$li, fac=pop(myData_genind_allMarkersOnly),
@@ -167,23 +180,22 @@ print(pca_plot)
 
 
 #clonecorrected PCA  with samplingYear
-setPop(cc_myData_genind_allMarkersOnly_SY) <- ~Pop
-x.pops_cc.SY <- tab(cc_myData_genind_allMarkersOnly_SY,
+setPop(cc_myData_genind_allMarkersOnly) <- ~Pop
+x.pops_cc <- tab(cc_myData_genind_allMarkersOnly,
                     freq=TRUE, NA.method="mean")
-pca.pops_cc.SY <- dudi.pca(df = x.pops_cc.SY,
-                           center = TRUE, scale = FALSE, scannf = FALSE, nf = 3)
+pca.pops_cc <- dudi.pca(df = x.pops_cc,
+                           center = TRUE, scale = FALSE, scannf = FALSE, nf = 100)
 
 # Calculate explained variance for each PCA axis
-cc.explained_variance <- pca.pops_cc.SY$eig / sum(pca.pops_cc.SY$eig) * 100
+cc.explained_variance <- pca.pops_cc$eig / sum(pca.pops_cc$eig) * 100
 barplot(cc.explained_variance, main = "Explained Variance per PCA Axis", xlab = "Principal Component", ylab = "Variance Explained (%)")
 
 
-
 #looking at first two axes:
-s.class(pca.pops_cc.SY$li,
-        fac=pop(cc_myData_genind_allMarkersOnly_SY),
+s.class(pca.pops_cc$li,
+        fac=pop(cc_myData_genind_allMarkersOnly),
         col=transp(funky(15),0.6),axesel=FALSE,cstar=0,cpoint=3)
-add.scatter.eig(pca.pops_cc.SY$eig[1:50],3,1,2, ratio=.17)
+add.scatter.eig(pca.pops_cc$eig[1:50],3,1,2, ratio=.17)
 
 #looking at 2 and 3 axis:
 s.class(pca.pops_cc.SY$li, fac=pop(cc_myData_genind_allMarkersOnly_SY),
@@ -225,24 +237,19 @@ add.scatter.eig(pca.pops_cc.TY$eig[1:50],3,2,3, ratio=.2)
 #plot(pca.pops_cc.TY$li, col=
 
 ```
-```{r PCA new way}
+```{r PCA new way, eval=FALSE, include=FALSE}
 setPop(myData_genind_allMarkersOnly) <- ~Pop
 
 pca_result_aMO_pop <- dudi.pca(tab(myData_genind_allMarkersOnly), center = TRUE, scale = TRUE, scannf = FALSE)
-
-library(FactoMineR)
-pca_result_FactoMineR <- PCA(tab(myData_genind_allMarkersOnly), graph = FALSE)
-pca_scores_FactoMineR <- as.data.frame(pca_result_FactoMineR$ind$coord)
 
 # Eigenvalues and explained variance
 eigenvalues <- pca_result_aMO_pop$eig
 total_variance <- sum(eigenvalues)
 explained_variance <- (eigenvalues / total_variance) * 100
+explained_variance
 
 # Extract PCA scores (loadings)
 pca_scores <- as.data.frame(pca_result_aMO_pop$li)
-
-# All axes (PCs) are included here
 
 # Add group/population labels if applicable
 pca_scores_FactoMineR$Group <- pop(myData_genind_allMarkersOnly)  # Adjust this if your grouping variable is named differently
@@ -250,7 +257,6 @@ pca_scores_FactoMineR$Group <- pop(myData_genind_allMarkersOnly)  # Adjust this 
 population_vector_aMO <- pop(myData_genind_allMarkersOnly)  # Create a vector with population names
 # Convert population vector to a data frame
 population_df_aMO <- data.frame(Pop = population_vector_aMO)
-pca_scores_FactoMineR$Pop <- population_df_aMO
 
 ggplot(pca_scores_amO, aes(x = Axis1, y = Axis2, color = Group)) +
   geom_point(size = 3) +
@@ -313,6 +319,8 @@ cc_p1 <- ggplot(cc_pca_scores_FactoMineR, aes(x = Dim.1, y = Dim.2, color = Grou
        x = paste("Principal Component 1 (", round(cc_explained_variance[1], 2), "%)", sep=""),
        y = paste("Principal Component 2 (", round(cc_explained_variance[2], 2), "%)", sep="")) +
   theme(legend.position = "none")  # Remove the legend from this plot
+
+cc_p1
 
 # Create the second PCA plot (Axis 2 vs Axis 3) with the legend
 cc_p2 <- ggplot(cc_pca_scores_FactoMineR, aes(x = Dim.2, y = Dim.3, color = Group)) +

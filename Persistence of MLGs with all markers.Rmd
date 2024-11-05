@@ -74,7 +74,7 @@ kable(select(poppr_withoutNA_genind, Pop, N, MLG, eMLG, SE, H, G, lambda, E.5, H
 
 Info zur Tabelle: N = Number of individuals, MLG = Number of multilocus
 genotypes, eMLG = number of expected MLG at the smallest sample size \>=
-10 based on rarefaction SE = Standard error based on eMLG, H =
+10 based on   rarefaction SE = Standard error based on eMLG, H =
 Shannon-Wiener Index of MLG diversity G = Stoddart & Taylor's Index of
 MLG diversity lambda = Simpsons index, E.5 = Evenness, Hexp = Neis
 Expected Heterozygosity Ia = Index of association, rbarD = stand. Index

@@ -25,7 +25,7 @@ library(poppr)
 library(treemap)
 library(pegas)
 library(adegenet)
-library(devtools)
+#library(devtools)
 library(hierfstat)
 library(mmod)
 library(diveRsity)
@@ -179,7 +179,6 @@ The number of observed MLGs is equivalent to genotypic richness. We expect that 
 
 setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
 # Calculating minimal necessary sample size
-# Step 1: Extract population information
 
 # Step 1: Extract population information
 populations <- pop(myData_genind_allMarkersOnly)
@@ -225,11 +224,15 @@ rarecurve(H.year, ylab="Number of expected MLGs", sample=min(rowSums(H.year)),
           border = NA, fill = NA, font = 2, cex = 1, col = "blue")
 title("Rarecurve of Sampling Years (min. sample size = 100 per year)")
 
+setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
+H.year_all <- mlg.table(myData_genind_allMarkersOnly, plot = FALSE)
+rarecurve(H.year_all, ylab="Number of expected MLGs",
+          border = NA, fill = NA, font = 2, cex = 1, col = "blue")
+title("Rarecurve of Sampling Years")
 
 
 setPop(myData_genind_allMarkersOnly) <- ~Pop
 # Calculating minimal necessary sample size
-# Step 1: Extract population information
 
 # Step 1: Extract population information
 populations <- pop(myData_genind_allMarkersOnly)
@@ -274,14 +277,25 @@ rarecurve(H.year, ylab="Number of expected MLGs", sample=min(rowSums(H.year)),
           border = NA, fill = NA, font = 2, cex = 1, col = "blue")
 title("Rarecurve of Pop (min. Sample size = 5 per Pop)")
 
+H.year_allPop <- mlg.table(myData_genind_allMarkersOnly, plot = FALSE)
+rarecurve(H.year_allPop, ylab="Number of expected MLGs",
+          border = NA, fill = NA, font = 2, cex = 1, col = "blue")
+title("Rarecurve of Pop")
+
 #rescale to see anything except for BOB
 setPop(myData_genind_allMarkersOnly) <- ~Pop
+myData_genind_aMO_withoutBOB <- popsub(myData_genind_allMarkersOnly,exclude="BOB")
 myData_genind_allMarkersOnly_above5N_withoutBOB <- popsub(myData_genind_allMarkersOnly_above5N,exclude="BOB")
 poppr(myData_genind_allMarkersOnly_above5N_withoutBOB)
 H.year_withoutBOB <- mlg.table(myData_genind_allMarkersOnly_above5N_withoutBOB, plot = FALSE)
 rarecurve(H.year_withoutBOB, ylab="Number of expected MLGs", sample=min(rowSums(H.year_withoutBOB)),
 font = 2, cex = 1, col = "blue")
 title("Rarecurve of Pop  (min. Sample size = 5 per Pop; without BOB)")
+
+H.year_withoutBOB <- mlg.table(myData_genind_aMO_withoutBOB, plot = FALSE)
+rarecurve(H.year_withoutBOB, ylab="Number of expected MLGs",
+font = 2, cex = 1, col = "blue")
+title("Rarecurve of Pop  (without BOB)")
 
 
 setPop(myData_genind_allMarkersOnly) <- ~TruffleYear
@@ -409,7 +423,7 @@ A recent study reported that the origin of the potato late blight pathogen Phyto
 ```{r cluster analysis, eval=FALSE, include=FALSE}
 setPop(myData_genind_allMarkersOnly) <- ~Pop
 MX <- popsub(myData_genind_allMarkersOnly, "BUR")
-MXclust <- find.clusters(MX)
+MXclust <- find.clusters(myData_genind_allMarkersOnly)
 ```
 
 ```{r MSN}
@@ -679,65 +693,34 @@ ggplot(df_28,aes(x=SamplingYear,y=`Allele frequencies`)) +
 setPop(myData_genind_allMarkersOnly) <- ~Pop
 myData_genpop_allMarkersOnly <- genind2genpop(myData_genind_allMarkersOnly)
 
-coords <- coord[, c("LAT", "LON")]
+coords <- coord[, c("LON", "LAT")]
 
-geo_dist <- distm(coords, fun = distHaversine)
-rownames(geo_dist) <- coordinates$Population
-colnames(geo_dist) <- coordinates$Population
-print(geo_dist)  # View the distance matrix
+coordsgeo_dist <- distm(coords, fun = distGeo) /1000
+coordsgeo_dist
+rownames(coordsgeo_dist) <- coord$Site_1_abrev
+colnames(coordsgeo_dist) <- coord$Site_1_abrev
+
+coordsgeo_dist[upper.tri(coordsgeo_dist)] <- t(coordsgeo_dist)[upper.tri(coordsgeo_dist)]
 
 # Calculate genetic distance using the genpop object
 genetic_dist <- dist.genpop(myData_genpop_allMarkersOnly, method = "euclidean")  # You can choose other methods if needed
 genetic_dist
-
-library(adegenet)
-#try it with FST/(1-FST)
-truffles.matFst <- mat_pw_fst(myData_genind_allMarkersOnly)
-cc_truffles.matFst <- mat_pw_fst(cc_myData_genind_allMarkersOnly)
-#write.csv(cc_truffles.matFst,"cc_FST_allMarkersOnly.csv")
-
-# Assuming 'fst_matrix' is your FST matrix from mat_pw_fst
-# Replace any NA values to avoid division by zero issues
-truffles.matFst[is.na(truffles.matFst)] <- 0
-
-# Calculate the distance matrix
-distance_matrix <- truffles.matFst / (1 - truffles.matFst)
-
-# If you want to ensure no infinite values exist (due to FST being 1)
-distance_matrix[is.infinite(distance_matrix)] <- NA
-distance_object <- as.dist(distance_matrix)
-
-# Run the Mantel test
-mantel_result <- mantel.randtest(genetic_dist, geo_dist, nrepet = 999)  # Use an appropriate number of permutations
-print(mantel_result)  # View the full result
-
-# Check the structure of the Mantel test result
-str(mantel_result)
-plot(mantel_result)
-geo_dist <- as.dist(geo_dist)
-
-mantel_Fst <- mantel.randtest(distance_object,geo_dist,nrepet=999)
-mantel_Fst
-Fst_dist_vector <- as.vector(distance_object)
+# try with Laura Schürz's call (euclidean distance and Nei's genetic distance)
+mantel(genetic_dist,coordsgeo_dist,method='pearson', permutations=9999)
 
 # Extract lower triangles of the distance matrices for comparison
-genetic_dist_vector <- as.vector(genetic_dist)
-geographic_dist_vector <- as.vector(geo_dist)
+# Extract the lower triangles
+lower_triangle_geo <- coordsgeo_dist[lower.tri(coordsgeo_dist)]
+lower_triangle_genetic <- genetic_dist[lower.tri(genetic_dist)]
 
-# Create a data frame for plotting
-distance_data <- data.frame(
-  Genetic_Distance = genetic_dist_vector,
-  Geographic_Distance = log(geographic_dist_vector)
-)
-
-# Create a data frame for plotting with FST calculation
-distance_data_Fst <- data.frame(
-  Genetic_Distance = Fst_dist_vector,
-  Geographic_Distance = log(geographic_dist_vector)
+# Combine into a data frame
+distances_df <- data.frame(
+  Geographic_Distance = lower_triangle_geo,
+  Genetic_Distance = log(lower_triangle_genetic)
 )
 
 # Plot the relationship
-ggplot(distance_data, aes(x = Geographic_Distance, y = Genetic_Distance)) +
+ggplot(distances_df, aes(x = Geographic_Distance, y = Genetic_Distance)) +
   geom_point(alpha = 0.6) +
   geom_smooth(method = "lm", color = "blue") +
   labs(title = "Isolation by Distance",
@@ -745,14 +728,38 @@ ggplot(distance_data, aes(x = Geographic_Distance, y = Genetic_Distance)) +
        y = "Genetic Distance") +
   theme_minimal()
 
+#--------------------------------------------------------------------------
+#without cluster 3
+
+setPop(myData_genind_aMO_k6_minus3) <- ~Pop
+myData_genpop_aMO_k6_minus3 <- genind2genpop(myData_genind_aMO_k6_minus3)
+
+# Calculate genetic distance using the genpop object
+genetic_dist_minus3 <- dist.genpop(myData_genpop_aMO_k6_minus3, method = "euclidean")  # You can choose other methods if needed
+genetic_dist_minus3
+# try with Laura Schürz's call (euclidean distance and Nei's genetic distance)
+mantel(genetic_dist,coordsgeo_dist,method='pearson', permutations=9999)
+
+# Extract lower triangles of the distance matrices for comparison
+# Extract the lower triangles
+lower_triangle_geo <- coordsgeo_dist[lower.tri(coordsgeo_dist)]
+lower_triangle_genetic_minus3 <- genetic_dist_minus3[lower.tri(genetic_dist_minus3)]
+
+# Combine into a data frame
+distances_df_minus3 <- data.frame(
+  Geographic_Distance = lower_triangle_geo,
+  Genetic_Distance = log(lower_triangle_genetic_minus3)
+)
+
 # Plot the relationship
-ggplot(distance_data_Fst, aes(x = Geographic_Distance, y = Genetic_Distance)) +
+ggplot(distances_df_minus3, aes(x = Geographic_Distance, y = Genetic_Distance)) +
   geom_point(alpha = 0.6) +
   geom_smooth(method = "lm", color = "blue") +
   labs(title = "Isolation by Distance",
        x = "log() Geographic Distance",
-       y = "Genetic Distance (Fst/(1-Fst)") +
+       y = "Genetic Distance") +
   theme_minimal()
+
 ```
   
 ```{r isolate distance without cluster 3, eval=FALSE, include=FALSE}
@@ -771,8 +778,11 @@ genetic_dist_k6_minus3 <- dist.genpop(myData_genpop_aMO_k6_minus3, method = 1)
 genetic_dist_k6_minus3
 
 # Run the Mantel test
-mantel_result_k6_minus3 <- mantel.randtest(genetic_dist_k6_minus3, geo_dist, nrepet = 999)  # Use an appropriate number of permutations
+mantel_result_k6_minus3 <- mantel.randtest(genetic_dist_k6_minus3, geo_dist, nrepet = 9999)  # Use an appropriate number of permutations
 print(mantel_result_k6_minus3)  # View the full result
+
+# try with Laura Schürz's call (euclidean distance and Nei's genetic distance)
+mantel(genetic_dist_k6_minus3,geo_dist,method='pearson', permutations=9999)
 
 # Extract lower triangles of the distance matrices for comparison
 genetic_dist_vector_k6_minus3 <- as.vector(genetic_dist_k6_minus3)

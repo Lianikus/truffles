@@ -43,17 +43,17 @@ splitStrata(myData_genind_allMarkersOnly) <- ~Pop/Month/SamplingYear/TruffleYear
 
 Basic stats with hierfstat
 
-```{r basic stats with all data, message=FALSE, warning=FALSE}
+```{r basic stats with all data, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 basic.stats(myData_genind)
 ```
 ```{r basic stats with reduced dataset (no NAs), message=FALSE, warning=FALSE}
-basic.stats(myData_genind_allMarkersOnly)
+locus_table(myData_genind_allMarkersOnly)
+locus_table(myData_genind_aMO_k6_minus3)
 ```
 
 ```{r locus allele frequencies}
 allele_freq <- tab(myData_genind_allMarkersOnly, freq = TRUE)
 locus_freq <- colMeans(allele_freq)
-locus_freq
 
 # Convert to data frame for easier manipulation
 allele_freq_df <- as.data.frame(locus_freq)
@@ -63,7 +63,6 @@ allele_freq_df <- rownames_to_column(allele_freq_df, var = "Allele")
 allele_freq_df <- allele_freq_df %>%
   separate(Allele, into = c("Locus", "Allele"), sep = "\\.") %>%
   rename("Mean_Frequency" = "locus_freq")
-allele_freq_df
 
 # Calculate mean frequency per locus
 overall_mean_per_locus <- allele_freq_df %>%
@@ -73,7 +72,6 @@ overall_mean_per_locus <- allele_freq_df %>%
 # Combine individual allele frequencies with overall mean per locus
 final_table <- allele_freq_df %>%
   left_join(overall_mean_per_locus, by = "Locus")
-final_table
 
 ggplot(final_table, aes(x = Allele, y = Mean_Frequency, color = Locus)) +
   geom_point(size = 3) +
@@ -125,6 +123,7 @@ kable(poppr(myData_genind))
 setPop(myData_genind_allMarkersOnly) <- ~Pop
 kable(locus_table(myData_genind_allMarkersOnly))
 poppr_aMO <- as.tibble(poppr(myData_genind_allMarkersOnly))
+poppr_aMO
 
 #comparison with Virginie
 setPop(myData_genind_allMarkersOnly) <- ~Pop/SamplingYear
