@@ -33,19 +33,31 @@ library(RColorBrewer)
 library(patchwork)
 #library(FactoMineR)
 library(gghighlight)
+library(sf)
+library(ggspatial)
+library(rnaturalearth)
+library(ggrepel)
+library(envalysis)
+library(geosphere)
+library(adespatial)
+library(graph4lg)
 
 #---------------------------------------------------------------
 
-#read in genalex data, cleaning markers and creating clonecorrected dataset
+#read in genalex data, cleaning markers, genetic distance matrix and creating clonecorrected dataset
 
 T_all <- read_excel("Tuaest_Master_genMonit_haploid_MP_Mai2024.xlsx")
-myData <- read.genalex("Daten_Genalex.csv",genclone=TRUE, ploidy=1)
+GenDist_spagedi <- read_excel("Genetic_distance_FST_ANOVA_Spagedi.xlsx") %>%
+  column_to_rownames(var="...1")
+GenDist_RST_spagedi <- read_excel("Genetic_distance_Rst_Spagedi.xlsx") %>%
+  column_to_rownames(var="...1")
 myData_genind <- read.genalex("Daten_Genalex.csv",genclone=FALSE, ploidy=1)
 myData_genind_allMarkersOnly <- myData_genind %>%
   missingno("geno", cutoff = 0)
-splitStrata(myData) <- ~Pop/Month/SamplingYear/TruffleYear
+
 splitStrata(myData_genind) <- ~Pop/Month/SamplingYear/TruffleYear
 splitStrata(myData_genind_allMarkersOnly) <- ~Pop/Month/SamplingYear/TruffleYear
+myData_genind_allMarkersOnly@other$xy <- coords
 cc_myData_genind_allMarkersOnly <-clonecorrect(myData_genind_allMarkersOnly,strata=~Pop)
 
 #-----------------------------------------------------------------
@@ -108,10 +120,10 @@ color_palette_k5 <- c("1" = "#377EB8",
 
 color_palette_k6 <- c("1" = "#377EB8",
                    "2" = "#FF7F00",
-                   "3" = "#E41A1C",
-                   "4" = "mediumvioletred",
-                   "5" = "#4DAF4A",
-                   "6" = "orchid1",
+                   "3" = "#4DAF4A",
+                   "4" = "navy",
+                   "5" = "pink",
+                   "6" = "mediumvioletred",
                    "mixed" = "black")
 
 #------------------------------------------------------------------------
@@ -127,6 +139,52 @@ myData_genind_aMO_k6_minus3 <- popsub(myData_genind_aMO_k6,exclude="3")
 cc_myData_genind_aMO_k6_minus3 <- clonecorrect(myData_genind_aMO_k6_minus3)
 
 
+```
+## Karte & Koordinaten
+
+```{r Maps laden, echo=FALSE, warning=FALSE}
+europe <- ne_countries(scale="medium",returnclass="sf",continent="europe")
+europe_points <- st_centroid(europe)
+europe_points <- cbind(europe,st_coordinates(st_centroid(europe$geometry)))
+
+#emf(file="coordinates_truffle_sites.emf")
+ggplot(data = europe) +
+  geom_sf(fill = "lightgrey", color = "black") +
+  geom_text(data = europe_points, aes(x = X, y = Y, label = name),
+            color = "darkmagenta", fontface = "bold", size = 2.5, check_overlap = FALSE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  coord_sf(xlim = c(5, 11), ylim = c(45.5, 49), expand = FALSE) +
+  geom_point(data = coord, aes(x = LON, y = LAT),
+             shape = 21, color = "darkcyan", fill = "darkcyan", size = 1.5) +
+  geom_text_repel(data = coord, aes(x = LON, y = LAT, label = Site_1_abrev),
+                   color = "black",
+                   size = 2.5,
+                   box.padding = 0.2,
+                   point.padding = 0.4,
+                   segment.color = 'grey50',
+                   max.overlaps = Inf) +
+  labs(title = "Map of monitoring sites",
+       x = "",
+       y = "") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+#dev.off()
+```
+## Overview full dataset
+
+```{r all observations, echo=FALSE, message=FALSE, warning=FALSE}
+T_all$Sampling_date <- as_date(T_all$Sampling_date)
+T_all$Nb_Loci <- as.factor(T_all$Nb_Loci)
+T_all$Nb_Loci <- factor(T_all$Nb_Loci, ordered=TRUE, levels = c("10","11","12","13","14"))
+
+#emf(file="T_all.emf")
+ggplot(T_all, aes(x=Sampling_date, y= fct_rev(Site_1_abrev))) +
+  geom_point(aes(colour=factor(Nb_Loci))) +
+  theme_publish(base_family = "Times") +
+  scale_colour_brewer(palette= "Greens") +
+  scale_x_date(date_labels="%Y", date_breaks = "5 years") +
+  labs(title = "Overview of samples in truffle monitoring dataset", y = "Sampling site abbreviation", x ="Sampling date", colour="Number of loci")
+#dev.off()
 ```
 
 ## Locus based statistics
@@ -264,7 +322,6 @@ cc_pca_scores$individual <- rownames(cc_pca_scores)
 cc_pca_scores$Pop <- pop(cc_myData_genind_allMarkersOnly)
 
 # Create the PCA plot
-
 cc_pca_plot_1 <- ggplot(cc_pca_scores, aes(x = Axis1, y = Axis2, color=Pop)) +
   geom_point() +
   xlab(paste("PC1 (", round(cc_explained_variance[1], 2), "%)", sep = "")) +
@@ -280,7 +337,9 @@ cc_pca_plot_2 <- ggplot(cc_pca_scores, aes(x = Axis2, y = Axis3, color=Pop)) +
   theme_minimal()
 
 # Display the plot
+#emf(file="cc_pca_aMO.emf")
 print(cc_pca_plot_1 + cc_pca_plot_2)
+#dev.off()
 
 #show facet plots for more details per pop
 
@@ -795,7 +854,7 @@ cc_plot_k6_4 <- ggplot(cc_pca_scores6, aes(x = Axis2, y = Axis3, color = Cluster
 
 print(cc_plot_k6_3 + cc_plot_k6_4)
 
-cc_plot_k6_6 <- ggplot(pca_scores6, aes(x = Axis1, y = Axis2, color = Cluster)) +
+cc_plot_k6_5 <- ggplot(cc_pca_scores6, aes(x = Axis1, y = Axis2, color = Cluster)) +
   geom_point() +
   gghighlight::gghighlight() + 
   facet_wrap(vars(Cluster)) +
@@ -815,7 +874,7 @@ cc_plot_k6_6 <- ggplot(cc_pca_scores6, aes(x = Axis2, y = Axis3, color = Cluster
   theme_minimal() +
   scale_color_manual(values = color_palette_k6, name = "Cluster")
 
-print(cc_plot_k6_6 + cc_plot_k6_6)
+print(cc_plot_k6_5 + cc_plot_k6_6)
 ```
 
 ```{r pca with 6 clusters remove cluster 3}
@@ -989,6 +1048,13 @@ cc_plot_k6_minus3_6 <- ggplot(cc_pca_scores6_minus3, aes(x = Axis2, y = Axis3, c
 
 print(cc_plot_k6_minus3_5 + cc_plot_k6_minus3_6)
 ```
+## SPCA
+
+```{r spca}
+# https://adegenet.r-forge.r-project.org/files/tutorial-spca.pdf
+spca(myData_genind_allMarkersOnly)
+```
+
 ## Number of MLGS vs. Samples
 
 ```{r mlg sample}
@@ -1040,9 +1106,14 @@ title("Rarecurve of Pop  (without BOB)")
 
 ## FST Values
 ```{r fst values}
+Gst_Hedrick(myData_genind_allMarkersOnly)
+
+#https://www.rdocumentation.org/packages/hierfstat/versions/0.5-11/topics/pairwise.neifst
+
 setPop(myData_genind_allMarkersOnly) <- ~Pop
 pairwise.neiFst_aMO <- pairwise.neifst(myData_genind_allMarkersOnly, diploid=FALSE)
 pairwise.neiFst_aMO
+pairwise.Fst_aMO <- pegas::pairwise.fst(myData_genind_allMarkersOnly)
 
 #write.csv(pairwise.neiFst_aMO,"pairwise.neiFst_aMO.csv")
 
@@ -1052,10 +1123,16 @@ cc_pairwise.neiFst_aMO <- pairwise.neifst(cc_myData_genind_allMarkersOnly, diplo
 cc_pairwise.neiFst_aMO
 #write.csv(cc_pairwise.neiFst_aMO,"cc_pairwise.neiFst_aMO.csv")
 
+#-------------------------------------------------------------------------------------
+#https://www.rdocumentation.org/packages/graph4lg/versions/1.6.0/topics/mat_pw_fst
+
 truffles.matFst <- mat_pw_fst(myData_genind_allMarkersOnly)
+truffles.matFst
 #write.csv(truffles.matFst,"truffles.matFst_amO.csv")
 cc_truffles.matFst <- mat_pw_fst(myData_genind_allMarkersOnly)
 #write.csv(cc_truffles.matFst,"cc_truffles.matFst_amO.csv")
+
+#korreliere matFst & die zwei Matrizen um zu sehen ob signifikant, hohes R
 
 #k=5
 setPop(myData_genind_aMO_k5) <- ~cluster
@@ -1110,6 +1187,58 @@ allMarkers_amovacc <- poppr.amova(myData_genind_allMarkersOnly, ~Pop, clonecorre
 allMarkers_amovacc
 allMarkers_cluster_amova <- poppr.amova(myData_genind_withClusters, ~cluster)
 allMarkers_cluster_amova
+
+#-----------------------------------------------------------------------
+#try to get pairwise phipt
+
+# Extract unique populations from the genind object
+populations <- levels(pop(myData_genind_allMarkersOnly))
+
+# Initialize a list to store results
+pairwise_amova_results <- list()
+
+# Nested loops for pairwise comparisons
+for (i in 1:(length(populations) - 1)) {
+  for (j in (i + 1):length(populations)) {
+    
+    # Get the current pair of populations
+    pop1 <- populations[i]
+    pop2 <- populations[j]
+    
+    # Subset the genind object for the two populations
+    subset_genind <- myData_genind_allMarkersOnly[pop(myData_genind_allMarkersOnly) %in% c(pop1, pop2), ]
+    
+    # Run AMOVA on the subset
+    amova_result <- poppr.amova(subset_genind, ~Pop)
+    
+    # Extract PhiPT (or assign NA if AMOVA fails)
+    phipt <- tryCatch(
+      amova_result$components$Phi[["Among populations"]],
+      error = function(e) NA
+    )
+    
+    # Store results in the list
+    pairwise_amova_results[[paste(pop1, pop2, sep = "_vs_")]] <- list(
+      populations = c(pop1, pop2),
+      amova = amova_result,
+      phipt = phipt
+    )
+  }
+}
+
+# Summarize results in a data frame
+pairwise_phipt <- do.call(rbind, lapply(names(pairwise_amova_results), function(pair) {
+  data.frame(
+    Population_Pair = pair,
+    Pop1 = pairwise_amova_results[[pair]]$populations[1],
+    Pop2 = pairwise_amova_results[[pair]]$populations[2],
+    PhiPT = pairwise_amova_results[[pair]]$phipt
+  )
+}))
+
+# View the summarized results
+print(pairwise_phipt)
+
 ```
 
 ## Isolation by distance
@@ -1130,10 +1259,11 @@ colnames(coordsgeo_dist) <- coord$Site_1_abrev
 coordsgeo_dist[upper.tri(coordsgeo_dist)] <- t(coordsgeo_dist)[upper.tri(coordsgeo_dist)]
 
 # Calculate genetic distance using the genpop object
-genetic_dist <- dist.genpop(myData_genpop_allMarkersOnly, method = "euclidean")  # You can choose other methods if needed
+genetic_dist <- dist.genpop(myData_genpop_allMarkersOnly, method = "1")  # You can choose other methods if needed
 genetic_dist
 # try with Laura Schürz's call (euclidean distance and Nei's genetic distance)
 mantel(genetic_dist,coordsgeo_dist,method='pearson', permutations=9999)
+
 
 # Extract lower triangles of the distance matrices for comparison
 # Extract the lower triangles
@@ -1142,8 +1272,8 @@ lower_triangle_genetic <- genetic_dist[lower.tri(genetic_dist)]
 
 # Combine into a data frame
 distances_df <- data.frame(
-  Geographic_Distance = lower_triangle_geo,
-  Genetic_Distance = log(lower_triangle_genetic)
+  Geographic_Distance = log(lower_triangle_geo),
+  Genetic_Distance = lower_triangle_genetic
 )
 
 # Plot the relationship
@@ -1155,6 +1285,166 @@ ggplot(distances_df, aes(x = Geographic_Distance, y = Genetic_Distance)) +
        y = "Genetic Distance") +
   theme_minimal()
 
+#-----------------------------------------------------------------------
+#trying to find the mismatch between Genalex and R
+
+setPop(myData_genind_allMarkersOnly_) <- ~Pop
+myData_genpop_allMarkersOnly <- genind2genpop(myData_genind_allMarkersOnly)
+
+
+#creating log10(1+geodist) --- verified with Genalex Results
+
+coord_minusBAR <- coord[!grepl("BAR",coord$Site_1_abrev),]
+coords_minusBAR <- coord_minusBAR[, c("LON", "LAT")]
+
+coordsgeo_dist_minusBAR <- distm(coords_minusBAR, fun = distHaversine) /1000
+rownames(coordsgeo_dist_minusBAR) <- coord_minusBAR$Site_1_abrev
+colnames(coordsgeo_dist_minusBAR) <- coord_minusBAR$Site_1_abrev
+
+coordsgeo_dist_minusBAR[upper.tri(coordsgeo_dist_minusBAR)] <- t(coordsgeo_dist_minusBAR)[upper.tri(coordsgeo_dist_minusBAR)]
+log_plus_geodist <- log10(1+coordsgeo_dist_minusBAR)
+geo_sorted_rows <- log_plus_geodist[order(rownames(log_plus_geodist)),]
+log_plus_geodist <- geo_sorted_rows[,order(colnames(geo_sorted_rows))]
+
+#checking with PhiPT Genalex values
+
+PhiPT_Genalex <- read_excel("PhiPT.xlsx")
+PhiPT_Genalex <- PhiPT_Genalex %>%
+  column_to_rownames(var="...1")
+PhiPT_Genalex <- as.dist(PhiPT_Genalex)
+
+#recreating PhiPT from Genalex versus geographical distances from R
+mantel(PhiPT_Genalex,log_plus_geodist,permutations=999) #looks almost like in Genalex, okay!
+
+# Extract lower triangles of the distance matrices for comparison
+# Extract the lower triangles
+lower_triangle_geo_minusBAR <- log_plus_geodist[lower.tri(log_plus_geodist)]
+lower_triangle_geo_minusBAR #geographic coordinates without BAR, calculated in R, but correspond to Martina's values
+
+# Combine into a data frame
+cc_distances_df_logplus1 <- data.frame(
+  Geographic_Distance = lower_triangle_geo_minusBAR,
+  Genetic_Distance = PhiPT_Genalex
+)
+
+# Plot the relationship
+ggplot(cc_distances_df_logplus1, aes(x = Geographic_Distance, y = Genetic_Distance)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", color = "blue") +
+  labs(title = "Isolation by Distance",
+       x = "log10(1+Geographic Distance)",
+       y = "Genetic Distance Genalex PhiPT") +
+  theme_minimal()
+
+#-------------------------------------------------------------------------------------
+
+#creating genetic distance matrix with dist.genpop and method Nei =1
+setPop(myData_genind_allMarkersOnly_allButBAR) <- ~Pop
+cc_myData_genind_allMarkersOnly_allButBAR <- clonecorrect(myData_genind_allMarkersOnly_allButBAR, ~Pop)
+cc_myData_genpop_aMO_minusBar <- genind2genpop(cc_myData_genind_allMarkersOnly_allButBAR)
+cc_genetic_dist_minusBAR <- dist.genpop(cc_myData_genpop_aMO_minusBar, method="1")
+cc_genetic_dist_minusBAR <- as.matrix(cc_genetic_dist_minusBAR)
+mat_sorted_rows <- cc_genetic_dist_minusBAR[order(rownames(cc_genetic_dist_minusBAR)),] #ordering rows alphabetically in order to match the other matrices
+cc_genetic_dist_minusBAR <- mat_sorted_rows[,order(colnames(mat_sorted_rows))] #ordering column names alphabetically
+
+mantel(cc_genetic_dist_minusBAR, PhiPT_Genalex,permutations=9999) # correlates beautifully
+
+#plotting it:
+# Create a logical mask for the lower triangle (including diagonal)
+lower_triangle <- cc_genetic_dist_minusBAR[lower.tri(cc_genetic_dist_minusBAR, diag = TRUE)]
+# Create a matrix to hold only the lower triangle values (or NA for others)
+mat_lower <- cc_genetic_dist_minusBAR
+mat_lower[!lower.tri(mat_lower, diag = TRUE)] <- NA  # Replace upper triangle with NA
+
+vec_PhiGenalex <- as.vector(PhiPT_Genalex)
+cc_genetic_dist_minusBAR_lower <- cc_genetic_dist_minusBAR[lower.tri(cc_genetic_dist_minusBAR)]
+vec_neiGenetic <- as.vector(cc_genetic_dist_minusBAR_lower)
+cor_test <- cor.test(vec_PhiGenalex, vec_neiGenetic)
+
+# Extract the correlation coefficient and p-value
+correlation <- cor_test$estimate
+p_value <- cor_test$p.value
+
+plot(vec_PhiGenalex,vec_neiGenetic)
+text(x = max(vec_PhiGenalex) * 0.7, y = max(vec_neiGenetic) * 0.9, 
+     labels = paste("Correlation = ", round(correlation, 2), 
+                    "\nP-value = ", format(p_value, digits = 3)),
+     col = "red", cex = 1.2)
+
+#now calculate mantel test for Nei genetic distance
+
+mantel(cc_genetic_dist_minusBAR,log_plus_geodist,permutations=999) #not such a clear result as with PhiPT values
+cc_genetic_dist_minusBAR
+cc_distances_df_nei <- data.frame(
+  Geographic_Distance = lower_triangle_geo_minusBAR,
+  Genetic_Distance = cc_genetic_dist_minusBAR_lower
+)
+
+ggplot(cc_distances_df_nei, aes(x = Geographic_Distance, y = Genetic_Distance)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", color = "blue") +
+  labs(title = "Isolation by Distance",
+       x = "log10(1+Geographic Distance)",
+       y = "Genetic Distance Nei R") +
+  theme_minimal()
+
+#------------------------------------------------------------------------------------
+# working the same with FST values on cc dataset
+
+cc_truffles.matFst_minusBar <- mat_pw_fst(cc_myData_genind_allMarkersOnly_allButBAR)
+cc_truffles.matFst_minusBar <- as.matrix(cc_truffles.matFst_minusBar)
+matFst_sorted_rows <- cc_truffles.matFst_minusBar[order(rownames(cc_truffles.matFst_minusBar)),] #ordering rows alphabetically in order to match the other matrices
+cc_truffles.matFst_minusBar <- matFst_sorted_rows[,order(colnames(matFst_sorted_rows))] #ordering column names alphabetically
+
+#correlation between Fst and PhiPT values
+mantel(cc_truffles.matFst_minusBar,PhiPT_Genalex,permutations=9999) # okay
+
+cc_matFst_lower <- cc_truffles.matFst_minusBar[lower.tri(cc_truffles.matFst_minusBar)]
+vec_Fst <- as.vector(cc_matFst_lower)
+cor_test_Fst <- cor.test(vec_PhiGenalex, vec_Fst)
+
+# Extract the correlation coefficient and p-value
+correlation_Fst <- cor_test_Fst$estimate
+p_value_Fst <- cor_test_Fst$p.value
+
+plot(vec_PhiGenalex,vec_Fst)
+text(x = max(vec_PhiGenalex) * 0.7, y = max(vec_Fst) * 0.9, 
+     labels = paste("Correlation = ", round(correlation_Fst, 2), 
+                    "\nP-value = ", format(p_value_Fst, digits = 3)),
+     col = "red", cex = 1.2)
+
+#correlation between Nei distance and FST
+mantel(cc_genetic_dist_minusBAR,cc_truffles.matFst_minusBar,permutations=9999) #quite high!
+cor_test_Fst_Nei <- cor.test(vec_neiGenetic, vec_Fst)
+
+# Extract the correlation coefficient and p-value
+correlation_Fst_Nei <- cor_test_Fst_Nei$estimate
+p_value_Fst_Nei <- cor_test_Fst_Nei$p.value
+
+plot(vec_neiGenetic,vec_Fst)
+text(x = max(vec_neiGenetic) * 0.7, y = max(vec_Fst) * 0.9, 
+     labels = paste("Correlation = ", round(correlation_Fst_Nei, 2), 
+                    "\nP-value = ", format(p_value_Fst_Nei, digits = 3)),
+     col = "red", cex = 1.2)
+
+#missing piece: 
+# IBD with FST values
+
+mantel(cc_truffles.matFst_minusBar,log_plus_geodist,permutations=999) #not such a clear result as with PhiPT values
+
+cc_distances_df_Fst <- data.frame(
+  Geographic_Distance = lower_triangle_geo_minusBAR,
+  Genetic_Distance = cc_matFst_lower
+)
+
+ggplot(cc_distances_df_Fst, aes(x = Geographic_Distance, y = Genetic_Distance)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", color = "blue") +
+  labs(title = "Isolation by Distance",
+       x = "log10(1+Geographic Distance)",
+       y = "Genetic Distance Fst") +
+  theme_minimal()
+
 #--------------------------------------------------------------------------
 #without cluster 3
 
@@ -1162,7 +1452,7 @@ setPop(myData_genind_aMO_k6_minus3) <- ~Pop
 myData_genpop_aMO_k6_minus3 <- genind2genpop(myData_genind_aMO_k6_minus3)
 
 # Calculate genetic distance using the genpop object
-genetic_dist_minus3 <- dist.genpop(myData_genpop_aMO_k6_minus3, method = "euclidean")  # You can choose other methods if needed
+genetic_dist_minus3 <- dist.genpop(myData_genpop_aMO_k6_minus3, method = "1")  # You can choose other methods if needed
 genetic_dist_minus3
 # try with Laura Schürz's call (euclidean distance and Nei's genetic distance)
 mantel(genetic_dist,coordsgeo_dist,method='pearson', permutations=9999)
@@ -1174,8 +1464,8 @@ lower_triangle_genetic_minus3 <- genetic_dist_minus3[lower.tri(genetic_dist_minu
 
 # Combine into a data frame
 distances_df_minus3 <- data.frame(
-  Geographic_Distance = lower_triangle_geo,
-  Genetic_Distance = log(lower_triangle_genetic_minus3)
+  Geographic_Distance = log(lower_triangle_geo),
+  Genetic_Distance = lower_triangle_genetic_minus3
 )
 
 # Plot the relationship
@@ -1186,6 +1476,70 @@ ggplot(distances_df_minus3, aes(x = Geographic_Distance, y = Genetic_Distance)) 
        x = "log() Geographic Distance",
        y = "Genetic Distance") +
   theme_minimal()
+
+
+#------------------------------------------------------------------
+# try it with genetic distance coming from Spagedi Analysis
+
+mantel(GenDist_spagedi,coordsgeo_dist,method='pearson',permutations=9999)
+
+lower_triangle_genetic_spagedi <- GenDist_spagedi[lower.tri(GenDist_spagedi)]
+distances_df_spagedi <- data.frame(
+  Geographic_Distance = log(lower_triangle_geo),
+  Genetic_Distance_spagedi = lower_triangle_genetic_spagedi
+)
+
+# Plot the relationship
+ggplot(distances_df_spagedi, aes(x = Geographic_Distance, y = Genetic_Distance_spagedi)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", color = "blue") +
+  labs(title = "Isolation by Distance (Spagedi)",
+       x = "log() Geographic Distance",
+       y = "Genetic Distance Fst/(1-Fst)") +
+  theme_minimal()
+
+ggplotly(
+  p = ggplot2::last_plot(),
+  width = NULL,
+  height = NULL,
+  tooltip = "all",
+  dynamicTicks = FALSE,
+  layerData = 1,
+  originalData = TRUE,
+  source = "A"
+)
+
+#----------------------------------------------------------------
+#try also the RST matrix
+
+mantel(GenDist_RST_spagedi,coordsgeo_dist,method='pearson',permutations=9999)
+mantel(GenDist_RST_spagedi,coordsgeo_dist,method='spearman', permutations=9999)
+
+lower_triangle_genetic_rst_spagedi <- GenDist_RST_spagedi[lower.tri(GenDist_RST_spagedi)]
+distances_df_RST_spagedi <- data.frame(
+  Geographic_Distance = log(lower_triangle_geo),
+  Genetic_Distance_spagedi = lower_triangle_genetic_rst_spagedi
+)
+
+# Plot the relationship
+ggplot(distances_df_RST_spagedi, aes(x = Geographic_Distance, y = Genetic_Distance_spagedi)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", color = "blue") +
+  labs(title = "Isolation by Distance (Spagedi)",
+       x = "log() Geographic Distance",
+       y = "Genetic Distance Rst/(1-Rst)") +
+  theme_minimal()
+
+ggplotly(
+  p = ggplot2::last_plot(),
+  width = NULL,
+  height = NULL,
+  tooltip = "all",
+  dynamicTicks = FALSE,
+  layerData = 1,
+  originalData = TRUE,
+  source = "A"
+)
 
 ```
 
@@ -1263,7 +1617,8 @@ setPop(myData_genind_allMarkersOnly) <- ~Pop/SamplingYear
 locus_table_aMO_SY <- data.frame(t(
   sapply(seppop(myData_genind_allMarkersOnly),
     function(ls) poppr::locus_table(ls,lev="allele"))))
-
+write.csv(locus_table_aMO_SY,"check locustable.csv")
+summary(myData_genind_allMarkersOnly)
 # choose only the columns corresponding to Hexp values and rename them with their loci
 
 locus_table_aMO_hexp <- locus_table_aMO_SY %>%
@@ -1271,15 +1626,14 @@ locus_table_aMO_hexp <- locus_table_aMO_SY %>%
   dplyr::rename(aest06_1 = X31,aest07_1=X32, aest15_1=X33, aest26_1=X34,aest28_1=X35, aest35_1=X36, aest36_1=X37, aest01_1=X38, aest10_1=X39, aest18_1=X40, aest24_1=X41, aest25_1=X42, aest29_1=X43, aest31_1=X44, mean=X45) %>%
   tibble::rownames_to_column("Pop") %>%
   separate(.,Pop,sep="_", into=c("Pop","SamplingYear"))
+#write.csv(locus_table_aMO_hexp,"locus_table_aMO_hexp.csv")
                                       
 #check with one population:
 #locus_table(myData_genind_AllMarkersOnly, lev="genotype",population="UEB_2015")
 #looks good
 
-kable(locus_table_aMO_hexp)
 locus_table_SY_hexp_pivot <- pivot_longer(locus_table_aMO_hexp,cols=3:16,names_to="locus",values_to="value")
 
-library(devEMF)
 #emf(file= "allMarkersOnly_Pop_SY_hexp.emf") # Opens a device
 ggplot(locus_table_SY_hexp_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
@@ -1297,13 +1651,59 @@ ggplot(locus_table_SY_hexp_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
 n_samples_allMarkersOnly_SY <- poppr(myData_genind_allMarkersOnly) %>%
   separate(Pop, sep="_", into=c("Pop","SamplingYear"))
 
-n_samples_allMarkersOnly_SY %>%
+n_samples_allMarkersOnly_SY <- n_samples_allMarkersOnly_SY %>%
   select(Pop,SamplingYear,N) %>%
   pivot_wider(names_from=SamplingYear, values_from=N) %>%
   select(.,-"NA") %>%
-  replace(is.na(.),0) %>%
-  kable()
+  replace(is.na(.),0)
+#write.csv(n_samples_allMarkersOnly_SY,"n_samples_allMarkersOnly_SY.csv")
 
+
+#-------------------------------------------------------------------------
+# remove boundary effects: definition: less than  half of the sample size of neighboring year's sample size (only outside)
+setPop(myData_genind_allMarkersOnly) <- ~Pop/SamplingYear
+myData_genind_allMarkersOnly_Boundaries <- popsub(myData_genind_allMarkersOnly,exclude=c("ALD_2014","ALD_2015","BOB_2011,FRB_2014","FRI_2018","GEN_2018","HAN_2016","HAN_2019","KON_2013","NEU_2021","RIE_2015","SCD_2017","SCG_2013","SCG_2014","SCS_2017","UEB_2019","WSL_2012","WSL_2021","BAR_2014"))
+
+locus_table_aMO_SY_noEE <- data.frame(t(
+  sapply(seppop(myData_genind_allMarkersOnly_Boundaries),
+    function(ls) poppr::locus_table(ls,lev="allele"))))
+#write.csv(locus_table_aMO_SY,"check locustable.csv")
+
+# choose only the columns corresponding to Hexp values and rename them with their loci
+
+locus_table_aMO_hexp_noEE <- locus_table_aMO_SY_noEE %>%
+  select(X31:X45) %>%
+  dplyr::rename(aest06_1 = X31,aest07_1=X32, aest15_1=X33, aest26_1=X34,aest28_1=X35, aest35_1=X36, aest36_1=X37, aest01_1=X38, aest10_1=X39, aest18_1=X40, aest24_1=X41, aest25_1=X42, aest29_1=X43, aest31_1=X44, mean=X45) %>%
+  tibble::rownames_to_column("Pop") %>%
+  separate(.,Pop,sep="_", into=c("Pop","SamplingYear"))
+#write.csv(locus_table_aMO_hexp,"locus_table_aMO_hexp.csv")
+                                      
+#check with one population:
+#locus_table(myData_genind_AllMarkersOnly, lev="genotype",population="UEB_2015")
+#looks good
+
+locus_table_SY_hexp_noEE_pivot <- pivot_longer(locus_table_aMO_hexp_noEE,cols=3:16,names_to="locus",values_to="value")
+
+# Sample size list per population
+sample_sizes_noEE <- c("ALD" = 52, "BOB" = 423, "BOH" = 40, "BRU"=178, "BUR" = 223, "FRB"=12, "FRE" = 214, "FRI"=117, "GEN"=9,"HAN"=61, "KON"=209,"LIM"=216, "NEU"=30,"RIE"=58, "SCD"=97,  "SCG"=12,"SCL"=99,"SCS"=41,"TRO"=34,"UEB"=150,"UST"=35,"WSL"=278)
+
+# Modify facet labels to include sample sizes
+facet_labels_noEE <- paste(names(sample_sizes_noEE), "(n =", sample_sizes_noEE,")")
+names(facet_labels_noEE) <- names(sample_sizes_noEE)
+
+#emf(file= "allMarkersOnly_Pop_SY_hexp_nEE.emf") # Opens a device
+ggplot(locus_table_SY_hexp_noEE_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
+  geom_point(pch=20, alpha=0.3, size=0.8) +
+  geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
+  facet_wrap(vars(Pop), labeller = labeller(Pop = facet_labels_noEE)) +
+  labs(y="Nei's genetic diversity Hexp", x="Sampling year") +
+  ggtitle("Nei's genetic diversity per locus, Sampling year and Population", subtitle="Edge effects removed") +
+  theme(aspect.ratio=0.4,
+    strip.background = element_blank(),
+    strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
+    panel.grid = element_blank(),
+    panel.spacing=unit(0.1,"lines"))
+#dev.off()  # Close the device
 
 #--------------------------------------------------------------------------
 
@@ -1319,6 +1719,8 @@ cc_locus_table_aMO_SY <- data.frame(t(
   sapply(seppop(cc_myData_genind_allMarkersOnly),
     function(ls) poppr::locus_table(ls,lev="allele"))))
 
+#write.csv(cc_locus_table_aMO_SY,"check locustable cc.csv")
+
 # choose only the columns corresponding to Hexp values and rename them with their loci
 
 cc_locus_table_aMO_hexp <- cc_locus_table_aMO_SY %>%
@@ -1327,9 +1729,10 @@ cc_locus_table_aMO_hexp <- cc_locus_table_aMO_SY %>%
   tibble::rownames_to_column("Pop") %>%
   separate(.,Pop,sep="_", into=c("Pop","SamplingYear"))
 
+#write.csv(cc_locus_table_aMO_hexp,"cc_locus_table_aMO_hexp.csv")
+
 cc_locus_table_SY_hexp_pivot <- pivot_longer(cc_locus_table_aMO_hexp,cols=3:16,names_to="locus",values_to="value")
 
-library(devEMF)
 #emf(file= "allMarkersOnly_Pop_SY_hexp.emf") # Opens a device
 ggplot(cc_locus_table_SY_hexp_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
   geom_point(pch=20, alpha=0.3, size=0.8) +
@@ -1347,13 +1750,67 @@ ggplot(cc_locus_table_SY_hexp_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
 cc_n_samples_allMarkersOnly_SY <- poppr(cc_myData_genind_allMarkersOnly) %>%
   separate(Pop, sep="_", into=c("Pop","SamplingYear"))
 
-cc_n_samples_allMarkersOnly_SY %>%
+cc_n_samples_allMarkersOnly_SY <- cc_n_samples_allMarkersOnly_SY %>%
   select(Pop,SamplingYear,N) %>%
   pivot_wider(names_from=SamplingYear, values_from=N) %>%
   select(.,-"NA") %>%
-  replace(is.na(.),0) %>%
-  kable()
+  replace(is.na(.),0)
+#write.csv(cc_n_samples_allMarkersOnly_SY,"cc_n_samples_allMarkersOnly_SY.csv")
 
+#there's almost nothing to look at anymore on the level individual / MLG. Only look at two populations with big sample size / many MLGS
+
+# remove boundary effects: definition: less than  half of the sample size of neighboring year's sample size (only outside)
+setPop(cc_myData_genind_allMarkersOnly) <- ~Pop
+cc_myData_genind_allMarkersOnly_Boundaries <- popsub(cc_myData_genind_allMarkersOnly,c("BOB","KON"))
+                                                     
+setPop(cc_myData_genind_allMarkersOnly_Boundaries) <- ~Pop/SamplingYear
+cc_locus_table_aMO_SY_noEE <- data.frame(t(
+  sapply(seppop(cc_myData_genind_allMarkersOnly_Boundaries),
+    function(ls) poppr::locus_table(ls,lev="allele"))))
+#write.csv(locus_table_aMO_SY,"check locustable.csv")
+
+# choose only the columns corresponding to Hexp values and rename them with their loci
+
+cc_locus_table_aMO_hexp_noEE <- cc_locus_table_aMO_SY_noEE %>%
+  select(X31:X45) %>%
+  dplyr::rename(aest06_1 = X31,aest07_1=X32, aest15_1=X33, aest26_1=X34,aest28_1=X35, aest35_1=X36, aest36_1=X37, aest01_1=X38, aest10_1=X39, aest18_1=X40, aest24_1=X41, aest25_1=X42, aest29_1=X43, aest31_1=X44, mean=X45) %>%
+  tibble::rownames_to_column("Pop") %>%
+  separate(.,Pop,sep="_", into=c("Pop","SamplingYear"))
+#write.csv(locus_table_aMO_hexp,"locus_table_aMO_hexp.csv")
+
+cc_locus_table_SY_hexp_noEE_pivot <- pivot_longer(cc_locus_table_aMO_hexp_noEE,cols=3:16,names_to="locus",values_to="value")
+
+# Sample size list per population
+cc_sample_sizes_noEE <- c("BOB" = 115, "KON"=25)
+
+# Modify facet labels to include sample sizes
+cc_facet_labels_noEE <- paste(names(cc_sample_sizes_noEE), "(n =", cc_sample_sizes_noEE,")")
+names(cc_facet_labels_noEE) <- names(cc_sample_sizes_noEE)
+
+#emf(file= "cc_allMarkersOnly_Pop_SY_hexp_nEE.emf") # Opens a device
+ggplot(cc_locus_table_SY_hexp_noEE_pivot,aes(x=as.numeric(SamplingYear), y=value)) +
+  geom_point(pch=20, alpha=0.3, size=0.8) +
+  geom_smooth(method="gam", formula=y~s(x,k=2), colour="darkgreen", linewidth=0.6) +
+  facet_wrap(vars(Pop), labeller = labeller(Pop = cc_facet_labels_noEE)) +
+  labs(y="Nei's genetic diversity Hexp", x="Sampling year") +
+  ggtitle("Nei's genetic diversity per locus, Sampling year and Population", subtitle="Clone corrected dataset") +
+  theme(aspect.ratio=0.4,
+    strip.background = element_blank(),
+    strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
+    panel.grid = element_blank(),
+    panel.spacing=unit(0.1,"lines"))
+#dev.off()  # Close the device
 ```
 
 ## Perennial truffles
+
+```{r persistence}
+crosspop <- T_all_withMLGs_allMarkersOnly %>%
+  select(MLG,Site_1_abrev) %>%
+  group_by(MLG) %>%
+  filter(n_distinct(Site_1_abrev) > 1) %>% # Filter MLGs appearing in more than one population
+  summarize(Populations = toString(unique(Site_1_abrev))) # List all populations for each MLG
+
+write.csv(crosspop,"crosspop.csv")
+
+```

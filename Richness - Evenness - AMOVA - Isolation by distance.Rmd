@@ -167,6 +167,11 @@ shared_mlgs <- mlg_data %>%
   filter(n_pops > 1)
 print(shared_mlgs)
 
+setPop(myData_genind_allMarkersOnly) = ~Pop
+crosspop <- mlg.crosspop(myData_genind_allMarkersOnly, df=TRUE)
+
+write.csv(crosspop,"mlg.crosspop.csv")
+
 ```
 
 # Hardy-Weinberg equilibrium

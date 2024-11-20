@@ -28,7 +28,7 @@ library(poppr)
 library(treemap)
 library(pegas)
 library(adegenet)
-library(devtools)
+#library(devtools)
 library(hierfstat)
 library(mmod)
 library(scales)
@@ -245,6 +245,7 @@ summary(glm_model)
 persistence_bob <- ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "BOB"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
   labs(title ="distribution of MLGs in BOB (Bohlingen Buche) over the years") + scale_x_continuous(breaks=2010:2023)
 persistence_bob
+subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "BOB") %>% group_by(MLG,Sampling_year)
 ```
 ```{r emf, eval=FALSE, include=FALSE}
 emf(file="persistence_bob.emf")
@@ -328,10 +329,11 @@ ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "UEB"),aes(Sampli
   labs(title ="Distribution of MLGs in UEB over the years") + scale_x_continuous(breaks=2010:2023)
 ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "UST"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
   labs(title ="Distribution of MLGs in UST over the years") + scale_x_continuous(breaks=2010:2023)
-ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "WSL"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
-  labs(title ="Distribution of MLGs in WSL over the years") + scale_x_continuous(breaks=2010:2023)
+persistence_wsl <- ggplot(subset(T_all_withMLGs_allMarkersOnly, Site_1_abrev %in% "WSL"),aes(Sampling_year,MLG)) + geom_point() + geom_line(aes(group=MLG)) +
+  labs(title ="Distribution of MLGs in WSL over the years") + scale_x_continuous(breaks=2010:2024)
+persistence_wsl
 
-#emf(file="persistence_kon.emf")
-#persistence_kon
+#emf(file="persistence_wsl.emf")
+#persistence_wsl
 #dev.off()
 ```

@@ -21,7 +21,7 @@ library(poppr)
 library(treemap)
 library(pegas)
 library(adegenet)
-library(devtools)
+#library(devtools)
 library(hierfstat)
 library(mmod)
 library(diveRsity)
@@ -44,12 +44,12 @@ pops <- coord %>%
   select(1,3,4)
 colnames(pops) <- c("Site","Lat","Lon")
 
-color_palette_k6 <- c("#377EB8",
-                   "#FF7F00",
-                   "#E41A1C",
-                   "mediumvioletred",
-                   "#4DAF4A",
-                   "orchid1")
+color_palette_k6 <- c("Cluster 1" = "#377EB8",
+                   "Cluster 2" = "#FF7F00",
+                   "Cluster 3" = "#4DAF4A",
+                   "Cluster 4" = "navy",
+                   "Cluster 5" = "orchid1",
+                   "Cluster 6" = "mediumvioletred")
                    #"mixed" = "black")
 ```
 
@@ -57,6 +57,13 @@ color_palette_k6 <- c("#377EB8",
 # from https://github.com/Tom-Jenkins/mapmixture/blob/main/README.md
 map1 <- mapmixture(anc.mat,pops,crs=2056)
 map1
+
+color_palette_pies_k6 <- c("#377EB8",
+                   "#FF7F00",
+                   "#4DAF4A",
+                   "navy",
+                   "pink",
+                   "mediumvioletred")
 
 map2 <- mapmixture(
   admixture_df = anc.mat,
@@ -89,11 +96,11 @@ map2
 map3_ohneHannover <- mapmixture(
   admixture_df = anc.mat,
   coords_df = pops,
-  cluster_cols = color_palette_k6,
+  cluster_cols = color_palette_pies_k6,
   cluster_names = c("Cluster 1","Cluster 2","Cluster 3","Cluster 4", "Cluster 5","Cluster 6"),
   crs = 2056,
   basemap = rnaturalearthhires::countries10[, c("geometry")],
-  boundary = c(xmin=5.5, xmax=10.5, ymin=45, ymax=48.5),
+  boundary = c(xmin=5.5, xmax=10, ymin=45.5, ymax=48.5),
   pie_size = 0.3,
   pie_border = 0.3,
   pie_border_col = "white",
@@ -109,33 +116,51 @@ map3_ohneHannover <- mapmixture(
   scalebar_position = "tl",
   plot_title = "Ancestry Map",
   plot_title_size = 12,
-  axis_title_size = 10,
-  axis_text_size = 8
+  axis_text_size = 8,
+  theme(legend.position="")
 )
 map3_ohneHannover
 
 map4 <- mapmixture(
   admixture_df = anc.mat,
   coords_df = pops,
-  cluster_cols = color_palette_k6,
+  cluster_cols = color_palette_pies_k6,
   cluster_names = c("Cluster 1","Cluster 2","Cluster 3","Cluster 4", "Cluster 5","Cluster 6"),
   crs = 2056,
-  boundary = c(xmin=5.5, xmax=10.5, ymin=45, ymax=48.5),
+  boundary = c(xmin=5.5, xmax=10.5, ymin=45, ymax=53),
   pie_size = 0.3
 )+
   # Adjust theme options
   theme(
-    legend.position = "top",
+    legend.position = "right",
     plot.margin = margin(l = 10, r = 10),
   )+
   # Adjust the size of the legend keys
   guides(fill = guide_legend(override.aes = list(size = 5, alpha = 1)))
 
+map5 <- mapmixture(
+  admixture_df = anc.mat,
+  coords_df = pops,
+  cluster_cols = color_palette_pies_k6,
+  cluster_names = c("Cluster 1","Cluster 2","Cluster 3","Cluster 4", "Cluster 5","Cluster 6"),
+  crs = 2056,
+  boundary = c(xmin=5.5, xmax=7.8, ymin=45, ymax=47.5),
+  pie_size = 0.3
+)+
+  # Adjust theme options
+  theme(
+    legend.position = "",
+    plot.margin = margin(l = 10, r = 10),
+  )+
+  # Adjust the size of the legend keys
+  guides(fill = guide_legend(override.aes = list(size = 5, alpha = 1)))
+map5
+
 # Traditional structure barplot
 structure_barplot <- structure_plot(
   admixture_df = anc.mat,
   type = "structure",
-  cluster_cols = color_palette_k6,
+  cluster_cols = color_palette_pies_k6,
   site_dividers = TRUE,
   site_order=NULL,
   display_site_labels=TRUE,
@@ -157,7 +182,7 @@ structure_barplot
 
 facet_barplot <- structure_plot(anc.mat,
   type = "facet",
-  cluster_cols = color_palette_k6,
+  cluster_cols = color_palette_pies_k6,
   facet_col = 2,
   ylabel = "Ancestry proportions",
 )+
@@ -170,7 +195,8 @@ facet_barplot <- structure_plot(anc.mat,
 # Arrange plots
 grid.arrange(map4, structure_barplot, nrow = 2, heights = c(4,1))
 
-grid.arrange(map4, facet_barplot, ncol = 2, widths = c(3,2))
+grid.arrange(map3_ohneHannover, facet_barplot, ncol = 2, widths = c(3,2))
+map4
 
 ggplotly(
   p = ggplot2::last_plot(),
