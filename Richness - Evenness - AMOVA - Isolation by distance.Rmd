@@ -584,6 +584,26 @@ aest24_1  <- tab(temp[["aest24_1"]]) #allele 295 & 301
 aest10_1  <- tab(temp[["aest10_1"]]) #allele 280
 aest28_1  <- tab(temp[["aest28_1"]])
 aest36_1  <- tab(temp[["aest36_1"]])
+aest07_1  <- tab(temp[["aest07_1"]])
+aest15_1  <- tab(temp[["aest15_1"]])
+aest35_1  <- tab(temp[["aest35_1"]])
+aest01_1  <- tab(temp[["aest01_1"]])
+aest18_1  <- tab(temp[["aest18_1"]])
+aest25_1  <- tab(temp[["aest25_1"]])
+
+#find private alleles
+setPop(myData_genind_aMO_k6) <- ~cluster
+(freq29 <- apply(aest29_1, 2, function(e) tapply(e, pop(myData_genind_aMO_k6), mean, na.rm = TRUE)))
+(freq06 <- apply(aest06_1, 2, function(e) tapply(e, pop(myData_genind_aMO_k6), mean, na.rm = TRUE)))
+(freq07 <- apply(aest07_1, 2, function(e) tapply(e, pop(myData_genind_aMO_k6), mean, na.rm = TRUE)))
+(freq15 <- apply(aest15_1, 2, function(e) tapply(e, pop(myData_genind_aMO_k6), mean, na.rm = TRUE)))
+(freq35 <- apply(aest35_1, 2, function(e) tapply(e, pop(myData_genind_aMO_k6), mean, na.rm = TRUE)))
+(freq36 <- apply(aest36_1, 2, function(e) tapply(e, pop(myData_genind_aMO_k6), mean, na.rm = TRUE)))
+(freq01 <- apply(aest01_1, 2, function(e) tapply(e, pop(myData_genind_aMO_k6), mean, na.rm = TRUE)))
+(freq10 <- apply(aest10_1, 2, function(e) tapply(e, pop(myData_genind_aMO_k6), mean, na.rm = TRUE)))
+(freq18 <- apply(aest18_1, 2, function(e) tapply(e, pop(myData_genind_aMO_k6), mean, na.rm = TRUE)))
+(freq24 <- apply(aest24_1, 2, function(e) tapply(e, pop(myData_genind_aMO_k6), mean, na.rm = TRUE)))
+(freq25 <- apply(aest25_1, 2, function(e) tapply(e, pop(myData_genind_aMO_k6), mean, na.rm = TRUE)))
 
 # The following two commands find the average allele frequencies per population
 setPop(myData_genind_allMarkersOnly) <- ~Pop
@@ -591,6 +611,9 @@ setPop(myData_genind_allMarkersOnly) <- ~Pop
 
 setPop(myData_genind_allMarkersOnly) <- ~SamplingYear
 (freq29 <- apply(aest29_1, 2, function(e) tapply(e, pop(myData_genind_allMarkersOnly), mean, na.rm = TRUE)))
+
+
+library(reshape)
 
 df_29 <- melt(freq29)
 names(df_29)[1] <- "SamplingYear"

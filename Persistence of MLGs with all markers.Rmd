@@ -139,6 +139,28 @@ year_mean_k6 <- year_count_k6 %>%
   summarize(mean = mean(years_found))
 year_mean_k6
 
+min_max_year_found <- T_all_withMLGs_withClusters_allMarkersOnly %>%
+  group_by(MLG) %>%
+  mutate(First_appearance=min(Sampling_year), Last_appearance=max(Sampling_year)) %>%
+  mutate(span=(Last_appearance-First_appearance)+1) %>%
+  distinct(MLG, span) %>%
+  select(MLG,span)
+mean(min_max_year_found$span)
+
+span_categories <- min_max_year_found %>%
+  mutate(Category = case_when(
+    span == 1 ~ "Found once",
+    span > 5 ~ "More than five years",
+    span >= 2 & span <= 5 ~ "Between 2-5 years"
+  ))
+span_categories
+
+span_proportions <- span_categories %>%
+  group_by(Category) %>%
+  count(Category) %>%
+  mutate(proportion=n/sum(n))
+span_proportions
+
 # Find the maximum number of years any MLG has been found
 max_years <- max(year_count_k6$years_found)
 # Filter the data to include only MLGs found for the maximum number of years

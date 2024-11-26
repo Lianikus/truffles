@@ -41,6 +41,7 @@ library(envalysis)
 library(geosphere)
 library(adespatial)
 library(graph4lg)
+library(mapmixture)
 
 #---------------------------------------------------------------
 
@@ -79,6 +80,9 @@ T_all_withMLGs_allMarkersOnly <- inner_join(T_all,cc_FullTable_Tuaest_allMarkers
   select(Code, MLG, Site_1_abrev, truffle_year, Sampling_year,Sampling_date)
 T_all_withMLGs_withClusters_k5_allMarkersOnly <- left_join(T_all_withMLGs_allMarkersOnly,clustersk5,by=c("MLG"="MLG_ID")) %>% distinct(Code, .keep_all=TRUE) %>%select(-"IndID2")
 
+Structure_ClusterAssignMLGs_k5 <- read_excel("Structure_ClusterAssignMLGs_k5_forPies.xlsx")
+Structure_ClusterAssignMLGs_k6 <- read_excel("Structure_ClusterAssignMLGs.xlsx")
+
 #write.csv(T_all_withMLGs_withClusters_k5_allMarkersOnly,file="T_all_withMLGs_withClusters_k5_allMarkersOnly.csv", sep=";")
 myData_genind_withClusters_k5 <- read.genalex("DatenGenalex_withClusters_k5_aMO.csv",genclone=FALSE,ploidy=1)
 myData_genind_aMO_k5 <- myData_genind_withClusters_k5 %>%
@@ -113,17 +117,17 @@ cc_myData_genind_aMO_k6 <- clonecorrect(myData_genind_aMO_k6,strata=~Pop)
 
 color_palette_k5 <- c("1" = "#377EB8",
                    "2" = "#FF7F00",
-                   "3" = "#E41A1C",
-                   "4" = "mediumvioletred",
-                   "5" = "#4DAF4A",
+                   "3" = "navy",
+                   "4" = "#4DAF4A",
+                   "5" = "mediumvioletred",
                    "mixed" = "black")
 
 color_palette_k6 <- c("1" = "#377EB8",
                    "2" = "#FF7F00",
-                   "3" = "#4DAF4A",
-                   "4" = "navy",
-                   "5" = "pink",
-                   "6" = "mediumvioletred",
+                   "3" = "navy",
+                   "4" = "#4DAF4A",
+                   "5" = "mediumvioletred",
+                   "6" = "pink",
                    "mixed" = "black")
 
 #------------------------------------------------------------------------
@@ -459,6 +463,7 @@ barplot(cc_explained_variance_k5, main = "Explained Variance per PCA Axis", xlab
 
 cc_pca_scores5 <- as.data.frame(cc_pca_result_k5$li)
 cc_pca_scores5$Cluster <- pop(cc_myData_genind_aMO_k5)
+cc_pca_scores5$Cluster <- factor(cc_pca_scores5$Cluster,levels=c("1","2","3","4","5","mixed"))
 cc_pca_scores5$individual <- rownames(cc_pca_scores5)
 cc_pca_scores5
 mlg_test <- left_join(cc_pca_scores5,T_all_withMLGs_withClusters_k5_allMarkersOnly,by=c("individual"="Code")) %>%
@@ -470,25 +475,28 @@ cc_pca_scores5$Pop <- pop(cc_myData_genind_aMO_k5)
 
 cc_plot_k5_1 <- ggplot(cc_pca_scores5, aes(x = Axis1, y = Axis2, color=Cluster)) +
   geom_point() +
-  geom_text(aes(label = MLG), vjust = -0.5, hjust = 0.5, size = 3) +
+  #geom_text(aes(label = MLG), vjust = -0.5, hjust = 0.5, size = 3) +
   xlab(paste("PC1 (", round(cc_explained_variance_k5[1], 2), "%)", sep = "")) +
   ylab(paste("PC2 (", round(cc_explained_variance_k5[2], 2), "%)", sep = "")) +
   ggtitle("PCA of dataset with 14 markers, clone corrected") +
-  theme_minimal() +
-  scale_color_manual(values = color_palette_k5, name = "Cluster") +
-  theme(legend.position = "none")
+  theme_publish() +
+  theme(aspect.ratio=1) +
+  scale_color_manual(values = color_palette_k5, name = "Cluster")
 
 cc_plot_k5_2 <- ggplot(cc_pca_scores5, aes(x = Axis2, y = Axis3, color=Cluster)) +
   geom_point() +
-  geom_text(aes(label = MLG), vjust = -0.5, hjust = 0.5, size = 3) +
+  #geom_text(aes(label = MLG), vjust = -0.5, hjust = 0.5, size = 3) +
   xlab(paste("PC2 (", round(cc_explained_variance_k5[2], 2), "%)", sep = "")) +
   ylab(paste("PC3 (", round(cc_explained_variance_k5[3], 2), "%)", sep = "")) +
-  theme_minimal() +
-  scale_color_manual(values = color_palette_k5, name = "Cluster")
+  theme_publish() +
+  scale_color_manual(values = color_palette_k5, name = "Cluster") +
+    theme(aspect.ratio=1) +
+  theme(legend.position = "none")
 
 # Display the plot
 print(cc_plot_k5_1 + cc_plot_k5_2)
-
+PCA_k5_colored <- cc_plot_k5_1 + cc_plot_k5_2
+ggsave("PCA_k5_colored.emf",width=10, height=4, device = {function(filename, ...) devEMF::emf(file = filename)})
 
 cc_plot_k5_3 <- ggplot(cc_pca_scores5, aes(x = Axis1, y = Axis2, color = Cluster)) +
   geom_point() +
@@ -718,7 +726,7 @@ barplot(explained_variance_k6, main = "Explained Variance per PCA Axis", xlab = 
 pca_scores6 <- as.data.frame(pca_result_k6$li)
 pca_scores6$Cluster <- pop(myData_genind_aMO_k6)
 pca_scores6$individual <- rownames(pca_scores6)
-pca_scores6
+pca_scores6$Cluster <- factor(pca_scores6$Cluster,levels=c("1","2","3","4","5","6","mixed"))
 
 setPop(myData_genind_aMO_k6) <- ~Pop
 pca_scores6$Pop <- pop(myData_genind_aMO_k6)
@@ -728,20 +736,21 @@ plot_k6_1 <- ggplot(pca_scores6, aes(x = Axis1, y = Axis2, color=Cluster)) +
   xlab(paste("PC1 (", round(explained_variance_k6[1], 2), "%)", sep = "")) +
   ylab(paste("PC2 (", round(explained_variance_k6[2], 2), "%)", sep = "")) +
   ggtitle("PCA of dataset with 14 markers, uncorrected") +
-  theme_minimal() +
-  scale_color_manual(values = color_palette_k6, name = "Cluster") +
-  theme(legend.position = "none")
+  theme_publish() +
+  theme(aspect.ratio=1) +
+  scale_color_manual(values = color_palette_k6, name = "Cluster")
 
 plot_k6_2 <- ggplot(pca_scores6, aes(x = Axis2, y = Axis3, color=Cluster)) +
   geom_point() +
   xlab(paste("PC2 (", round(explained_variance_k6[2], 2), "%)", sep = "")) +
   ylab(paste("PC3 (", round(explained_variance_k6[3], 2), "%)", sep = "")) +
-  theme_minimal() +
-  scale_color_manual(values = color_palette_k6, name = "Cluster")
+  theme_publish() +
+  theme(aspect.ratio=1) +
+  scale_color_manual(values = color_palette_k6, name = "Cluster") +
+  theme(legend.position = "none")
 
 # Display the plot
 print(plot_k6_1 + plot_k6_2)
-
 
 plot_k6_3 <- ggplot(pca_scores6, aes(x = Axis1, y = Axis2, color = Cluster)) +
   geom_point() +
@@ -801,6 +810,7 @@ barplot(cc_explained_variance_k6, main = "Explained Variance per PCA Axis", xlab
 
 cc_pca_scores6 <- as.data.frame(cc_pca_result_k6$li)
 cc_pca_scores6$Cluster <- pop(cc_myData_genind_aMO_k6)
+cc_pca_scores6$Cluster <- factor(cc_pca_scores6$Cluster, levels = c("1","2","3","4","5","6","mixed"))
 cc_pca_scores6$individual <- rownames(cc_pca_scores6)
 cc_pca_scores6
 mlg_test <- left_join(cc_pca_scores6,T_all_withMLGs_withClusters_allMarkersOnly,by=c("individual"="Code")) %>%
@@ -812,26 +822,28 @@ cc_pca_scores6$Pop <- pop(cc_myData_genind_aMO_k6)
 
 cc_plot_k6_1 <- ggplot(cc_pca_scores6, aes(x = Axis1, y = Axis2, color=Cluster)) +
   geom_point() +
-  geom_text(aes(label = MLG), vjust = -0.5, hjust = 0.5, size = 3) +
+  #geom_text(aes(label = MLG), vjust = -0.5, hjust = 0.5, size = 3) +
   xlab(paste("PC1 (", round(cc_explained_variance_k6[1], 2), "%)", sep = "")) +
   ylab(paste("PC2 (", round(cc_explained_variance_k6[2], 2), "%)", sep = "")) +
   ggtitle("PCA of dataset with 14 markers, clone corrected") +
-  theme_minimal() +
-  scale_color_manual(values = color_palette_k6, name = "Cluster") +
-  theme(legend.position = "none")
+  theme_publish() +
+  theme(aspect.ratio = 1)+
+  scale_color_manual(values = color_palette_k6, name = "Cluster")
 
 cc_plot_k6_2 <- ggplot(cc_pca_scores6, aes(x = Axis2, y = Axis3, color=Cluster)) +
   geom_point() +
-  geom_text(aes(label = MLG), vjust = -0.5, hjust = 0.5, size = 3) +
+  #geom_text(aes(label = MLG), vjust = -0.5, hjust = 0.5, size = 3) +
   xlab(paste("PC2 (", round(cc_explained_variance_k6[2], 2), "%)", sep = "")) +
   ylab(paste("PC3 (", round(cc_explained_variance_k6[3], 2), "%)", sep = "")) +
-  theme_minimal() +
-  scale_color_manual(values = color_palette_k6, name = "Cluster")
+  theme_publish() +
+  theme(aspect.ratio = 1)+
+  scale_color_manual(values = color_palette_k6, name = "Cluster") +
+  theme(legend.position = "none")
 
 # Display the plot
 print(cc_plot_k6_1 + cc_plot_k6_2)
-
-
+PCA_k6_colored <- cc_plot_k6_1 + cc_plot_k6_2
+ggsave("PCA_k6_colored.emf",width=10, height=4, device = {function(filename, ...) devEMF::emf(file = filename)})
 cc_plot_k6_3 <- ggplot(cc_pca_scores6, aes(x = Axis1, y = Axis2, color = Cluster)) +
   geom_point() +
   gghighlight::gghighlight() + 
@@ -1055,6 +1067,164 @@ print(cc_plot_k6_minus3_5 + cc_plot_k6_minus3_6)
 spca(myData_genind_allMarkersOnly)
 ```
 
+## Piecharts
+
+```{r piecharts}
+pops <- coord %>%
+  select(1,3,4)
+colnames(pops) <- c("Site","Lat","Lon")
+
+anc.mat_k5 <- Structure_ClusterAssignMLGs_k5 %>%
+  select(7,6,1:5) %>%
+  data.frame()
+colnames(anc.mat_k5) <-c("Site","Ind","Cluster 1","Cluster 2","Cluster 3","Cluster 4","Cluster 5")
+
+anc.mat_k5_withoutlocprior <- Structure_ClusterAssignMLGs_k5 %>%
+  select(7,6,8:12) %>%
+  data.frame()
+colnames(anc.mat_k5_withoutlocprior) <-c("Site","Ind","Cluster 1","Cluster 2","Cluster 3","Cluster 4","Cluster 5")
+
+color_palette_pies_k5 <- c("#377EB8",
+                   "#FF7F00",
+                   "navy",
+                   "#4DAF4A",
+                   "mediumvioletred")
+
+(map_k5 <- mapmixture(
+  admixture_df = anc.mat_k5,
+  coords_df = pops,
+  cluster_cols = color_palette_pies_k5,
+  cluster_names = c("Cluster 1","Cluster 2","Cluster 3","Cluster 4", "Cluster 5"),
+  crs = 2056,
+  basemap = rnaturalearthhires::countries10[, c("geometry")],
+  boundary = c(xmin=5.5, xmax=10.5, ymin=45, ymax=53),
+  pie_size = 0.3,
+  pie_border = 0.3,
+  pie_border_col = "white",
+  pie_opacity = 1,
+  land_colour = "#d9d9d9",
+  sea_colour = "#deebf7",
+  expand = TRUE,
+  arrow = TRUE,
+  arrow_size = 1.5,
+  arrow_position = "bl",
+  scalebar = TRUE,
+  scalebar_size = 1.5,
+  scalebar_position = "tl",
+  plot_title = "Ancestry Map",
+  plot_title_size = 12,
+  axis_title_size = 10,
+  axis_text_size = 8
+))
+
+ggsave("map_k5.emf",width=10, height=4, device = {function(filename, ...) devEMF::emf(file = filename)})
+
+(map_k5_withoutLocPrior <- mapmixture(
+  admixture_df = anc.mat_k5_withoutlocprior,
+  coords_df = pops,
+  cluster_cols = color_palette_pies_k5,
+  cluster_names = c("Cluster 1","Cluster 2","Cluster 3","Cluster 4", "Cluster 5"),
+  crs = 2056,
+  basemap = rnaturalearthhires::countries10[, c("geometry")],
+  boundary = c(xmin=5.5, xmax=10.5, ymin=45, ymax=53),
+  pie_size = 0.3,
+  pie_border = 0.3,
+  pie_border_col = "white",
+  pie_opacity = 1,
+  land_colour = "#d9d9d9",
+  sea_colour = "#deebf7",
+  expand = TRUE,
+  arrow = TRUE,
+  arrow_size = 1.5,
+  arrow_position = "bl",
+  scalebar = TRUE,
+  scalebar_size = 1.5,
+  scalebar_position = "tl",
+  plot_title = "Ancestry Map",
+  plot_title_size = 12,
+  axis_title_size = 10,
+  axis_text_size = 8
+))
+ggsave("map_k5_withoutLocPrior.emf",width=10, height=4, device = {function(filename, ...) devEMF::emf(file = filename)})
+
+#----------------------------------------------------------
+
+anc.mat_k6 <- Structure_ClusterAssignMLGs_k6 %>%
+select(4,12,5:10) %>%
+  data.frame()
+colnames(anc.mat_k6) <-c("Site","Ind","Cluster 1","Cluster 2","Cluster 3","Cluster 4","Cluster 5","Cluster 6")
+
+anc.mat_k6_withLocPrior <- Structure_ClusterAssignMLGs_k6 %>%
+select(4,12,29:34) %>%
+  data.frame()
+colnames(anc.mat_k6_withLocPrior) <-c("Site","Ind","Cluster 1","Cluster 2","Cluster 3","Cluster 4","Cluster 5","Cluster 6")
+
+color_palette_pies_k6 <- c("#377EB8",
+                   "#FF7F00",
+                   "navy",
+                   "#4DAF4A",
+                   "mediumvioletred",
+                   "pink")
+
+(map_k6 <- mapmixture(
+  admixture_df = anc.mat_k6,
+  coords_df = pops,
+  cluster_cols = color_palette_pies_k6,
+  cluster_names = c("Cluster 1","Cluster 2","Cluster 3","Cluster 4", "Cluster 5","Cluster 6"),
+  crs = 2056,
+  basemap = rnaturalearthhires::countries10[, c("geometry")],
+  boundary = c(xmin=5.5, xmax=10.5, ymin=45, ymax=53),
+  pie_size = 0.3,
+  pie_border = 0.3,
+  pie_border_col = "white",
+  pie_opacity = 1,
+  land_colour = "#d9d9d9",
+  sea_colour = "#deebf7",
+  expand = TRUE,
+  arrow = TRUE,
+  arrow_size = 1.5,
+  arrow_position = "bl",
+  scalebar = TRUE,
+  scalebar_size = 1.5,
+  scalebar_position = "tl",
+  plot_title = "Ancestry Map",
+  plot_title_size = 12,
+  axis_title_size = 10,
+  axis_text_size = 8
+))
+
+ggsave("map_k6.emf",width=10, height=4, device = {function(filename, ...) devEMF::emf(file = filename)})
+
+(map_k6_withLocPrior <- mapmixture(
+  admixture_df = anc.mat_k6_withLocPrior,
+  coords_df = pops,
+  cluster_cols = color_palette_pies_k6,
+  cluster_names = c("Cluster 1","Cluster 2","Cluster 3","Cluster 4", "Cluster 5","Cluster 6"),
+  crs = 2056,
+  basemap = rnaturalearthhires::countries10[, c("geometry")],
+  boundary = c(xmin=5.5, xmax=10.5, ymin=45, ymax=53),
+  pie_size = 0.3,
+  pie_border = 0.3,
+  pie_border_col = "white",
+  pie_opacity = 1,
+  land_colour = "#d9d9d9",
+  sea_colour = "#deebf7",
+  expand = TRUE,
+  arrow = TRUE,
+  arrow_size = 1.5,
+  arrow_position = "bl",
+  scalebar = TRUE,
+  scalebar_size = 1.5,
+  scalebar_position = "tl",
+  plot_title = "Ancestry Map",
+  plot_title_size = 12,
+  axis_title_size = 10,
+  axis_text_size = 8
+))
+
+ggsave("map_k6_withLocPrior.emf",width=10, height=4, device = {function(filename, ...) devEMF::emf(file = filename)})
+```
+
 ## Number of MLGS vs. Samples
 
 ```{r mlg sample}
@@ -1080,6 +1250,22 @@ n_samples_allMarkersOnly %>%
     strip.text=element_text(size=7,hjust=0.1, vjust=0.5),
     panel.grid = element_blank(),
     panel.spacing=unit(0.1,"lines"))
+
+#-----------------------------------------------------------------------------
+# Table for thesis with Pop, #samples, #Genotypes, #genotypic diversity, # Simpson's
+
+setPop(myData_genind_allMarkersOnly) <- ~Pop
+table1
+table1 <- poppr(myData_genind_allMarkersOnly)
+table1 <- table1 %>%
+  select(Pop,N,MLG) %>%
+  mutate("Genotypic diversity" = ((MLG-1)/(N-1))) %>%
+  arrange(Pop)
+table1
+  
+diversity_ci(myData_genind_allMarkersOnly, n = 100L, raw = FALSE, H=FALSE, G=FALSE)
+tab <- mlg.table(myData_genind_allMarkersOnly)
+diversity_ci(tab,n=100L, raw = FALSE, H=FALSE, G=FALSE)
 ```
 
 ## Rarecurves
@@ -1168,6 +1354,40 @@ ggplot(fst_k6_long, aes(x = variable, y = Fst, fill=variable)) +
        y = "Fst Value") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
+```
+
+## Private alleles
+
+```{r private alleles}
+setPop(myData_genind_aMO_k6) <- ~Pop
+
+temp    <- seploc(myData_genind_allMarkersOnly)       # seploc {adegenet} creates a list of individual loci.
+aest29_1  <- tab(temp[["aest29_1"]])
+aest06_1  <- tab(temp[["aest06_1"]]) #allele 217
+aest24_1  <- tab(temp[["aest24_1"]]) #allele 295 & 301
+aest10_1  <- tab(temp[["aest10_1"]]) #allele 280
+aest28_1  <- tab(temp[["aest28_1"]])
+aest36_1  <- tab(temp[["aest36_1"]])
+aest07_1  <- tab(temp[["aest07_1"]])
+aest15_1  <- tab(temp[["aest15_1"]])
+aest35_1  <- tab(temp[["aest35_1"]])
+aest01_1  <- tab(temp[["aest01_1"]])
+aest18_1  <- tab(temp[["aest18_1"]])
+aest25_1  <- tab(temp[["aest25_1"]])
+
+#find private alleles
+setPop(myData_genind_aMO_k6) <- ~cluster
+(freq29 <- apply(aest29_1, 2, function(e) tapply(e, pop(myData_genind_aMO_k6), mean, na.rm = TRUE)))
+(freq06 <- apply(aest06_1, 2, function(e) tapply(e, pop(myData_genind_aMO_k6), mean, na.rm = TRUE)))
+(freq07 <- apply(aest07_1, 2, function(e) tapply(e, pop(myData_genind_aMO_k6), mean, na.rm = TRUE)))
+(freq15 <- apply(aest15_1, 2, function(e) tapply(e, pop(myData_genind_aMO_k6), mean, na.rm = TRUE)))
+(freq35 <- apply(aest35_1, 2, function(e) tapply(e, pop(myData_genind_aMO_k6), mean, na.rm = TRUE)))
+(freq36 <- apply(aest36_1, 2, function(e) tapply(e, pop(myData_genind_aMO_k6), mean, na.rm = TRUE)))
+(freq01 <- apply(aest01_1, 2, function(e) tapply(e, pop(myData_genind_aMO_k6), mean, na.rm = TRUE)))
+(freq10 <- apply(aest10_1, 2, function(e) tapply(e, pop(myData_genind_aMO_k6), mean, na.rm = TRUE)))
+(freq18 <- apply(aest18_1, 2, function(e) tapply(e, pop(myData_genind_aMO_k6), mean, na.rm = TRUE)))
+(freq24 <- apply(aest24_1, 2, function(e) tapply(e, pop(myData_genind_aMO_k6), mean, na.rm = TRUE)))
+(freq25 <- apply(aest25_1, 2, function(e) tapply(e, pop(myData_genind_aMO_k6), mean, na.rm = TRUE)))
 ```
 
 ## AMOVA
@@ -1314,7 +1534,11 @@ PhiPT_Genalex <- PhiPT_Genalex %>%
 PhiPT_Genalex <- as.dist(PhiPT_Genalex)
 
 #recreating PhiPT from Genalex versus geographical distances from R
-mantel(PhiPT_Genalex,log_plus_geodist,permutations=999) #looks almost like in Genalex, okay!
+mantel_result_phipt <- mantel(PhiPT_Genalex,log_plus_geodist,permutations=999) #looks almost like in Genalex, okay!
+mantel_result_phipt
+mantel_r <- round(mantel_result_phipt$statistic, 3)  # Mantel R statistic
+mantel_p <- mantel_result_phipt$signif # p-value
+
 
 # Extract lower triangles of the distance matrices for comparison
 # Extract the lower triangles
@@ -1333,8 +1557,13 @@ ggplot(cc_distances_df_logplus1, aes(x = Geographic_Distance, y = Genetic_Distan
   geom_smooth(method = "lm", color = "blue") +
   labs(title = "Isolation by Distance",
        x = "log10(1+Geographic Distance)",
-       y = "Genetic Distance Genalex PhiPT") +
-  theme_minimal()
+       y = "Genetic Distance PhiPT") +
+  theme_publish() +
+  annotate("text", 
+           x = Inf, y = Inf, 
+           label = paste0("Mantel R = ", mantel_r, "\nP = ", signif(mantel_p, 3)), 
+           hjust = 1.1, vjust = 1.5, 
+           size = 5, color = "black")
 
 #-------------------------------------------------------------------------------------
 
@@ -1812,5 +2041,27 @@ crosspop <- T_all_withMLGs_allMarkersOnly %>%
   summarize(Populations = toString(unique(Site_1_abrev))) # List all populations for each MLG
 
 write.csv(crosspop,"crosspop.csv")
+
+min_max_year_found <- T_all_withMLGs_withClusters_allMarkersOnly %>%
+  group_by(MLG) %>%
+  mutate(First_appearance=min(Sampling_year), Last_appearance=max(Sampling_year)) %>%
+  mutate(span=(Last_appearance-First_appearance)+1) %>%
+  distinct(MLG, span) %>%
+  select(MLG,span)
+mean(min_max_year_found$span)
+
+span_categories <- min_max_year_found %>%
+  mutate(Category = case_when(
+    span == 1 ~ "Found once",
+    span > 5 ~ "More than five years",
+    span >= 2 & span <= 5 ~ "Between 2-5 years"
+  ))
+span_categories
+
+span_proportions <- span_categories %>%
+  group_by(Category) %>%
+  count(Category) %>%
+  mutate(proportion=n/sum(n))
+span_proportions
 
 ```
